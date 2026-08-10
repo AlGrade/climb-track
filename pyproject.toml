@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = { text = "Private project - all rights reserved" }
 dependencies = [
+    "huggingface-hub>=1.4,<2",
     "lap==0.5.12",
     "matplotlib==3.11.1",
     "numpy>=2.1,<3",
@@ -16,6 +17,7 @@ dependencies = [
     "rich>=13.9,<15",
     "torch==2.13.0",
     "torchvision==0.28.0",
+    "transformers==5.14.0",
     "typer>=0.15,<1",
     "ultralytics==8.4.104",
 ]

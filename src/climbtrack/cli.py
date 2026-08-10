@@ -17,13 +17,15 @@ from climbtrack.config import AppConfig, load_config, resolve_cache_dir, resolve
 from climbtrack.device import require_torch_device, seed_torch
 from climbtrack.errors import ClimbTrackError, SelectionUncertainError
 from climbtrack.hashing import fingerprint_file
-from climbtrack.models import ensure_yolo11_checkpoint
+from climbtrack.models import ensure_sapiens2_checkpoint, ensure_yolo11_checkpoint
 from climbtrack.provenance import executable_version
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.tracks import read_tracks
 from climbtrack.selection.click import choose_track_by_click
 from climbtrack.stages.detect import detect_people
 from climbtrack.stages.ingest import ingest_video
+from climbtrack.stages.pose import estimate_pose
+from climbtrack.stages.render_pose import render_pose_overlay
 from climbtrack.stages.render_tracks import render_tracking_overlay
 from climbtrack.stages.select import select_climber
 from climbtrack.stages.track import track_people
@@ -77,7 +79,7 @@ def preflight(config_path: ConfigOption = Path("configs/default.yaml")) -> None:
     """Validate tools, checkpoint, and the explicitly configured compute device."""
     try:
         context = _context(config_path)
-        table = Table(title="Milestone 2 preflight")
+        table = Table(title="Milestone 3 preflight")
         table.add_column("Check")
         table.add_column("Resolved value")
         table.add_row("device", str(require_torch_device(context.config.project.device)))
@@ -94,6 +96,15 @@ def preflight(config_path: ConfigOption = Path("configs/default.yaml")) -> None:
             )
         model = fingerprint_file(model_path)
         table.add_row("YOLO11x", f"{model_path}\nsha256 {model['sha256'][:16]}…")
+        sapiens_dir = resolve_project_path(context.config.models.sapiens2.model_dir, config_path)
+        sapiens_checkpoint = sapiens_dir / context.config.models.sapiens2.checkpoint_filename
+        if not sapiens_checkpoint.is_file():
+            raise ClimbTrackError(
+                f"Sapiens2-1B checkpoint is missing: {sapiens_checkpoint}. "
+                "Run 'climbtrack download-sapiens'."
+            )
+        sapiens = fingerprint_file(sapiens_checkpoint)
+        table.add_row("Sapiens2-1B", f"{sapiens_dir}\nsha256 {sapiens['sha256'][:16]}…")
         table.add_row("cache", str(context.cache_root))
         console.print(table)
     except (ClimbTrackError, OSError) as exc:
@@ -108,6 +119,18 @@ def download_yolo(config_path: ConfigOption = Path("configs/default.yaml")) -> N
         path, downloaded = ensure_yolo11_checkpoint(config, config_path)
         state = "downloaded" if downloaded else "already present"
         console.print(f"[green]YOLO11x {state}:[/green] {path}")
+    except (ClimbTrackError, OSError) as exc:
+        _abort(exc)
+
+
+@app.command("download-sapiens")
+def download_sapiens(config_path: ConfigOption = Path("configs/default.yaml")) -> None:
+    """Explicitly download the pinned 6.08-GB Sapiens2-1B snapshot."""
+    try:
+        config = load_config(config_path)
+        path, downloaded = ensure_sapiens2_checkpoint(config, config_path)
+        state = "downloaded" if downloaded else "already present"
+        console.print(f"[green]Sapiens2-1B {state}:[/green] {path}")
     except (ClimbTrackError, OSError) as exc:
         _abort(exc)
 
@@ -227,6 +250,59 @@ def render_tracks(
         _abort(exc)
 
 
+@app.command("pose")
+def pose(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    force: ForceOption = False,
+) -> None:
+    """Run prerequisites and Stage 30 raw Sapiens2-1B inference."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        result = _run_pose(ingest_result, selection, context, force)
+        _report("30_pose", result)
+        console.print(f"[bold green]Raw poses:[/bold green] {result.path / 'pose_raw.parquet'}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except ClimbTrackError as exc:
+        _abort(exc)
+
+
+@app.command("render-pose")
+def render_pose(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    force: ForceOption = False,
+) -> None:
+    """Render the raw Sapiens2 skeleton over the source video."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        result = render_pose_overlay(
+            ingest_result,
+            selection,
+            pose_result,
+            config=context.config,
+            cache_root=context.cache_root,
+            project_root=context.project_root,
+            force=force,
+        )
+        _report("50_render_pose", result)
+        console.print(f"[bold green]Video:[/bold green] {result.path / 'skeleton_raw_overlay.mp4'}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except ClimbTrackError as exc:
+        _abort(exc)
+
+
 @app.command("run-all")
 def run_all(
     video: VideoArgument,
@@ -235,7 +311,7 @@ def run_all(
     click: ClickOption = False,
     force: ForceOption = False,
 ) -> None:
-    """Run every Milestone-2 stage in dependency order."""
+    """Run every stage through Milestone 3 in dependency order."""
     try:
         context, ingest_result, tracks_result, detections = _pipeline_to_tracks(
             video, config_path, force
@@ -264,9 +340,21 @@ def run_all(
             force=force,
         )
         _report("50_render_tracks", rendered)
+        pose_result = _run_pose(ingest_result, selection, context, force)
+        _report("30_pose", pose_result)
+        skeleton = render_pose_overlay(
+            ingest_result,
+            selection,
+            pose_result,
+            config=context.config,
+            cache_root=context.cache_root,
+            project_root=context.project_root,
+            force=force,
+        )
+        _report("50_render_pose", skeleton)
         console.print(
-            f"[bold green]Milestone 2 complete:[/bold green] "
-            f"{rendered.path / 'tracking_overlay.mp4'}"
+            f"[bold green]Milestone 3 complete:[/bold green] "
+            f"{skeleton.path / 'skeleton_raw_overlay.mp4'}"
         )
     except SelectionUncertainError as exc:
         _abort_selection(exc)
@@ -354,6 +442,44 @@ def _pipeline_to_tracks(
         force=force,
     )
     return context, ingest_result, tracks, detections
+
+
+def _pipeline_to_selection(
+    video: Path,
+    config_path: Path,
+    *,
+    track_id: int | None,
+    click: bool,
+) -> tuple[PipelineContext, CacheResult, CacheResult]:
+    context, ingest_result, tracks_result, _ = _pipeline_to_tracks(video, config_path, False)
+    chosen = _resolve_manual_track(track_id, click, ingest_result, tracks_result)
+    selection = select_climber(
+        ingest_result,
+        tracks_result,
+        config=context.config,
+        cache_root=context.cache_root,
+        project_root=context.project_root,
+        manual_track_id=chosen,
+    )
+    return context, ingest_result, selection
+
+
+def _run_pose(
+    ingest_result: CacheResult,
+    selection: CacheResult,
+    context: PipelineContext,
+    force: bool,
+) -> CacheResult:
+    model_dir = resolve_project_path(context.config.models.sapiens2.model_dir, context.config_path)
+    return estimate_pose(
+        ingest_result,
+        selection,
+        model_dir=model_dir,
+        config=context.config,
+        cache_root=context.cache_root,
+        project_root=context.project_root,
+        force=force,
+    )
 
 
 def _resolve_manual_track(

@@ -10,7 +10,7 @@ Ultralytics AGPL-3.0 terms before any use beyond this private project.
 
 ## Current status
 
-Milestones 1 and 2 implement:
+Milestones 1 through 3 implement:
 
 - strict YAML configuration with unknown-key rejection;
 - Stage 00 video probing and lossless PNG extraction;
@@ -27,11 +27,16 @@ Milestones 1 and 2 implement:
 - a model-aspect pose crop with local motion context, temporal stabilization and short-gap
   interpolation;
 - a VFR-aware MP4 overlay with bounding boxes, confidence, track IDs, frame numbers and audio;
+- pinned local Sapiens2-1B inference through the official Transformers implementation;
+- all 308 Sociopticon/Goliath keypoints with their original confidence values;
+- a canonical, versioned registry with official names, groups, symmetry pairs and skeleton edges;
+- horizontal-flip and multi-scale test-time augmentation with decoded-result averaging;
+- a separate raw-pose Parquet cache and VFR-aware skeleton overlay for visual inspection;
 - resumable CLI commands for each stage and `run-all`;
 - unit tests for hashing, cache behavior, timestamps, schemas, scoring, ByteTrack and VFR output.
 
-Pose inference, skeleton rendering, refinement, annotation and evaluation remain outside this
-milestone. The current overlay verifies person detection, identity persistence and climber choice.
+Temporal refinement is deliberately absent from the Milestone-3 output: `pose_raw.parquet` contains
+only model observations. Refinement, annotation and evaluation remain for later milestones.
 
 ## Requirements
 
@@ -39,7 +44,7 @@ milestone. The current overlay verifies person detection, identity persistence a
 - `uv`
 - Python 3.12, managed by `uv`
 - `ffmpeg` and `ffprobe`
-- enough disk space for lossless PNG ingest plus temporary overlay JPEGs
+- enough disk space for lossless PNG ingest, temporary overlay JPEGs and the 6.08-GB pose model
 
 Install ffmpeg with Homebrew if `climbtrack preflight` reports that it is missing:
 
@@ -75,6 +80,10 @@ the official Sapiens 1024×768 (H×W) aspect ratio, a centered local motion enve
 and a final 15-frame moving-average stabilization. Raw boxes remain unchanged in `tracks.parquet`; the
 derived crop is stored separately in `pose_crops.parquet`.
 
+`pose` controls raw Sapiens2 inference. The default performs full-resolution 1024×768 inference,
+an additional 1152×864 pass, and a horizontal-flip pass at each scale. The four forward passes per
+frame are intentionally expensive. `half_precision: false` preserves the checkpoint's FP32 path.
+
 No unavailable device or model is replaced automatically. A configured `mps`, `cpu`, or `cuda`
 device that cannot execute the selected backend fails clearly. Change the YAML explicitly if you
 intend to use CPU or a rented CUDA host.
@@ -85,6 +94,12 @@ Download the pinned YOLO11x checkpoint explicitly (there are no implicit downloa
 
 ```bash
 uv run climbtrack download-yolo --config configs/default.yaml
+```
+
+Review Meta's Sapiens2 license, then explicitly download the pinned 6.08-GB Transformers snapshot:
+
+```bash
+uv run climbtrack download-sapiens --config configs/default.yaml
 ```
 
 Validate configuration, external tools, checkpoint and configured device:
@@ -106,6 +121,8 @@ uv run climbtrack detect /absolute/path/to/video.mov
 uv run climbtrack track /absolute/path/to/video.mov
 uv run climbtrack select /absolute/path/to/video.mov
 uv run climbtrack render-tracks /absolute/path/to/video.mov
+uv run climbtrack pose /absolute/path/to/video.mov
+uv run climbtrack render-pose /absolute/path/to/video.mov
 ```
 
 Run every currently implemented stage:
@@ -158,6 +175,8 @@ cache/10_detect/<cache-key>/detections.parquet
 cache/20_track/<cache-key>/tracks.parquet
 cache/25_select/<cache-key>/{candidates.json,selection.json}
 cache/50_render_tracks/<cache-key>/tracking_overlay.mp4
+cache/30_pose/<cache-key>/{pose_raw.parquet,keypoints.json,summary.json}
+cache/50_render_pose/<cache-key>/skeleton_raw_overlay.mp4
 ```
 
 The cache key covers the source video's full SHA-256, the effective Stage-00 configuration, the
@@ -198,17 +217,20 @@ YOLO11x is stored at `models/yolo11x.pt`, outside Git. The explicit `download-yo
 the pinned URL from YAML, writes to a temporary file, publishes atomically and fingerprints the
 result. Inference never triggers a download.
 
-For Milestone 3, pose models will likewise remain outside Git. The approved primary model is:
-
-Models are stored outside Git and are never downloaded implicitly. The approved primary model is:
+Pose models likewise remain outside Git and are never downloaded implicitly. The approved primary
+model is pinned to an immutable Hugging Face revision:
 
 ```text
 repository: facebook/sapiens2-pose-1b
-file:       sapiens2_1b_pose.safetensors
+revision:   f5fed8b97b99698d5eea1d14ff0855d0b4c3f000
+file:       model.safetensors (6.08 GB, Transformers-compatible)
 ```
 
-The exact Hugging Face revision and downloaded SHA-256 must be pinned before inference. ViTPose++
-Huge will use the maintained Transformers/Safetensors path rather than legacy MMCV 1.3.9.
+The downloader fingerprints every local model file. Inference is local-only and fails instead of
+contacting Hugging Face or switching models. The official keypoint metadata is independently pinned
+to Sapiens2 commit `7e5bae88456ac418ff0e58e74106c9fe192055d4` and parsed as data without
+executing downloaded Python. ViTPose++ Huge will use the maintained Transformers/Safetensors path
+rather than legacy MMCV 1.3.9.
 
 ## Development
 

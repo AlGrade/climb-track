@@ -34,8 +34,14 @@ models:
     source_url: https://example.test/yolo11x.pt
   sapiens2:
     model_id: facebook/sapiens2-pose-1b
-    checkpoint_filename: sapiens2_1b_pose.safetensors
-    revision: null
+    model_dir: models/sapiens2-pose-1b
+    checkpoint_filename: model.safetensors
+    checkpoint_sha256: 2dab7014a17e99e460c18817325a71dd7a81ce48d87027f01c2ee7d7b3af969f
+    checkpoint_size_bytes: 6079194752
+    download_connections: 16
+    download_segment_mb: 8
+    revision: f5fed8b97b99698d5eea1d14ff0855d0b4c3f000
+    keypoint_source_url: https://example.test/keypoints.py
 """,
         encoding="utf-8",
     )
@@ -43,6 +49,8 @@ models:
     config = load_config(config_path)
 
     assert config.project.device is Device.MPS
+    assert config.pose.flip_tta is True
+    assert config.pose.multi_scale_tta == (1.0, 1.125)
     assert resolve_cache_dir(config, config_path) == tmp_path / "cache"
 
 

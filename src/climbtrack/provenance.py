@@ -82,6 +82,7 @@ def runtime_state() -> dict[str, str]:
         "pydantic",
         "torch",
         "torchvision",
+        "transformers",
         "ultralytics",
     ):
         try:

@@ -49,6 +49,13 @@ pose_crop:
   smoothing_window: 15
   maximum_interpolation_gap: 5
 
+pose:
+  batch_size: 1
+  half_precision: false
+  flip_tta: true
+  multi_scale_tta: [1.0, 1.125]
+  postprocess_kernel_size: 11
+
 render:
   ffmpeg_path: ffmpeg
   codec: libx264
@@ -58,6 +65,13 @@ render:
   font_scale: 1.2
   show_all_tracks: true
 
+pose_render:
+  confidence_threshold: 0.15
+  point_radius: 5
+  line_thickness: 5
+  show_face_keypoints: false
+  show_pose_crop: false
+
 models:
   primary_pose_backend: sapiens2
   yolo11:
@@ -66,5 +80,11 @@ models:
     source_url: https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11x.pt
   sapiens2:
     model_id: facebook/sapiens2-pose-1b
-    checkpoint_filename: sapiens2_1b_pose.safetensors
-    revision: null
+    model_dir: models/sapiens2-pose-1b
+    checkpoint_filename: model.safetensors
+    checkpoint_sha256: 2dab7014a17e99e460c18817325a71dd7a81ce48d87027f01c2ee7d7b3af969f
+    checkpoint_size_bytes: 6079194752
+    download_connections: 32
+    download_segment_mb: 8
+    revision: f5fed8b97b99698d5eea1d14ff0855d0b4c3f000
+    keypoint_source_url: https://raw.githubusercontent.com/facebookresearch/sapiens2/7e5bae88456ac418ff0e58e74106c9fe192055d4/sapiens/pose/configs/_base_/keypoints308.py

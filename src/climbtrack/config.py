@@ -54,8 +54,14 @@ class Sapiens2Config(StrictModel):
     """Pinned identity for the approved primary pose model."""
 
     model_id: str
+    model_dir: Path
     checkpoint_filename: str
-    revision: str | None = None
+    checkpoint_sha256: str = Field(pattern="^[0-9a-f]{64}$")
+    checkpoint_size_bytes: int = Field(gt=0)
+    download_connections: int = Field(default=16, ge=1, le=32)
+    download_segment_mb: int = Field(default=8, ge=4, le=256)
+    revision: str = Field(pattern="^[0-9a-f]{40}$")
+    keypoint_source_url: str
 
 
 class Yolo11Config(StrictModel):
@@ -150,6 +156,39 @@ class PoseCropConfig(StrictModel):
         return self
 
 
+class PoseConfig(StrictModel):
+    """Quality-first raw pose inference settings."""
+
+    batch_size: int = Field(default=1, ge=1, le=8)
+    half_precision: bool = False
+    flip_tta: bool = True
+    multi_scale_tta: tuple[float, ...] = (1.0, 1.125)
+    postprocess_kernel_size: int = Field(default=11, ge=3, le=31)
+
+    @model_validator(mode="after")
+    def validate_pose_settings(self) -> "PoseConfig":
+        """Require actual multi-scale TTA and an odd refinement kernel."""
+        if len(self.multi_scale_tta) < 2:
+            raise ValueError("pose.multi_scale_tta must contain at least two scales")
+        if any(scale < 0.5 or scale > 1.5 for scale in self.multi_scale_tta):
+            raise ValueError("pose.multi_scale_tta scales must be in [0.5, 1.5]")
+        if len(set(self.multi_scale_tta)) != len(self.multi_scale_tta):
+            raise ValueError("pose.multi_scale_tta scales must be unique")
+        if self.postprocess_kernel_size % 2 == 0:
+            raise ValueError("pose.postprocess_kernel_size must be odd")
+        return self
+
+
+class PoseRenderConfig(StrictModel):
+    """Raw skeleton quality-control rendering settings."""
+
+    confidence_threshold: float = Field(default=0.15, ge=0.0, le=1.0)
+    point_radius: int = Field(default=5, ge=1, le=30)
+    line_thickness: int = Field(default=5, ge=1, le=30)
+    show_face_keypoints: bool = False
+    show_pose_crop: bool = False
+
+
 class RenderConfig(StrictModel):
     """Tracking quality-control video settings."""
 
@@ -171,7 +210,9 @@ class AppConfig(StrictModel):
     tracking: TrackingConfig
     selection: SelectionConfig
     pose_crop: PoseCropConfig = PoseCropConfig()
+    pose: PoseConfig = PoseConfig()
     render: RenderConfig
+    pose_render: PoseRenderConfig = PoseRenderConfig()
     models: ModelsConfig
 
 

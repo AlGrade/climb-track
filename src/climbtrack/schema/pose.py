@@ -56,9 +56,6 @@ def validate_pose_record(record: Mapping[str, Any]) -> None:
         raise SchemaValidationError("Observed keypoints require x, y and confidence")
     if not all(math.isfinite(float(value)) for value in values):
         raise SchemaValidationError("Coordinates and confidence must be finite")
-    confidence = float(record["confidence"])
-    if not 0.0 <= confidence <= 1.0:
-        raise SchemaValidationError("confidence must be in [0, 1]")
 
 
 def write_pose_parquet(records: Iterable[Mapping[str, Any]], path: Path) -> None:
@@ -69,3 +66,11 @@ def write_pose_parquet(records: Iterable[Mapping[str, Any]], path: Path) -> None
     table = pa.Table.from_pylist(materialized, schema=POSE_SCHEMA)
     path.parent.mkdir(parents=True, exist_ok=True)
     pq.write_table(table, path, compression="zstd", version="2.6")
+
+
+def read_pose_parquet(path: Path) -> list[dict[str, Any]]:
+    """Read canonical observations and verify the exact Arrow schema."""
+    table = pq.read_table(path)
+    if not table.schema.equals(POSE_SCHEMA, check_metadata=True):
+        raise SchemaValidationError(f"Unexpected pose schema: {path}")
+    return table.to_pylist()

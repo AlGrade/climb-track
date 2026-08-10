@@ -4,7 +4,7 @@ import pyarrow.parquet as pq
 import pytest
 
 from climbtrack.errors import SchemaValidationError
-from climbtrack.schema.pose import POSE_SCHEMA_VERSION, write_pose_parquet
+from climbtrack.schema.pose import POSE_SCHEMA_VERSION, read_pose_parquet, write_pose_parquet
 
 
 def _record(**changes):
@@ -54,6 +54,8 @@ def test_missing_keypoint_cannot_contain_zero_coordinates(tmp_path: Path) -> Non
         )
 
 
-def test_confidence_is_bounded(tmp_path: Path) -> None:
-    with pytest.raises(SchemaValidationError, match=r"\[0, 1\]"):
-        write_pose_parquet([_record(confidence=1.2)], tmp_path / "invalid.parquet")
+def test_raw_heatmap_confidence_is_not_clamped(tmp_path: Path) -> None:
+    path = tmp_path / "pose.parquet"
+    write_pose_parquet([_record(confidence=1.2)], path)
+
+    assert read_pose_parquet(path)[0]["confidence"] == pytest.approx(1.2)
