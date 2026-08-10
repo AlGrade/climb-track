@@ -33,12 +33,8 @@ def validate_pose_crop(record: Mapping[str, Any]) -> None:
         raise SchemaValidationError("Pose-crop values must be finite")
     if int(record["frame_idx"]) < 0 or int(record["track_id"]) <= 0:
         raise SchemaValidationError("Pose-crop frame and track IDs are invalid")
-    width = float(record["x2"]) - float(record["x1"])
-    height = float(record["y2"]) - float(record["y1"])
-    if width <= 0 or height <= 0:
+    if float(record["x2"]) <= float(record["x1"]) or float(record["y2"]) <= float(record["y1"]):
         raise SchemaValidationError("Pose crop must have positive width and height")
-    if not math.isclose(width, height, rel_tol=1e-5, abs_tol=1e-3):
-        raise SchemaValidationError("Pose crop must be square")
 
 
 def write_pose_crops(records: Iterable[Mapping[str, Any]], path: Path) -> None:

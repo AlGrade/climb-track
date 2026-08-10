@@ -42,7 +42,10 @@ selection:
     image_area: 0.10
 
 pose_crop:
-  padding_scale: 1.55
+  input_width: 768
+  input_height: 1024
+  padding_scale: 1.35
+  context_window: 91
   smoothing_window: 15
   maximum_interpolation_gap: 5
 

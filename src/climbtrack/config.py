@@ -133,17 +133,20 @@ class SelectionConfig(StrictModel):
 
 
 class PoseCropConfig(StrictModel):
-    """Stable square crop derived from the selected raw tracking box."""
+    """Stable model-aspect crop derived from nearby selected-person boxes."""
 
-    padding_scale: float = Field(default=1.55, ge=1.0, le=3.0)
+    input_width: int = Field(default=768, ge=16, multiple_of=16)
+    input_height: int = Field(default=1024, ge=16, multiple_of=16)
+    padding_scale: float = Field(default=1.35, ge=1.0, le=3.0)
+    context_window: int = Field(default=91, ge=1, le=241)
     smoothing_window: int = Field(default=15, ge=1, le=121)
     maximum_interpolation_gap: int = Field(default=5, ge=0, le=120)
 
     @model_validator(mode="after")
     def require_odd_window(self) -> "PoseCropConfig":
         """A centered temporal window must have an unambiguous middle frame."""
-        if self.smoothing_window % 2 == 0:
-            raise ValueError("pose_crop.smoothing_window must be odd")
+        if self.context_window % 2 == 0 or self.smoothing_window % 2 == 0:
+            raise ValueError("pose_crop temporal windows must be odd")
         return self
 
 

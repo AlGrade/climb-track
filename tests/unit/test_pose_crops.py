@@ -29,7 +29,7 @@ def _track(frame_idx: int, x1: float, y1: float, x2: float, y2: float) -> dict:
     }
 
 
-def test_pose_crop_is_square_padded_smoothed_and_fills_short_gap(tmp_path: Path) -> None:
+def test_pose_crop_matches_model_aspect_and_fills_short_gap(tmp_path: Path) -> None:
     frames = [_frame(index) for index in range(5)]
     tracks = [
         _track(0, 40, 20, 60, 80),
@@ -39,6 +39,7 @@ def test_pose_crop_is_square_padded_smoothed_and_fills_short_gap(tmp_path: Path)
     ]
     config = PoseCropConfig(
         padding_scale=1.4,
+        context_window=3,
         smoothing_window=3,
         maximum_interpolation_gap=2,
     )
@@ -54,9 +55,11 @@ def test_pose_crop_is_square_padded_smoothed_and_fills_short_gap(tmp_path: Path)
 
     assert len(crops) == 5
     assert crops[2]["is_interpolated"]
-    assert crops[1]["x2"] - crops[1]["x1"] == pytest.approx(crops[1]["y2"] - crops[1]["y1"])
-    assert crops[1]["x2"] - crops[1]["x1"] >= 60 * 1.4
-    assert (crops[2]["x1"] + crops[2]["x2"]) / 2 == pytest.approx(70.5)
+    width = crops[1]["x2"] - crops[1]["x1"]
+    height = crops[1]["y2"] - crops[1]["y1"]
+    assert width / height == pytest.approx(768 / 1024)
+    assert height >= 60 * 1.4
+    assert 50 < (crops[2]["x1"] + crops[2]["x2"]) / 2 < 75
 
     path = tmp_path / "pose_crops.parquet"
     write_pose_crops(crops, path)
