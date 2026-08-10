@@ -6,7 +6,14 @@ from climbtrack.cache import StageCache
 from climbtrack.errors import CacheIntegrityError
 
 
-def _materialize(cache: StageCache, key: str, builder, *, force: bool = False):
+def _materialize(
+    cache: StageCache,
+    key: str,
+    builder,
+    *,
+    force: bool = False,
+    resume_incomplete: bool = False,
+):
     return cache.materialize(
         cache_key=key,
         stage_version="1",
@@ -17,6 +24,7 @@ def _materialize(cache: StageCache, key: str, builder, *, force: bool = False):
         git={"commit": None, "dirty": None},
         verify_checksums=True,
         force=force,
+        resume_incomplete=resume_incomplete,
         builder=builder,
     )
 
@@ -105,3 +113,28 @@ def test_force_keeps_replaced_entry(tmp_path: Path) -> None:
     backups = list(cache.stage_root.glob(f".replaced-{key}-*"))
     assert len(backups) == 1
     assert (backups[0] / "artifact.txt").read_text(encoding="utf-8") == "first"
+
+
+def test_resumable_build_reuses_atomic_work_after_interrupt(tmp_path: Path) -> None:
+    cache = StageCache(tmp_path, "30_pose")
+    key = "f" * 64
+
+    def interrupt(output: Path) -> None:
+        (output / "frame-0001.txt").write_text("complete", encoding="utf-8")
+        raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        _materialize(cache, key, interrupt, resume_incomplete=True)
+
+    work = cache.stage_root / f".work-{key}"
+    assert (work / "frame-0001.txt").read_text(encoding="utf-8") == "complete"
+
+    def resume(output: Path) -> None:
+        assert (output / "frame-0001.txt").read_text(encoding="utf-8") == "complete"
+        (output / "frame-0002.txt").write_text("complete", encoding="utf-8")
+
+    result = _materialize(cache, key, resume, resume_incomplete=True)
+
+    assert not result.cache_hit
+    assert not work.exists()
+    assert (result.path / "frame-0002.txt").read_text(encoding="utf-8") == "complete"

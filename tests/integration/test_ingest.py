@@ -49,6 +49,10 @@ def test_ingest_and_resume_tiny_video(tmp_path: Path) -> None:
                 "yolo11": {
                     "model_id": "yolo11x",
                     "checkpoint_filename": "yolo11x.pt",
+                    "checkpoint_sha256": (
+                        "7bc158aa95c0ebfdd87f70f01653c1131b93e92522dbe15c228bcd742e773a24"
+                    ),
+                    "checkpoint_size_bytes": 114636239,
                     "source_url": "https://example.test/yolo11x.pt",
                 },
                 "sapiens2": {

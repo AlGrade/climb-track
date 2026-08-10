@@ -69,6 +69,8 @@ class Yolo11Config(StrictModel):
 
     model_id: str = Field(pattern="^yolo11x$")
     checkpoint_filename: str = Field(pattern=r"^yolo11x\.pt$")
+    checkpoint_sha256: str = Field(pattern="^[0-9a-f]{64}$")
+    checkpoint_size_bytes: int = Field(gt=0)
     source_url: str
 
 

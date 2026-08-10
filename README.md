@@ -181,8 +181,11 @@ cache/50_render_pose/<cache-key>/skeleton_raw_overlay.mp4
 
 The cache key covers the source video's full SHA-256, the effective Stage-00 configuration, the
 stage implementation version, and the resolved ffmpeg/ffprobe versions. A complete manifest stores
-checksums for every artifact. Builds are published by atomic directory rename; interrupted builds
-are retained under `.failed/` and are never treated as cache hits.
+checksums for every artifact. Builds are published by atomic directory rename. Ordinary failed
+builds are retained under `.failed/` and are never treated as cache hits. The expensive `30_pose`
+stage additionally checkpoints each completed frame under a deterministic hidden `.work-<key>`
+directory. Re-running the same command validates and skips those frames; `--force` explicitly
+archives that work and starts again.
 
 Only a stage's effective configuration participates in its cache key. A rendering change therefore
 cannot invalidate tracking or ingest artifacts. Downstream keys include the upstream artifact hash;
@@ -208,14 +211,14 @@ x, y, confidence, is_missing, is_interpolated, source_backend
 ```
 
 A missing point must use Arrow nulls for `x`, `y`, and `confidence`; zero coordinates are invalid.
-The future 308-keypoint registry will additionally version backend mappings, symmetry partners,
-body groups and skeleton edges from the official model metadata.
+The 308-keypoint registry versions backend mappings, symmetry partners, body groups and skeleton
+edges from the official model metadata.
 
 ## Model download policy
 
 YOLO11x is stored at `models/yolo11x.pt`, outside Git. The explicit `download-yolo` command uses
-the pinned URL from YAML, writes to a temporary file, publishes atomically and fingerprints the
-result. Inference never triggers a download.
+the pinned URL, byte size and SHA-256 from YAML, writes to a temporary file, verifies it and then
+publishes atomically. Inference never triggers a download.
 
 Pose models likewise remain outside Git and are never downloaded implicitly. The approved primary
 model is pinned to an immutable Hugging Face revision:

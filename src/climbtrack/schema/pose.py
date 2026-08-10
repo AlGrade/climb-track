@@ -70,7 +70,39 @@ def write_pose_parquet(records: Iterable[Mapping[str, Any]], path: Path) -> None
 
 def read_pose_parquet(path: Path) -> list[dict[str, Any]]:
     """Read canonical observations and verify the exact Arrow schema."""
+    return read_pose_table(path).to_pylist()
+
+
+def read_pose_table(path: Path) -> pa.Table:
+    """Read a canonical pose table without materializing Python dictionaries."""
     table = pq.read_table(path)
     if not table.schema.equals(POSE_SCHEMA, check_metadata=True):
         raise SchemaValidationError(f"Unexpected pose schema: {path}")
-    return table.to_pylist()
+    return table
+
+
+def combine_pose_parquet(parts: Iterable[Path], path: Path) -> int:
+    """Stream canonical pose parts into one atomically published Parquet file."""
+    part_paths = list(parts)
+    if not part_paths:
+        raise SchemaValidationError("At least one pose part is required")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.part")
+    temporary.unlink(missing_ok=True)
+    rows = 0
+    try:
+        with pq.ParquetWriter(
+            temporary,
+            POSE_SCHEMA,
+            compression="zstd",
+            version="2.6",
+        ) as writer:
+            for part in part_paths:
+                table = read_pose_table(part)
+                writer.write_table(table)
+                rows += table.num_rows
+        temporary.replace(path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return rows

@@ -16,8 +16,12 @@ from climbtrack.cache.manifest import CacheManifest
 from climbtrack.config import AppConfig, load_config, resolve_cache_dir, resolve_project_path
 from climbtrack.device import require_torch_device, seed_torch
 from climbtrack.errors import ClimbTrackError, SelectionUncertainError
-from climbtrack.hashing import fingerprint_file
-from climbtrack.models import ensure_sapiens2_checkpoint, ensure_yolo11_checkpoint
+from climbtrack.model_downloads import (
+    ensure_sapiens2_checkpoint,
+    ensure_yolo11_checkpoint,
+    verify_sapiens2_checkpoint,
+    verify_yolo11_checkpoint,
+)
 from climbtrack.provenance import executable_version
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.tracks import read_tracks
@@ -94,7 +98,11 @@ def preflight(config_path: ConfigOption = Path("configs/default.yaml")) -> None:
             raise ClimbTrackError(
                 f"YOLO11x checkpoint is missing: {model_path}. Run 'climbtrack download-yolo'."
             )
-        model = fingerprint_file(model_path)
+        model = verify_yolo11_checkpoint(
+            model_path,
+            context.config.models.yolo11.checkpoint_sha256,
+            context.config.models.yolo11.checkpoint_size_bytes,
+        )
         table.add_row("YOLO11x", f"{model_path}\nsha256 {model['sha256'][:16]}…")
         sapiens_dir = resolve_project_path(context.config.models.sapiens2.model_dir, config_path)
         sapiens_checkpoint = sapiens_dir / context.config.models.sapiens2.checkpoint_filename
@@ -103,7 +111,10 @@ def preflight(config_path: ConfigOption = Path("configs/default.yaml")) -> None:
                 f"Sapiens2-1B checkpoint is missing: {sapiens_checkpoint}. "
                 "Run 'climbtrack download-sapiens'."
             )
-        sapiens = fingerprint_file(sapiens_checkpoint)
+        sapiens = verify_sapiens2_checkpoint(
+            sapiens_checkpoint,
+            context.config.models.sapiens2.checkpoint_sha256,
+        )
         table.add_row("Sapiens2-1B", f"{sapiens_dir}\nsha256 {sapiens['sha256'][:16]}…")
         table.add_row("cache", str(context.cache_root))
         console.print(table)

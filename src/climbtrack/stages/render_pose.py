@@ -15,11 +15,11 @@ from climbtrack.config import AppConfig
 from climbtrack.errors import ClimbTrackError, ExternalToolError
 from climbtrack.hashing import hash_json
 from climbtrack.provenance import executable_version, git_state, runtime_state
+from climbtrack.rendering.video import encode_overlay, escape_concat_path, frame_durations
 from climbtrack.schema.crops import read_pose_crops
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.keypoints import read_registry
 from climbtrack.schema.pose import read_pose_parquet
-from climbtrack.stages.render_tracks import _encode_overlay, _escape_concat_path, _frame_durations
 
 STAGE_NAME = "50_render_pose"
 STAGE_VERSION = "1.0.0"
@@ -105,20 +105,20 @@ def render_pose_overlay(
                     shutil.copy2(overlay_path, output / f"preview_{frame_idx:09d}.jpg")
                 progress.advance(task)
 
-        durations = _frame_durations(frames)
+        durations = frame_durations(frames)
         concat_path = output / ".overlay-concat.txt"
         lines = ["ffconcat version 1.0"]
         for path, duration in zip(overlay_paths, durations, strict=True):
-            lines.append(f"file '{_escape_concat_path(path)}'")
+            lines.append(f"file '{escape_concat_path(path)}'")
             lines.append(f"duration {duration:.9f}")
-        lines.append(f"file '{_escape_concat_path(overlay_paths[-1])}'")
+        lines.append(f"file '{escape_concat_path(overlay_paths[-1])}'")
         concat_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         metadata = json.loads((ingest.path / "metadata.json").read_text(encoding="utf-8"))
         duration_seconds = float(metadata["video"]["duration_seconds"])
         source_video = Path(str(ingest.manifest.input_fingerprint["path"]))
         output_video = output / "skeleton_raw_overlay.mp4"
-        _encode_overlay(concat_path, source_video, output_video, duration_seconds, config)
+        encode_overlay(concat_path, source_video, output_video, duration_seconds, config)
         shutil.rmtree(overlay_dir)
         concat_path.unlink()
         summary = {

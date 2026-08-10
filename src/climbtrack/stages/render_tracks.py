@@ -2,11 +2,8 @@
 
 import json
 import shutil
-import statistics
-import subprocess
 from collections import defaultdict
 from importlib.metadata import version
-from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +14,8 @@ from climbtrack.cache.upstream import upstream_fingerprint
 from climbtrack.config import AppConfig
 from climbtrack.errors import ExternalToolError
 from climbtrack.hashing import hash_json
-from climbtrack.provenance import executable_version, git_state, resolve_executable, runtime_state
+from climbtrack.provenance import executable_version, git_state, runtime_state
+from climbtrack.rendering.video import encode_overlay, escape_concat_path, frame_durations
 from climbtrack.schema.crops import read_pose_crops
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.tracks import read_tracks
@@ -99,20 +97,20 @@ def render_tracking_overlay(
                     shutil.copy2(overlay_path, output / f"preview_{frame_idx:09d}.jpg")
                 progress.advance(task)
 
-        durations = _frame_durations(frames)
+        durations = frame_durations(frames)
         concat_path = output / ".overlay-concat.txt"
         lines = ["ffconcat version 1.0"]
         for path, duration in zip(overlay_paths, durations, strict=True):
-            lines.append(f"file '{_escape_concat_path(path)}'")
+            lines.append(f"file '{escape_concat_path(path)}'")
             lines.append(f"duration {duration:.9f}")
-        lines.append(f"file '{_escape_concat_path(overlay_paths[-1])}'")
+        lines.append(f"file '{escape_concat_path(overlay_paths[-1])}'")
         concat_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         metadata = json.loads((ingest.path / "metadata.json").read_text(encoding="utf-8"))
         duration_seconds = float(metadata["video"]["duration_seconds"])
         source_video = Path(str(ingest.manifest.input_fingerprint["path"]))
         output_video = output / "tracking_overlay.mp4"
-        _encode_overlay(
+        encode_overlay(
             concat_path,
             source_video,
             output_video,
@@ -214,71 +212,6 @@ def _track_color(track_id: int) -> tuple[int, int, int]:
         64 + (track_id * 57) % 192,
         64 + (track_id * 137) % 192,
     )
-
-
-def _frame_durations(frames: list[dict[str, Any]]) -> list[float]:
-    timestamps = [float(frame["timestamp"]) for frame in frames]
-    deltas = [right - left for left, right in pairwise(timestamps)]
-    fallback = statistics.median(deltas)
-    last = frames[-1]["duration"]
-    last_duration = float(last) if last is not None and float(last) > 0 else fallback
-    return [*deltas, last_duration]
-
-
-def _escape_concat_path(path: Path) -> str:
-    return str(path.resolve()).replace("'", "'\\''")
-
-
-def _encode_overlay(
-    concat_path: Path,
-    source_video: Path,
-    output_video: Path,
-    duration_seconds: float,
-    config: AppConfig,
-) -> None:
-    executable = resolve_executable(config.render.ffmpeg_path)
-    command = [
-        str(executable),
-        "-hide_banner",
-        "-loglevel",
-        "error",
-        "-f",
-        "concat",
-        "-safe",
-        "0",
-        "-i",
-        str(concat_path),
-        "-i",
-        str(source_video),
-        "-map",
-        "0:v:0",
-        "-map",
-        "1:a:0?",
-        "-c:v",
-        config.render.codec,
-        "-preset",
-        config.render.preset,
-        "-crf",
-        str(config.render.crf),
-        "-pix_fmt",
-        "yuv420p",
-        "-fps_mode",
-        "vfr",
-        "-c:a",
-        "aac",
-        "-b:a",
-        "192k",
-        "-t",
-        f"{duration_seconds:.9f}",
-        "-movflags",
-        "+faststart",
-        "-y",
-        str(output_video),
-    ]
-    process = subprocess.run(command, check=False, capture_output=True, text=True)
-    if process.returncode != 0:
-        detail = process.stderr.strip() or "no error output"
-        raise ExternalToolError(f"ffmpeg overlay encoding failed: {detail}")
 
 
 def _selected_track_id(selection: CacheResult | None) -> int | None:

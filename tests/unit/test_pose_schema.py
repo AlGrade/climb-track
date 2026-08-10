@@ -4,7 +4,12 @@ import pyarrow.parquet as pq
 import pytest
 
 from climbtrack.errors import SchemaValidationError
-from climbtrack.schema.pose import POSE_SCHEMA_VERSION, read_pose_parquet, write_pose_parquet
+from climbtrack.schema.pose import (
+    POSE_SCHEMA_VERSION,
+    combine_pose_parquet,
+    read_pose_parquet,
+    write_pose_parquet,
+)
 
 
 def _record(**changes):
@@ -59,3 +64,16 @@ def test_raw_heatmap_confidence_is_not_clamped(tmp_path: Path) -> None:
     write_pose_parquet([_record(confidence=1.2)], path)
 
     assert read_pose_parquet(path)[0]["confidence"] == pytest.approx(1.2)
+
+
+def test_pose_parts_are_streamed_in_order(tmp_path: Path) -> None:
+    first = tmp_path / "first.parquet"
+    second = tmp_path / "second.parquet"
+    combined = tmp_path / "combined.parquet"
+    write_pose_parquet([_record(frame_idx=0)], first)
+    write_pose_parquet([_record(frame_idx=1)], second)
+
+    rows = combine_pose_parquet([first, second], combined)
+
+    assert rows == 2
+    assert [row["frame_idx"] for row in read_pose_parquet(combined)] == [0, 1]
