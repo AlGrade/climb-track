@@ -1,0 +1,20 @@
+project:
+  cache_dir: cache
+  seed: 42
+  device: mps
+
+ingest:
+  ffmpeg_path: ffmpeg
+  ffprobe_path: ffprobe
+  frame_format: png
+  png_compression: 3
+  hdr_policy: fail
+  verify_cached_checksums: true
+
+models:
+  primary_pose_backend: sapiens2
+  sapiens2:
+    model_id: facebook/sapiens2-pose-1b
+    checkpoint_filename: sapiens2_1b_pose.safetensors
+    revision: null
+
