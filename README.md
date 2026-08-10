@@ -24,6 +24,7 @@ Milestones 1 and 2 implement:
 - explainable climber ranking from track length, continuity, movement, position and area;
 - explicit `--track-id` and interactive `--click` selection;
 - a hard uncertainty stop when automatic selection is ambiguous;
+- a padded square pose crop with centered temporal stabilization and short-gap interpolation;
 - a VFR-aware MP4 overlay with bounding boxes, confidence, track IDs, frame numbers and audio;
 - resumable CLI commands for each stage and `run-all`;
 - unit tests for hashing, cache behavior, timestamps, schemas, scoring, ByteTrack and VFR output.
@@ -67,6 +68,10 @@ Important ingest settings:
 - `hdr_policy: clip` explicitly accepts direct conversion to 8-bit RGB and can lose highlight
   detail. It must never be selected implicitly.
 - `verify_cached_checksums: true` verifies every artifact before declaring a cache hit.
+
+`pose_crop` controls the model input region independently of the raw YOLO/ByteTrack box. The
+default uses a 1.55 square padding scale and a centered 15-frame median window. Raw boxes remain
+unchanged in `tracks.parquet`; the derived crop is stored separately in `pose_crops.parquet`.
 
 No unavailable device or model is replaced automatically. A configured `mps`, `cpu`, or `cuda`
 device that cannot execute the selected backend fails clearly. Change the YAML explicitly if you

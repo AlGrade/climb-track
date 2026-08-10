@@ -132,6 +132,21 @@ class SelectionConfig(StrictModel):
     weights: SelectionWeights = SelectionWeights()
 
 
+class PoseCropConfig(StrictModel):
+    """Stable square crop derived from the selected raw tracking box."""
+
+    padding_scale: float = Field(default=1.55, ge=1.0, le=3.0)
+    smoothing_window: int = Field(default=15, ge=1, le=121)
+    maximum_interpolation_gap: int = Field(default=5, ge=0, le=120)
+
+    @model_validator(mode="after")
+    def require_odd_window(self) -> "PoseCropConfig":
+        """A centered temporal window must have an unambiguous middle frame."""
+        if self.smoothing_window % 2 == 0:
+            raise ValueError("pose_crop.smoothing_window must be odd")
+        return self
+
+
 class RenderConfig(StrictModel):
     """Tracking quality-control video settings."""
 
@@ -152,6 +167,7 @@ class AppConfig(StrictModel):
     detection: DetectionConfig
     tracking: TrackingConfig
     selection: SelectionConfig
+    pose_crop: PoseCropConfig = PoseCropConfig()
     render: RenderConfig
     models: ModelsConfig
 

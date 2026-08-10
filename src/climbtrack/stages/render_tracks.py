@@ -18,11 +18,12 @@ from climbtrack.config import AppConfig
 from climbtrack.errors import ExternalToolError
 from climbtrack.hashing import hash_json
 from climbtrack.provenance import executable_version, git_state, resolve_executable, runtime_state
+from climbtrack.schema.crops import read_pose_crops
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.tracks import read_tracks
 
 STAGE_NAME = "50_render_tracks"
-STAGE_VERSION = "1.0.0"
+STAGE_VERSION = "2.0.0"
 
 
 def render_tracking_overlay(
@@ -68,6 +69,7 @@ def render_tracking_overlay(
         by_frame: dict[int, list[dict[str, Any]]] = defaultdict(list)
         for row in track_rows:
             by_frame[int(row["frame_idx"])].append(row)
+        crops_by_frame = _pose_crops_by_frame(selection)
 
         overlay_dir = output / ".overlay-frames"
         overlay_dir.mkdir()
@@ -86,6 +88,7 @@ def render_tracking_overlay(
                     frame_idx,
                     by_frame.get(frame_idx, []),
                     selected_track_id,
+                    crops_by_frame.get(frame_idx),
                     config,
                 )
                 overlay_path = overlay_dir / f"{frame_idx:09d}.jpg"
@@ -151,6 +154,7 @@ def _draw_overlay(
     frame_idx: int,
     rows: list[dict[str, Any]],
     selected_track_id: int | None,
+    pose_crop: dict[str, Any] | None,
     config: AppConfig,
 ) -> None:
     import cv2
@@ -171,6 +175,8 @@ def _draw_overlay(
         if not config.render.show_all_tracks and track_id != selected_track_id:
             continue
         selected = track_id == selected_track_id
+        if selected and pose_crop is not None:
+            continue
         color = (0, 255, 0) if selected else _track_color(track_id)
         x1, y1, x2, y2 = (round(float(row[name])) for name in ("x1", "y1", "x2", "y2"))
         cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
@@ -178,6 +184,21 @@ def _draw_overlay(
         cv2.putText(
             image,
             label,
+            (x1, max(30, y1 - 12)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            config.render.font_scale,
+            color,
+            max(2, thickness // 2),
+            cv2.LINE_AA,
+        )
+    if pose_crop is not None:
+        x1, y1, x2, y2 = (round(float(pose_crop[name])) for name in ("x1", "y1", "x2", "y2"))
+        color = (0, 255, 0)
+        cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+        suffix = " interpolated" if pose_crop["is_interpolated"] else ""
+        cv2.putText(
+            image,
+            f"ID {pose_crop['track_id']} pose crop{suffix}",
             (x1, max(30, y1 - 12)),
             cv2.FONT_HERSHEY_SIMPLEX,
             config.render.font_scale,
@@ -265,3 +286,10 @@ def _selected_track_id(selection: CacheResult | None) -> int | None:
         return None
     payload = json.loads((selection.path / "selection.json").read_text(encoding="utf-8"))
     return int(payload["track_id"])
+
+
+def _pose_crops_by_frame(selection: CacheResult | None) -> dict[int, dict[str, Any]]:
+    if selection is None:
+        return {}
+    rows = read_pose_crops(selection.path / "pose_crops.parquet")
+    return {int(row["frame_idx"]): row for row in rows}

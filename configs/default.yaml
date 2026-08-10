@@ -41,6 +41,11 @@ selection:
     center: 0.15
     image_area: 0.10
 
+pose_crop:
+  padding_scale: 1.55
+  smoothing_window: 15
+  maximum_interpolation_gap: 5
+
 render:
   ffmpeg_path: ffmpeg
   codec: libx264

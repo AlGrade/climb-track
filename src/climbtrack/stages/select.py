@@ -8,11 +8,14 @@ from climbtrack.cache.upstream import upstream_fingerprint
 from climbtrack.config import AppConfig
 from climbtrack.errors import SelectionUncertainError, UnknownTrackError
 from climbtrack.provenance import git_state, runtime_state
+from climbtrack.schema.crops import write_pose_crops
+from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.tracks import read_tracks
+from climbtrack.selection.crops import build_pose_crops
 from climbtrack.selection.scoring import SelectionCandidate, rank_candidates
 
 STAGE_NAME = "25_select"
-STAGE_VERSION = "1.0.0"
+STAGE_VERSION = "2.0.0"
 
 
 def select_climber(
@@ -37,7 +40,8 @@ def select_climber(
     selected, method, margin = _decide(candidates, config, manual_track_id)
 
     effective_config = {
-        **config.selection.model_dump(mode="json"),
+        "selection": config.selection.model_dump(mode="json"),
+        "pose_crop": config.pose_crop.model_dump(mode="json"),
         "manual_track_id": manual_track_id,
     }
     tools: dict[str, object] = {}
@@ -54,6 +58,16 @@ def select_climber(
     )
 
     def build(output: Path) -> None:
+        frames = read_frame_index(ingest.path / "frames.parquet")
+        crops = build_pose_crops(
+            frames,
+            rows,
+            track_id=selected.track_id,
+            image_width=int(metadata["video"]["display_width"]),
+            image_height=int(metadata["video"]["display_height"]),
+            config=config.pose_crop,
+        )
+        write_pose_crops(crops, output / "pose_crops.parquet")
         candidate_payload = [candidate.as_dict() for candidate in candidates]
         (output / "candidates.json").write_text(
             json.dumps(candidate_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -66,6 +80,7 @@ def select_climber(
             "score": selected.score,
             "score_margin": margin,
             "candidate": selected.as_dict(),
+            "pose_crop_records": len(crops),
             "effective_config": effective_config,
         }
         (output / "selection.json").write_text(
