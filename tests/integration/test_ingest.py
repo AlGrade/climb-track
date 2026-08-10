@@ -40,8 +40,17 @@ def test_ingest_and_resume_tiny_video(tmp_path: Path) -> None:
                 "ffprobe_path": "ffprobe",
                 "hdr_policy": "fail",
             },
+            "detection": {},
+            "tracking": {},
+            "selection": {},
+            "render": {},
             "models": {
                 "primary_pose_backend": "sapiens2",
+                "yolo11": {
+                    "model_id": "yolo11x",
+                    "checkpoint_filename": "yolo11x.pt",
+                    "source_url": "https://example.test/yolo11x.pt",
+                },
                 "sapiens2": {
                     "model_id": "facebook/sapiens2-pose-1b",
                     "checkpoint_filename": "sapiens2_1b_pose.safetensors",

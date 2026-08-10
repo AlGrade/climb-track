@@ -4,7 +4,7 @@ from enum import StrEnum
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from climbtrack.errors import ConfigurationError
 
@@ -58,11 +58,90 @@ class Sapiens2Config(StrictModel):
     revision: str | None = None
 
 
+class Yolo11Config(StrictModel):
+    """Pinned identity and explicit download source for YOLO11."""
+
+    model_id: str = Field(pattern="^yolo11x$")
+    checkpoint_filename: str = Field(pattern=r"^yolo11x\.pt$")
+    source_url: str
+
+
 class ModelsConfig(StrictModel):
     """Model identities; model dependencies are installed in later milestones."""
 
     primary_pose_backend: str = Field(pattern="^sapiens2$")
+    yolo11: Yolo11Config
     sapiens2: Sapiens2Config
+
+
+class DetectionConfig(StrictModel):
+    """Quality-first YOLO11 person-detection settings."""
+
+    model_path: Path = Path("models/yolo11x.pt")
+    image_size: int = Field(default=1280, ge=640, le=2560, multiple_of=32)
+    confidence_threshold: float = Field(default=0.05, ge=0.0, le=1.0)
+    iou_threshold: float = Field(default=0.70, gt=0.0, le=1.0)
+    max_detections: int = Field(default=50, ge=1, le=1000)
+    batch_size: int = Field(default=1, ge=1, le=64)
+    half_precision: bool = False
+
+
+class TrackingConfig(StrictModel):
+    """Pinned ByteTrack association settings."""
+
+    track_high_threshold: float = Field(default=0.25, ge=0.0, le=1.0)
+    track_low_threshold: float = Field(default=0.05, ge=0.0, le=1.0)
+    new_track_threshold: float = Field(default=0.25, ge=0.0, le=1.0)
+    track_buffer: int = Field(default=90, ge=1, le=10_000)
+    match_threshold: float = Field(default=0.80, gt=0.0, le=1.0)
+    fuse_score: bool = True
+    containment_threshold: float = Field(default=0.90, gt=0.0, le=1.0)
+
+    @model_validator(mode="after")
+    def validate_threshold_order(self) -> "TrackingConfig":
+        """Ensure the low-confidence rescue range is meaningful."""
+        if self.track_low_threshold >= self.track_high_threshold:
+            raise ValueError("track_low_threshold must be below track_high_threshold")
+        return self
+
+
+class SelectionWeights(StrictModel):
+    """Relative contribution of independent climber-selection signals."""
+
+    length: float = Field(default=0.25, ge=0.0)
+    continuity: float = Field(default=0.20, ge=0.0)
+    vertical_range: float = Field(default=0.15, ge=0.0)
+    motion: float = Field(default=0.15, ge=0.0)
+    center: float = Field(default=0.15, ge=0.0)
+    image_area: float = Field(default=0.10, ge=0.0)
+
+    @model_validator(mode="after")
+    def require_positive_sum(self) -> "SelectionWeights":
+        """Reject a selector with no usable signal."""
+        if sum(self.model_dump().values()) <= 0:
+            raise ValueError("selection weights must have a positive sum")
+        return self
+
+
+class SelectionConfig(StrictModel):
+    """Automatic-selection acceptance thresholds."""
+
+    minimum_observations: int = Field(default=30, ge=2)
+    minimum_continuity: float = Field(default=0.45, ge=0.0, le=1.0)
+    minimum_score_margin: float = Field(default=0.08, ge=0.0, le=1.0)
+    weights: SelectionWeights = SelectionWeights()
+
+
+class RenderConfig(StrictModel):
+    """Tracking quality-control video settings."""
+
+    ffmpeg_path: str = "ffmpeg"
+    codec: str = Field(default="libx264", pattern="^libx264$")
+    crf: int = Field(default=18, ge=0, le=51)
+    preset: str = Field(default="slow", pattern="^(medium|slow|slower)$")
+    line_thickness: int = Field(default=6, ge=1, le=30)
+    font_scale: float = Field(default=1.2, gt=0.0, le=5.0)
+    show_all_tracks: bool = True
 
 
 class AppConfig(StrictModel):
@@ -70,6 +149,10 @@ class AppConfig(StrictModel):
 
     project: ProjectConfig
     ingest: IngestConfig
+    detection: DetectionConfig
+    tracking: TrackingConfig
+    selection: SelectionConfig
+    render: RenderConfig
     models: ModelsConfig
 
 
@@ -97,3 +180,11 @@ def resolve_cache_dir(config: AppConfig, config_path: Path) -> Path:
         return cache_dir
     project_root = config_path.resolve().parent.parent
     return project_root / cache_dir
+
+
+def resolve_project_path(path: Path, config_path: Path) -> Path:
+    """Resolve a configured project-relative path."""
+    if path.is_absolute():
+        return path.expanduser().resolve()
+    project_root = config_path.resolve().parent.parent
+    return (project_root / path).resolve()

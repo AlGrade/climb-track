@@ -22,8 +22,16 @@ ingest:
   png_compression: 3
   hdr_policy: fail
   verify_cached_checksums: true
+detection: {}
+tracking: {}
+selection: {}
+render: {}
 models:
   primary_pose_backend: sapiens2
+  yolo11:
+    model_id: yolo11x
+    checkpoint_filename: yolo11x.pt
+    source_url: https://example.test/yolo11x.pt
   sapiens2:
     model_id: facebook/sapiens2-pose-1b
     checkpoint_filename: sapiens2_1b_pose.safetensors

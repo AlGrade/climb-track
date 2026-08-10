@@ -73,7 +73,17 @@ def runtime_state() -> dict[str, str]:
         "platform": platform.platform(),
         "machine": platform.machine(),
     }
-    for package in ("climbtrack", "numpy", "pyarrow", "pydantic"):
+    for package in (
+        "climbtrack",
+        "lap",
+        "numpy",
+        "opencv-python",
+        "pyarrow",
+        "pydantic",
+        "torch",
+        "torchvision",
+        "ultralytics",
+    ):
         try:
             state[f"package:{package}"] = version(package)
         except PackageNotFoundError:

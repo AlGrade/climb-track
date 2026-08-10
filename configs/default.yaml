@@ -11,10 +11,52 @@ ingest:
   hdr_policy: fail
   verify_cached_checksums: true
 
+detection:
+  model_path: models/yolo11x.pt
+  image_size: 1280
+  confidence_threshold: 0.05
+  iou_threshold: 0.70
+  max_detections: 50
+  batch_size: 1
+  half_precision: false
+
+tracking:
+  track_high_threshold: 0.25
+  track_low_threshold: 0.05
+  new_track_threshold: 0.25
+  track_buffer: 90
+  match_threshold: 0.80
+  fuse_score: true
+  containment_threshold: 0.90
+
+selection:
+  minimum_observations: 30
+  minimum_continuity: 0.45
+  minimum_score_margin: 0.08
+  weights:
+    length: 0.25
+    continuity: 0.20
+    vertical_range: 0.15
+    motion: 0.15
+    center: 0.15
+    image_area: 0.10
+
+render:
+  ffmpeg_path: ffmpeg
+  codec: libx264
+  crf: 18
+  preset: slow
+  line_thickness: 6
+  font_scale: 1.2
+  show_all_tracks: true
+
 models:
   primary_pose_backend: sapiens2
+  yolo11:
+    model_id: yolo11x
+    checkpoint_filename: yolo11x.pt
+    source_url: https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11x.pt
   sapiens2:
     model_id: facebook/sapiens2-pose-1b
     checkpoint_filename: sapiens2_1b_pose.safetensors
     revision: null
-

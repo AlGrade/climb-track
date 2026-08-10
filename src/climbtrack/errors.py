@@ -19,3 +19,20 @@ class CacheIntegrityError(ClimbTrackError):
 
 class SchemaValidationError(ClimbTrackError):
     """Raised when canonical output records violate the schema contract."""
+
+
+class DeviceUnavailableError(ClimbTrackError):
+    """Raised when the explicitly configured inference device is unavailable."""
+
+
+class SelectionUncertainError(ClimbTrackError):
+    """Raised when automatic climber selection cannot be justified."""
+
+    def __init__(self, reason: str, candidates: list[dict[str, object]]) -> None:
+        super().__init__(reason)
+        self.reason = reason
+        self.candidates = candidates
+
+
+class UnknownTrackError(ClimbTrackError):
+    """Raised when a manually requested track does not exist."""

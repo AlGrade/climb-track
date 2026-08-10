@@ -1,10 +1,12 @@
 """Frame timeline Parquet schema."""
 
 from pathlib import Path
+from typing import Any
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from climbtrack.errors import SchemaValidationError
 from climbtrack.video.probe import FrameTiming
 
 FRAME_SCHEMA_VERSION = "1.0.0"
@@ -34,3 +36,11 @@ def write_frame_index(frames: tuple[FrameTiming, ...], path: Path) -> None:
     ]
     table = pa.Table.from_pylist(records, schema=FRAME_SCHEMA)
     pq.write_table(table, path, compression="zstd", version="2.6")
+
+
+def read_frame_index(path: Path) -> list[dict[str, Any]]:
+    """Read Stage-00 frames and verify the exact Arrow schema."""
+    table = pq.read_table(path)
+    if not table.schema.equals(FRAME_SCHEMA, check_metadata=True):
+        raise SchemaValidationError(f"Unexpected frame-index schema: {path}")
+    return table.to_pylist()
