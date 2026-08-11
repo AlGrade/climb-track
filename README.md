@@ -631,9 +631,10 @@ und zwei Betriebsarten anbietet:
 - **Zugmodus:** genau einen Zug abspielen und am Ende automatisch pausieren;
 - **Gesamtvideo:** das komplette Video normal abspielen.
 
-Im Zugmodus gibt es **Zurück**, **Wiederholen** und **Weiter**. Zusätzlich sind langsame Wiedergabe,
-Frame-Schritte und die Anzeige von Zugnummer, Hand, Start- und Endzeit vorgesehen. Start, Ende und
-Handzuordnung können korrigiert werden; die Änderungen werden separat als Ground Truth gespeichert.
+Die englische Player-Oberfläche bietet **Previous move**, **Play move**, **Next move** und **Full
+video**. Sie ist bewusst auf Video, Zugliste und Messwerte reduziert. Frame-Schritte sowie die
+Korrektur von Start, Ende und Handzuordnung bleiben unter **Edit boundaries** eingeklappt erreichbar;
+Änderungen werden separat als Ground Truth gespeichert.
 
 Beim Start lädt der Player `pose_refined.parquet`, bildet pro Hand einen robusten Handflächenpunkt
 und erkennt Übergänge zwischen stabilen Positionen automatisch. Bereits fertige Pose- und
@@ -664,8 +665,8 @@ uv run climbtrack player "/path/to/video.mp4" --config configs/default.yaml
 Der Befehl öffnet eine ausschließlich an `127.0.0.1` gebundene Browser-Oberfläche. Der Terminal
 muss währenddessen geöffnet bleiben; `Ctrl+C` beendet den lokalen Player. Falls kein Browser
 automatisch geöffnet werden soll, `--no-open-browser` verwenden und den ausgegebenen Link manuell
-öffnen. Der Link enthält ein zufälliges Sitzungstoken. Ist der konfigurierte Port belegt, probiert
-der Player automatisch den nächsten lokalen Port; mit `--port 9000` kann ein Port erzwungen werden.
+öffnen. Ist der konfigurierte Port belegt, probiert der Player automatisch den nächsten lokalen
+Port; mit `--port 9000` kann ein Port erzwungen werden.
 
 Der Player speichert jede Änderung sofort und atomar in:
 

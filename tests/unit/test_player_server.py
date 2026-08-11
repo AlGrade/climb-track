@@ -1,8 +1,7 @@
 import json
 import threading
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 import pytest
@@ -62,21 +61,16 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
     thread = threading.Thread(target=player.httpd.serve_forever, daemon=True)
     thread.start()
     parsed = urlsplit(player.url)
-    token = parse_qs(parsed.query)["token"][0]
     origin = f"{parsed.scheme}://{parsed.netloc}"
     try:
-        with urlopen(f"{origin}/api/session?token={token}") as response:
+        with urlopen(f"{origin}/api/session") as response:
             payload = json.load(response)
         assert payload["session"]["moves"] == []
         assert payload["timeline"][2]["media_time"] == pytest.approx(0.2)
         assert payload["metrics"][0]["hand_max_speed_px_s"] == 42.0
 
-        with pytest.raises(HTTPError) as forbidden:
-            urlopen(f"{origin}/api/session")
-        assert forbidden.value.code == 403
-
         range_request = Request(
-            f"{origin}/video?token={token}",
+            f"{origin}/video",
             headers={"Range": "bytes=2-5"},
         )
         with urlopen(range_request) as response:
@@ -85,11 +79,10 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
             assert response.headers["Content-Range"] == "bytes 2-5/10"
 
         save_request = Request(
-            f"{origin}/api/moves?token={token}",
+            f"{origin}/api/moves",
             method="PUT",
             headers={
                 "Content-Type": "application/json",
-                "X-ClimbTrack-Token": token,
             },
             data=json.dumps(
                 {
@@ -109,7 +102,7 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
         assert saved["session"]["revision"] == 1
         assert saved["session"]["moves"][0]["start_timestamp"] == 0.0
         assert read_moves_parquet(tmp_path / "moves.parquet")[0]["moving_hand"] == "left"
-        with urlopen(f"{origin}/api/session?token={token}") as response:
+        with urlopen(f"{origin}/api/session") as response:
             refreshed = json.load(response)
         assert refreshed["metrics"] == []
     finally:

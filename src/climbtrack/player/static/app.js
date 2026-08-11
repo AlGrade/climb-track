@@ -1,13 +1,11 @@
 "use strict";
 
-const token = new URLSearchParams(window.location.search).get("token") || "";
 const elements = Object.fromEntries(
   [
-    "video", "videoName", "activeMove", "saveState", "currentTime", "currentFrame",
-    "moveCount", "previousMove", "replayMove", "nextMove", "playAll", "previousFrame",
-    "nextFrame", "togglePlayback", "playbackRate", "editorTitle", "resetDraft", "setStart",
+    "video", "activeMove", "saveState", "currentTime", "currentFrame", "previousMove",
+    "replayMove", "nextMove", "playAll", "previousFrame", "nextFrame", "editorTitle", "resetDraft", "setStart",
     "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
-    "emptyMoves", "moveList", "metricsTitle", "metricsEmpty", "metricsGrid", "metricsNote",
+    "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
     "handMaxSpeed", "handMaxSpeedPx", "bodyMaxSpeed", "bodyMaxSpeedPx",
     "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath",
   ].map((id) => [id, document.getElementById(id)]),
@@ -24,27 +22,21 @@ const state = {
   watcherRunning: false,
 };
 
-const handLabels = { left: "Linke Hand", right: "Rechte Hand", both: "Beide Hände" };
-const outcomeLabels = { completed: "Geschafft", fall: "Sturz" };
+const handLabels = { left: "Left hand", right: "Right hand", both: "Both hands" };
+const outcomeLabels = { completed: "Completed", fall: "Fall" };
 
 async function initialize() {
-  if (!token) {
-    setSaveState("Ungültiger Player-Link", "error");
-    return;
-  }
   try {
-    const response = await fetch(`/api/session?token=${encodeURIComponent(token)}`);
-    if (!response.ok) throw new Error(`Player-Daten konnten nicht geladen werden (${response.status})`);
+    const response = await fetch("/api/session");
+    if (!response.ok) throw new Error(`Could not load player data (${response.status})`);
     const payload = await response.json();
     state.session = payload.session;
     state.timeline = payload.timeline;
     state.settings = payload.settings;
     state.metrics = payload.metrics || [];
-    elements.videoName.textContent = payload.video.name;
     elements.video.src = payload.video.url;
-    elements.video.playbackRate = Number(elements.playbackRate.value);
     renderAll();
-    setSaveState("Lokal gespeichert", "saved");
+    setSaveState("Saved locally", "saved");
   } catch (error) {
     setSaveState(error.message, "error");
   }
@@ -60,44 +52,36 @@ function renderAll() {
 
 function renderMetrics() {
   if (state.selectedIndex < 0 || !state.session.moves.length) {
-    elements.metricsTitle.textContent = "Zug auswählen";
-    elements.metricsEmpty.hidden = false;
-    elements.metricsGrid.hidden = true;
-    elements.metricsEmpty.textContent = "Spiele einen Zug ab oder wähle ihn unten aus.";
-    elements.metricsNote.textContent = "";
+    elements.metricsCard.hidden = true;
     return;
   }
   const move = state.session.moves[state.selectedIndex];
   const metrics = state.metrics.find((row) => row.move_id === move.move_id);
-  elements.metricsTitle.textContent = `Zug ${move.move_id} · ${outcomeLabels[move.outcome]}`;
+  elements.metricsCard.hidden = false;
   if (!metrics) {
-    elements.metricsEmpty.hidden = false;
     elements.metricsGrid.hidden = true;
-    elements.metricsEmpty.textContent = "Nach einer Grenzänderung Player neu starten, um neu zu messen.";
-    elements.metricsNote.textContent = "";
+    elements.metricsNote.textContent = "Restart the player to recalculate.";
     return;
   }
-  elements.metricsEmpty.hidden = true;
   elements.metricsGrid.hidden = false;
   elements.handMaxSpeed.textContent = formatRelativeSpeed(metrics.hand_max_speed_body_lengths_s);
   elements.handMaxSpeedPx.textContent = `${metrics.hand_max_speed_px_s.toFixed(0)} px/s`;
   elements.bodyMaxSpeed.textContent = formatRelativeSpeed(metrics.body_max_speed_body_lengths_s);
   elements.bodyMaxSpeedPx.textContent = `${metrics.body_max_speed_px_s.toFixed(0)} px/s`;
   elements.handMeanSpeed.textContent = formatRelativeSpeed(metrics.hand_mean_speed_body_lengths_s);
-  elements.handPath.textContent = `Weg ${metrics.hand_path_length_px.toFixed(0)} px`;
+  elements.handPath.textContent = `Path ${metrics.hand_path_length_px.toFixed(0)} px`;
   elements.bodyMeanSpeed.textContent = formatRelativeSpeed(metrics.body_mean_speed_body_lengths_s);
-  elements.bodyPath.textContent = `Weg ${metrics.body_path_length_px.toFixed(0)} px`;
-  elements.metricsNote.textContent = "Körperlängen/s ist relativ; echte m/s erfordern Kalibrierung.";
+  elements.bodyPath.textContent = `Path ${metrics.body_path_length_px.toFixed(0)} px`;
+  elements.metricsNote.textContent = "BL/s = body lengths per second";
 }
 
 function formatRelativeSpeed(value) {
-  return `${value.toFixed(2)} KL/s`;
+  return `${value.toFixed(2)} BL/s`;
 }
 
 function renderMoveList() {
   elements.moveList.replaceChildren();
   const moves = state.session.moves;
-  elements.moveCount.textContent = String(moves.length);
   elements.emptyMoves.hidden = moves.length > 0;
   moves.forEach((move, index) => {
     const row = document.createElement("button");
@@ -130,8 +114,8 @@ function renderMoveList() {
 function renderDraft() {
   const draft = state.draft;
   elements.editorTitle.textContent = state.selectedIndex >= 0
-    ? `Zug ${state.selectedIndex + 1} bearbeiten`
-    : "Neuen Zug markieren";
+    ? `Move ${state.selectedIndex + 1}`
+    : "New move";
   elements.startValue.textContent = boundaryText(draft.start_frame);
   elements.endValue.textContent = boundaryText(draft.end_frame);
   document.querySelectorAll("[data-hand]").forEach((button) => {
@@ -140,10 +124,10 @@ function renderDraft() {
   const complete = draft.start_frame !== null && draft.end_frame !== null && draft.moving_hand !== null;
   const forward = complete && draft.end_frame > draft.start_frame;
   elements.saveMove.disabled = !forward;
-  elements.saveMove.textContent = state.selectedIndex >= 0 ? "Änderungen speichern" : "Zug speichern";
+  elements.saveMove.textContent = "Save";
   elements.deleteMove.hidden = state.selectedIndex < 0;
   elements.validationMessage.textContent = complete && !forward
-    ? "Das Ende muss nach dem Start liegen."
+    ? "The end must be after the start."
     : "";
 }
 
@@ -164,7 +148,7 @@ function selectMove(index, options = {}) {
     moving_hand: move.moving_hand,
     outcome: move.outcome,
   };
-  elements.activeMove.textContent = `Zug ${move.move_id} · ${handLabels[move.moving_hand]} · ${outcomeLabels[move.outcome]}`;
+  elements.activeMove.textContent = `Move ${move.move_id} · ${handLabels[move.moving_hand]} · ${outcomeLabels[move.outcome]}`;
   if (options.seek) seekToFrame(move.start_frame);
   renderAll();
 }
@@ -194,7 +178,7 @@ function watchPlayback() {
       elements.video.pause();
       elements.video.currentTime = state.playbackEnd;
       state.playbackEnd = null;
-      setSaveState("Zugende erreicht", "saved");
+      setSaveState("Move complete", "saved");
     }
     if (!elements.video.paused) {
       window.requestAnimationFrame(tick);
@@ -252,14 +236,14 @@ function setBoundary(name) {
 }
 
 function boundaryText(frameIdx) {
-  if (frameIdx === null) return "Noch offen";
+  if (frameIdx === null) return "Unset";
   return `${formatTime(mediaTime(frameIdx))} · Frame ${frameIdx}`;
 }
 
 function resetDraft() {
   state.selectedIndex = -1;
   state.draft = { start_frame: null, end_frame: null, moving_hand: null, outcome: "completed" };
-  elements.activeMove.textContent = "Gesamtvideo";
+  elements.activeMove.textContent = "Full video";
   renderAll();
 }
 
@@ -306,16 +290,16 @@ async function deleteSelected() {
 }
 
 async function persistMoves(edits, selectedEdit) {
-  setSaveState("Wird gespeichert …", "loading");
+  setSaveState("Saving…", "loading");
   elements.saveMove.disabled = true;
   try {
-    const response = await fetch(`/api/moves?token=${encodeURIComponent(token)}`, {
+    const response = await fetch("/api/moves", {
       method: "PUT",
-      headers: { "Content-Type": "application/json", "X-ClimbTrack-Token": token },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ expected_revision: state.session.revision, moves: edits }),
     });
     const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || `Speichern fehlgeschlagen (${response.status})`);
+    if (!response.ok) throw new Error(payload.error || `Save failed (${response.status})`);
     state.session = payload.session;
     state.metrics = [];
     if (selectedEdit) {
@@ -332,15 +316,15 @@ async function persistMoves(edits, selectedEdit) {
           moving_hand: move.moving_hand,
           outcome: move.outcome,
         };
-        elements.activeMove.textContent = `Zug ${move.move_id} · ${handLabels[move.moving_hand]} · ${outcomeLabels[move.outcome]}`;
+        elements.activeMove.textContent = `Move ${move.move_id} · ${handLabels[move.moving_hand]} · ${outcomeLabels[move.outcome]}`;
       }
     } else {
       resetDraft();
     }
     renderAll();
-    setSaveState("Lokal gespeichert", "saved");
+    setSaveState("Saved locally", "saved");
   } catch (error) {
-    setSaveState("Speichern fehlgeschlagen", "error");
+    setSaveState("Save failed", "error");
     renderDraft();
     elements.validationMessage.textContent = error.message;
   }
@@ -373,21 +357,13 @@ elements.nextMove.addEventListener("click", () => playMove(state.selectedIndex <
 elements.playAll.addEventListener("click", async () => {
   state.playbackEnd = null;
   state.selectedIndex = -1;
-  elements.activeMove.textContent = "Gesamtvideo";
+  elements.activeMove.textContent = "Full video";
   elements.video.currentTime = 0;
   renderAll();
   await elements.video.play();
 });
 elements.previousFrame.addEventListener("click", () => stepFrame(-1));
 elements.nextFrame.addEventListener("click", () => stepFrame(1));
-elements.togglePlayback.addEventListener("click", () => {
-  state.playbackEnd = null;
-  if (elements.video.paused) elements.video.play();
-  else elements.video.pause();
-});
-elements.playbackRate.addEventListener("change", () => {
-  elements.video.playbackRate = Number(elements.playbackRate.value);
-});
 elements.setStart.addEventListener("click", () => setBoundary("start"));
 elements.setEnd.addEventListener("click", () => setBoundary("end"));
 elements.resetDraft.addEventListener("click", resetDraft);
@@ -404,7 +380,9 @@ document.addEventListener("keydown", (event) => {
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (event.code === "Space") {
     event.preventDefault();
-    elements.togglePlayback.click();
+    state.playbackEnd = null;
+    if (elements.video.paused) elements.video.play();
+    else elements.video.pause();
   } else if (event.key === "ArrowLeft") {
     event.preventDefault();
     stepFrame(-1);

@@ -3,7 +3,6 @@
 import errno
 import json
 import mimetypes
-import secrets
 import threading
 import webbrowser
 from dataclasses import dataclass
@@ -11,7 +10,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import urlsplit
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -30,7 +29,7 @@ MOVE_EDITS = TypeAdapter(list[MoveEdit])
 
 @dataclass(frozen=True)
 class PlayerServer:
-    """Bound server plus the unguessable local session URL."""
+    """Bound loopback server plus its local URL."""
 
     httpd: ThreadingHTTPServer
     url: str
@@ -44,7 +43,6 @@ class _PlayerState:
     config: MovePlayerConfig
     move_metrics: tuple[dict[str, Any], ...]
     metrics_revision: int
-    token: str
     lock: threading.Lock
 
 
@@ -63,7 +61,6 @@ def create_player_server(
         raise ClimbTrackError(f"Player video does not exist: {source}")
     if len(frames) < 2:
         raise ClimbTrackError("Player requires at least two source frames")
-    token = secrets.token_urlsafe(24)
     state = _PlayerState(
         video_path=source,
         session_path=session_path.resolve(),
@@ -71,7 +68,6 @@ def create_player_server(
         config=config,
         move_metrics=tuple(move_metrics or []),
         metrics_revision=load_move_session(session_path).revision,
-        token=token,
         lock=threading.Lock(),
     )
     handler = _handler_for(state)
@@ -98,7 +94,7 @@ def create_player_server(
             f"{min(preferred_port + 20, 65_535)}: {last_error}"
         ) from last_error
     actual_port = int(httpd.server_address[1])
-    return PlayerServer(httpd=httpd, url=f"http://{config.host}:{actual_port}/?token={token}")
+    return PlayerServer(httpd=httpd, url=f"http://{config.host}:{actual_port}/")
 
 
 def run_player_server(server: PlayerServer, *, open_browser: bool) -> None:
@@ -154,11 +150,9 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
                 self.send_response(HTTPStatus.NO_CONTENT)
                 self.end_headers()
             elif request.path == "/api/session":
-                if self._authorized(request.query):
-                    self._send_session()
+                self._send_session()
             elif request.path == "/video":
-                if self._authorized(request.query):
-                    self._send_video(head_only=False)
+                self._send_video(head_only=False)
             elif request.path == "/health":
                 self._send_json({"status": "ok"})
             else:
@@ -166,7 +160,7 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
 
         def do_HEAD(self) -> None:
             request = urlsplit(self.path)
-            if request.path == "/video" and self._authorized(request.query):
+            if request.path == "/video":
                 self._send_video(head_only=True)
             else:
                 self.send_error(HTTPStatus.NOT_FOUND)
@@ -176,17 +170,7 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
             if request.path != "/api/moves":
                 self.send_error(HTTPStatus.NOT_FOUND)
                 return
-            if not self._authorized(request.query, allow_header=True):
-                return
             self._save_moves()
-
-        def _authorized(self, query: str, *, allow_header: bool = False) -> bool:
-            query_token = parse_qs(query).get("token", [None])[0]
-            header_token = self.headers.get("X-ClimbTrack-Token") if allow_header else None
-            if secrets.compare_digest(query_token or header_token or "", state.token):
-                return True
-            self.send_error(HTTPStatus.FORBIDDEN, "Invalid local player token")
-            return False
 
         def _send_session(self) -> None:
             with state.lock:
@@ -212,7 +196,7 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
                     "timeline": timeline,
                     "video": {
                         "name": state.video_path.name,
-                        "url": f"/video?token={state.token}",
+                        "url": "/video",
                     },
                     "settings": {
                         "lead_in_seconds": state.config.lead_in_seconds,
