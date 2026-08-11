@@ -35,6 +35,7 @@ class ProjectConfig(StrictModel):
     """Project-wide reproducibility settings."""
 
     cache_dir: Path = Path("cache")
+    annotation_dir: Path = Path("annotations")
     seed: int = Field(default=42, ge=0)
     device: Device
 
@@ -191,6 +192,16 @@ class PoseRenderConfig(StrictModel):
     show_pose_crop: bool = False
 
 
+class AnnotationConfig(StrictModel):
+    """Small, difficult-frame ground-truth workflow settings."""
+
+    sample_count: int = Field(default=10, ge=3, le=100)
+    minimum_spacing_seconds: float = Field(default=0.35, ge=0.0, le=30.0)
+    confidence_threshold: float = Field(default=0.15, ge=0.0, le=1.0)
+    pck_threshold: float = Field(default=0.20, gt=0.0, le=1.0)
+    oks_sigma: float = Field(default=0.10, gt=0.0, le=1.0)
+
+
 class RenderConfig(StrictModel):
     """Tracking quality-control video settings."""
 
@@ -215,6 +226,7 @@ class AppConfig(StrictModel):
     pose: PoseConfig = PoseConfig()
     render: RenderConfig
     pose_render: PoseRenderConfig = PoseRenderConfig()
+    annotation: AnnotationConfig = AnnotationConfig()
     models: ModelsConfig
 
 
@@ -242,6 +254,15 @@ def resolve_cache_dir(config: AppConfig, config_path: Path) -> Path:
         return cache_dir
     project_root = config_path.resolve().parent.parent
     return project_root / cache_dir
+
+
+def resolve_annotation_dir(config: AppConfig, config_path: Path) -> Path:
+    """Resolve the editable ground-truth directory against the project root."""
+    annotation_dir = config.project.annotation_dir
+    if annotation_dir.is_absolute():
+        return annotation_dir
+    project_root = config_path.resolve().parent.parent
+    return project_root / annotation_dir
 
 
 def resolve_project_path(path: Path, config_path: Path) -> Path:

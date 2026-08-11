@@ -38,6 +38,32 @@ Milestones 1 through 3 implement:
 Temporal refinement is deliberately absent from the Milestone-3 output: `pose_raw.parquet` contains
 only model observations. Refinement, annotation and evaluation remain for later milestones.
 
+## Lightweight Milestone 4 ground truth
+
+Milestone 4 uses a deliberately small stress-test instead of asking for exhaustive annotation.
+Ten frames are selected deterministically: mostly low-confidence/high-motion cases plus two
+timeline coverage frames. The editor reviews 40 movement-relevant landmarks (body, feet,
+additional shoulder/elbow points, and fingertips); dense face landmarks are excluded.
+
+```bash
+climbtrack annotate "/path/to/video.mp4" --config configs/default.yaml
+```
+
+Drag an incorrect point. Right-click it (or use **Unsichtbar**) if the image does not contain
+enough evidence to place it. **Bestätigen + weiter** marks the whole frame as reviewed. Work is
+saved after every edit and the command resumes the same session later.
+
+After reviewing the selected frames, run the exact command printed by the editor, or:
+
+```bash
+climbtrack evaluate annotations/<video-session>/ground_truth.json \
+  --config configs/default.yaml
+```
+
+The resulting `evaluation.json` reports pixel error, normalized PCK@0.2, an OKS-like score,
+low-confidence rate, and the share of predictions that required correction, overall and by
+keypoint group. This small set is a refinement guardrail, not a claim of dataset-wide accuracy.
+
 ## Requirements
 
 - macOS on Apple Silicon (other platforms are supported where the configured tools exist)

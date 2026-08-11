@@ -1,5 +1,6 @@
 project:
   cache_dir: cache
+  annotation_dir: annotations
   seed: 42
   device: mps
 
@@ -71,6 +72,13 @@ pose_render:
   line_thickness: 5
   show_face_keypoints: false
   show_pose_crop: false
+
+annotation:
+  sample_count: 10
+  minimum_spacing_seconds: 0.35
+  confidence_threshold: 0.15
+  pck_threshold: 0.20
+  oks_sigma: 0.10
 
 models:
   primary_pose_backend: sapiens2

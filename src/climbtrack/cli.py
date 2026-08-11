@@ -11,9 +11,17 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from climbtrack.annotation import evaluate_session, prepare_session
+from climbtrack.annotation.tool import launch_annotation_tool
 from climbtrack.cache import CacheResult
 from climbtrack.cache.manifest import CacheManifest
-from climbtrack.config import AppConfig, load_config, resolve_cache_dir, resolve_project_path
+from climbtrack.config import (
+    AppConfig,
+    load_config,
+    resolve_annotation_dir,
+    resolve_cache_dir,
+    resolve_project_path,
+)
 from climbtrack.device import require_torch_device, seed_torch
 from climbtrack.errors import ClimbTrackError, SelectionUncertainError
 from climbtrack.model_downloads import (
@@ -24,6 +32,7 @@ from climbtrack.model_downloads import (
 )
 from climbtrack.provenance import executable_version
 from climbtrack.schema.frames import read_frame_index
+from climbtrack.schema.keypoints import read_registry
 from climbtrack.schema.tracks import read_tracks
 from climbtrack.selection.click import choose_track_by_click
 from climbtrack.stages.detect import detect_people
@@ -311,6 +320,83 @@ def render_pose(
     except SelectionUncertainError as exc:
         _abort_selection(exc)
     except ClimbTrackError as exc:
+        _abort(exc)
+
+
+@app.command("annotate")
+def annotate(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+) -> None:
+    """Review ten difficult frames in a small local ground-truth editor."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        session_path, session, created = prepare_session(
+            ingest_result,
+            selection,
+            pose_result,
+            config=context.config,
+            annotation_root=resolve_annotation_dir(context.config, context.config_path),
+        )
+        state = "created" if created else "resumed"
+        console.print(f"[green]Annotation session {state}:[/green] {session_path}")
+        console.print(
+            "Drag wrong points, right-click invisible points, then press 'Bestätigen + weiter'."
+        )
+        registry = read_registry(pose_result.path / "keypoints.json")
+        launch_annotation_tool(
+            session,
+            session_path,
+            ingest_result.path,
+            registry["skeleton_edges"],
+        )
+        reviewed = sum(frame.reviewed for frame in session.frames)
+        console.print(f"[bold green]Reviewed:[/bold green] {reviewed}/{len(session.frames)} frames")
+        if reviewed == len(session.frames):
+            console.print(f"Next: climbtrack evaluate {session_path}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except (ClimbTrackError, OSError) as exc:
+        _abort(exc)
+
+
+@app.command("evaluate")
+def evaluate(
+    annotations: Annotated[
+        Path,
+        typer.Argument(help="ground_truth.json written by 'climbtrack annotate'.", dir_okay=False),
+    ],
+    config_path: ConfigOption = Path("configs/default.yaml"),
+) -> None:
+    """Measure raw pose accuracy against manually reviewed frames."""
+    try:
+        config = load_config(config_path.expanduser().resolve())
+        output, metrics = evaluate_session(
+            annotations.expanduser().resolve(),
+            pck_threshold=config.annotation.pck_threshold,
+            oks_sigma=config.annotation.oks_sigma,
+            confidence_threshold=config.annotation.confidence_threshold,
+        )
+        table = Table(title=f"Ground truth: {metrics['reviewed_frames']} reviewed frames")
+        for column in ("Group", "Points", "Mean px", "PCK@0.2", "OKS", "Corrected"):
+            table.add_column(column)
+        for group, values in metrics["groups"].items():
+            table.add_row(
+                group,
+                str(values["keypoints"]),
+                f"{values['mean_error_px']:.2f}",
+                f"{values['pck']:.1%}",
+                f"{values['oks']:.3f}",
+                f"{values['corrected_rate']:.1%}",
+            )
+        console.print(table)
+        console.print(f"[bold green]Metrics:[/bold green] {output}")
+    except (ClimbTrackError, OSError) as exc:
         _abort(exc)
 
 
