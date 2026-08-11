@@ -753,10 +753,13 @@ Die Berechnung ist als reproduzierbare Cache-Stufe `80_move_metrics` implementie
 wird dafür nicht erneut ausgeführt. Neben Parquet wird zur einfachen Einsicht dasselbe Ergebnis als
 JSON gespeichert.
 
-Der Player zeigt für den ausgewählten Zug mittlere und maximale Hand- und Körpergeschwindigkeit,
-die geschätzten Wege und eine Kurve mit beiden Geschwindigkeiten pro Frame. Ein Cursor folgt beim
-Abspielen der aktuellen Position. Die zugweisen Zusammenfassungen stehen in `move_metrics.parquet`,
-die vollständigen Kurvenwerte in `move_speed_timeline.parquet`. Am Referenzvideo ergeben sich:
+Der Player zeigt direkt unter dem Video eine vergrößerte Kurve mit Hand- und
+Körpergeschwindigkeit pro Frame, beschrifteten Zeit- und BL/s-Achsen sowie den exakten Werten am
+aktuellen Frame. Darunter stehen mittlere und maximale Geschwindigkeiten sowie die geschätzten
+Wege. Der weiße Cursor folgt sowohl beim Abspielen als auch beim manuellen Spulen. Die Pfeiltasten
+und die beiden Frame-Buttons springen jeweils exakt einen Videoframe. Die zugweisen
+Zusammenfassungen stehen in `move_metrics.parquet`, die vollständigen Kurvenwerte in
+`move_speed_timeline.parquet`. Am Referenzvideo ergeben sich:
 
 | Zug | Ergebnis | Hand max. | Hand Ø | Körper max. | Körper Ø |
 |---:|---|---:|---:|---:|---:|

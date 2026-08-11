@@ -16,21 +16,28 @@
           </div>
         </div>
 
-        <div class="transport" aria-label="Move navigation">
-          <button id="previousMove" class="secondary">← Previous move</button>
-          <button id="replayMove" class="primary">▶ Play move</button>
-          <button id="nextMove" class="secondary">Next move →</button>
-          <button id="playAll" class="ghost">Full video</button>
-        </div>
-      </section>
-
-      <aside class="side-panel">
-        <section class="moves-card">
-          <div id="emptyMoves" class="empty-state">No moves detected.</div>
-          <ol id="moveList" class="move-list"></ol>
-        </section>
-
         <section id="metricsCard" class="metrics-card" hidden>
+          <div id="speedChartWrap" class="speed-chart">
+            <div class="chart-header">
+              <strong>Speed per frame</strong>
+              <div class="chart-legend" aria-label="Chart legend">
+                <span><i class="hand-line"></i>Hand</span>
+                <span><i class="body-line"></i>Body</span>
+              </div>
+            </div>
+            <div class="chart-readout" aria-live="polite">
+              <span>Hand <strong id="chartHandValue">–</strong></span>
+              <span>Body <strong id="chartBodyValue">–</strong></span>
+              <span id="chartFrameLabel">Frame –</span>
+            </div>
+            <svg id="speedChart" viewBox="0 0 760 270" role="img" aria-label="Hand and body speed per video frame">
+              <g id="chartGrid"></g>
+              <path id="bodySpeedPath" class="chart-path body-path"></path>
+              <path id="handSpeedPath" class="chart-path hand-path"></path>
+              <line id="chartCursor" class="chart-cursor" x1="58" y1="18" x2="58" y2="224" visibility="hidden"></line>
+            </svg>
+          </div>
+
           <div id="metricsGrid" class="metrics-grid">
             <div>
               <span>Hand max</span>
@@ -53,26 +60,22 @@
               <small id="bodyPath">–</small>
             </div>
           </div>
-          <div id="speedChartWrap" class="speed-chart">
-            <div class="chart-legend">
-              <span><i class="hand-line"></i>Hand</span>
-              <span><i class="body-line"></i>Body</span>
-            </div>
-            <svg id="speedChart" viewBox="0 0 600 170" role="img" aria-label="Speed per frame">
-              <line class="chart-grid" x1="0" y1="150" x2="600" y2="150"></line>
-              <line class="chart-grid" x1="0" y1="80" x2="600" y2="80"></line>
-              <path id="bodySpeedPath" class="chart-path body-path"></path>
-              <path id="handSpeedPath" class="chart-path hand-path"></path>
-              <line id="chartCursor" class="chart-cursor" x1="0" y1="8" x2="0" y2="150" visibility="hidden"></line>
-            </svg>
-            <div class="chart-axis">
-              <span>0 s</span>
-              <span id="chartScale">–</span>
-              <span id="chartDuration">–</span>
-            </div>
-          </div>
           <p id="metricsNote" class="metrics-note"></p>
         </section>
+      </section>
+
+      <aside class="side-panel">
+        <section class="moves-card">
+          <div id="emptyMoves" class="empty-state">No moves detected.</div>
+          <ol id="moveList" class="move-list"></ol>
+        </section>
+
+        <div class="transport" aria-label="Move navigation">
+          <button id="replayMove" class="primary">▶ Play move</button>
+          <button id="previousMove" class="secondary">← Previous move</button>
+          <button id="nextMove" class="secondary">Next move →</button>
+          <button id="playAll" class="ghost">Full video</button>
+        </div>
 
         <details class="editor-card">
           <summary>Edit boundaries</summary>

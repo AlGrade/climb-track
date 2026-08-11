@@ -57,9 +57,9 @@ button:disabled {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.7fr);
+  grid-template-columns: minmax(0, 1.85fr) minmax(310px, 0.65fr);
   gap: 18px;
-  width: min(1500px, 100%);
+  width: min(1600px, 100%);
   margin: 0 auto;
   padding: 18px;
 }
@@ -81,7 +81,7 @@ button:disabled {
 
 video {
   width: 100%;
-  height: min(79vh, 900px);
+  height: min(68vh, 780px);
   object-fit: contain;
   background: #050606;
 }
@@ -101,9 +101,13 @@ video {
 
 .transport {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-top: 9px;
+}
+
+#replayMove,
+#playAll {
+  grid-column: 1 / -1;
 }
 
 .primary {
@@ -135,6 +139,11 @@ video {
   border-radius: var(--radius);
   padding: 12px;
   background: var(--surface);
+}
+
+.metrics-card {
+  margin-top: 10px;
+  padding: 14px;
 }
 
 .moves-card {
@@ -199,8 +208,9 @@ video {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
 }
 
 .metrics-grid div {
@@ -226,30 +236,57 @@ video {
 }
 
 .metrics-note {
-  margin: 9px 1px 0;
+  margin: 10px 1px 0;
   color: var(--muted);
   font-size: 0.7rem;
 }
 
 .speed-chart {
-  margin-top: 10px;
   border-radius: 9px;
-  padding: 9px 10px 7px;
+  padding: 13px 14px 9px;
   background: var(--raised);
 }
 
+.chart-header,
 .chart-legend,
-.chart-axis {
+.chart-readout {
   display: flex;
   align-items: center;
+}
+
+.chart-header {
   justify-content: space-between;
+  gap: 16px;
+}
+
+.chart-header > strong {
+  font-size: 0.9rem;
+}
+
+.chart-legend,
+.chart-readout {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
 }
 
 .chart-legend {
-  justify-content: flex-start;
   gap: 14px;
+}
+
+.chart-readout {
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-readout strong {
+  margin-left: 3px;
+  color: var(--text);
+}
+
+.chart-readout span:last-child {
+  margin-left: auto;
 }
 
 .chart-legend i {
@@ -271,20 +308,40 @@ video {
 .speed-chart svg {
   display: block;
   width: 100%;
-  margin: 4px 0 1px;
+  margin: 5px 0 0;
   overflow: visible;
 }
 
 .chart-grid {
   stroke: var(--line);
   stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-grid-axis {
+  stroke: #637068;
+}
+
+.chart-tick-label,
+.chart-axis-title {
+  fill: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-axis-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .chart-path {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 3;
+  stroke-width: 2.5;
   vector-effect: non-scaling-stroke;
 }
 
@@ -462,6 +519,10 @@ video {
   video {
     height: 64vh;
   }
+
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -469,11 +530,18 @@ video {
     padding: 9px;
   }
 
-  .transport {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .video-shell {
     min-height: 300px;
+  }
+
+  .chart-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .chart-readout span:last-child {
+    width: 100%;
+    margin-left: 0;
   }
 }

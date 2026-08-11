@@ -8,7 +8,8 @@ const elements = Object.fromEntries(
     "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
     "handMaxSpeed", "handMaxSpeedPx", "bodyMaxSpeed", "bodyMaxSpeedPx",
     "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath", "speedChartWrap",
-    "handSpeedPath", "bodySpeedPath", "chartCursor", "chartScale", "chartDuration",
+    "handSpeedPath", "bodySpeedPath", "chartCursor", "chartGrid", "chartHandValue",
+    "chartBodyValue", "chartFrameLabel",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
@@ -19,6 +20,7 @@ const state = {
   metrics: [],
   speedTimeline: [],
   chartSamples: [],
+  timelineIndexByFrame: new Map(),
   selectedIndex: -1,
   draft: { start_frame: null, end_frame: null, moving_hand: null, outcome: "completed" },
   playbackEnd: null,
@@ -28,6 +30,7 @@ const state = {
 
 const handLabels = { left: "Left hand", right: "Right hand", both: "Both hands" };
 const outcomeLabels = { completed: "Completed", fall: "Fall" };
+const chartLayout = Object.freeze({ width: 760, left: 58, right: 16, top: 18, bottom: 224 });
 
 async function initialize() {
   try {
@@ -36,6 +39,9 @@ async function initialize() {
     const payload = await response.json();
     state.session = payload.session;
     state.timeline = payload.timeline;
+    state.timelineIndexByFrame = new Map(
+      state.timeline.map((frame, index) => [frame.frame_idx, index]),
+    );
     state.settings = payload.settings;
     state.metrics = payload.metrics || [];
     state.speedTimeline = payload.speed_timeline || [];
@@ -92,41 +98,135 @@ function renderSpeedChart(move) {
     elements.speedChartWrap.hidden = true;
     return;
   }
-  const width = 600;
-  const top = 8;
-  const bottom = 150;
   const duration = samples[samples.length - 1].offset_seconds || 1;
   const maximum = Math.max(
     ...samples.map((sample) => sample.hand_speed_body_lengths_s),
     ...samples.map((sample) => sample.body_speed_body_lengths_s),
     0.01,
   );
-  const scaleMaximum = maximum * 1.08;
+  const scale = chartScale(maximum);
+  const plotWidth = chartLayout.width - chartLayout.left - chartLayout.right;
+  const plotHeight = chartLayout.bottom - chartLayout.top;
   const pathFor = (key) => samples.map((sample, index) => {
-    const x = (sample.offset_seconds / duration) * width;
-    const y = bottom - (sample[key] / scaleMaximum) * (bottom - top);
+    const x = chartLayout.left + (sample.offset_seconds / duration) * plotWidth;
+    const y = chartLayout.bottom - (sample[key] / scale.maximum) * plotHeight;
     return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
   }).join(" ");
+  renderChartGrid(duration, scale);
   elements.handSpeedPath.setAttribute("d", pathFor("hand_speed_body_lengths_s"));
   elements.bodySpeedPath.setAttribute("d", pathFor("body_speed_body_lengths_s"));
-  elements.chartScale.textContent = `0–${scaleMaximum.toFixed(1)} BL/s`;
-  elements.chartDuration.textContent = `${duration.toFixed(2)} s`;
   updateChartCursor();
+}
+
+function chartScale(maximum) {
+  const roughStep = maximum / 4;
+  const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+  const normalized = roughStep / magnitude;
+  let normalizedStep = 10;
+  if (normalized <= 1.5) normalizedStep = 1;
+  else if (normalized <= 3) normalizedStep = 2;
+  else if (normalized <= 7) normalizedStep = 5;
+  const step = normalizedStep * magnitude;
+  const tickCount = Math.max(1, Math.ceil(maximum / step));
+  return { maximum: step * tickCount, step, tickCount };
+}
+
+function renderChartGrid(duration, scale) {
+  elements.chartGrid.replaceChildren();
+  for (let index = 0; index <= scale.tickCount; index += 1) {
+    const value = index * scale.step;
+    const y = chartLayout.bottom - (value / scale.maximum) * (chartLayout.bottom - chartLayout.top);
+    appendSvgElement("line", {
+      class: `chart-grid${index === 0 ? " chart-grid-axis" : ""}`,
+      x1: chartLayout.left,
+      y1: y,
+      x2: chartLayout.width - chartLayout.right,
+      y2: y,
+    });
+    appendSvgElement("text", {
+      class: "chart-tick-label",
+      x: chartLayout.left - 10,
+      y: y + 4,
+      "text-anchor": "end",
+    }, formatAxisNumber(value));
+  }
+
+  const xTickCount = 4;
+  for (let index = 0; index <= xTickCount; index += 1) {
+    const fraction = index / xTickCount;
+    const x = chartLayout.left + fraction * (chartLayout.width - chartLayout.left - chartLayout.right);
+    appendSvgElement("line", {
+      class: `chart-grid${index === 0 ? " chart-grid-axis" : ""}`,
+      x1: x,
+      y1: chartLayout.top,
+      x2: x,
+      y2: chartLayout.bottom,
+    });
+    appendSvgElement("text", {
+      class: "chart-tick-label",
+      x,
+      y: chartLayout.bottom + 23,
+      "text-anchor": "middle",
+    }, `${(duration * fraction).toFixed(1)} s`);
+  }
+
+  appendSvgElement("text", {
+    class: "chart-axis-title",
+    x: -(chartLayout.top + chartLayout.bottom) / 2,
+    y: 13,
+    transform: "rotate(-90)",
+    "text-anchor": "middle",
+  }, "Speed (BL/s)");
+}
+
+function appendSvgElement(name, attributes, text = null) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+  Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, String(value)));
+  if (text !== null) element.textContent = text;
+  elements.chartGrid.append(element);
+}
+
+function formatAxisNumber(value) {
+  return Number(value.toFixed(2)).toString();
 }
 
 function updateChartCursor() {
   if (state.selectedIndex < 0 || state.chartSamples.length < 2) {
     elements.chartCursor.setAttribute("visibility", "hidden");
+    elements.chartHandValue.textContent = "–";
+    elements.chartBodyValue.textContent = "–";
+    elements.chartFrameLabel.textContent = "Frame –";
     return;
   }
   const move = state.session.moves[state.selectedIndex];
   const offset = elements.video.currentTime - mediaTime(move.start_frame);
   const duration = state.chartSamples[state.chartSamples.length - 1].offset_seconds;
   const clampedOffset = Math.max(0, Math.min(offset, duration));
-  const x = (clampedOffset / duration) * 600;
+  const x = chartLayout.left
+    + (clampedOffset / duration) * (chartLayout.width - chartLayout.left - chartLayout.right);
+  const sample = nearestChartSample(clampedOffset);
   elements.chartCursor.setAttribute("visibility", "visible");
   elements.chartCursor.setAttribute("x1", x.toFixed(2));
   elements.chartCursor.setAttribute("x2", x.toFixed(2));
+  elements.chartHandValue.textContent = formatRelativeSpeed(sample.hand_speed_body_lengths_s);
+  elements.chartBodyValue.textContent = formatRelativeSpeed(sample.body_speed_body_lengths_s);
+  elements.chartFrameLabel.textContent = `Frame ${sample.frame_idx}`;
+}
+
+function nearestChartSample(offset) {
+  let low = 0;
+  let high = state.chartSamples.length - 1;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (state.chartSamples[middle].offset_seconds < offset) low = middle + 1;
+    else high = middle;
+  }
+  if (low === 0) return state.chartSamples[0];
+  const before = state.chartSamples[low - 1];
+  const after = state.chartSamples[low];
+  return Math.abs(before.offset_seconds - offset) <= Math.abs(after.offset_seconds - offset)
+    ? before
+    : after;
 }
 
 function formatRelativeSpeed(value) {
@@ -224,7 +324,6 @@ function playMove(index) {
 }
 
 function startPlayback(start, end) {
-  state.playbackEnd = null;
   state.playbackReady = false;
   state.playbackEnd = end;
 
@@ -300,23 +399,28 @@ function nearestFrame() {
 }
 
 function mediaTime(frameIdx) {
-  const frame = state.timeline[frameIdx];
+  const timelineIndex = state.timelineIndexByFrame.get(frameIdx);
+  const frame = timelineIndex === undefined ? null : state.timeline[timelineIndex];
   return frame ? frame.media_time : 0;
 }
 
 function seekToFrame(frameIdx) {
+  const timelineIndex = state.timelineIndexByFrame.get(frameIdx);
+  if (timelineIndex === undefined) return;
+  seekToTimelineIndex(timelineIndex);
+}
+
+function seekToTimelineIndex(timelineIndex) {
   elements.video.pause();
   state.playbackEnd = null;
   state.playbackReady = true;
-  elements.video.currentTime = mediaTime(frameIdx);
+  elements.video.currentTime = state.timeline[timelineIndex].media_time;
   updateReadout();
 }
 
 function stepFrame(offset) {
-  elements.video.pause();
-  state.playbackEnd = null;
   const target = Math.max(0, Math.min(nearestTimelineIndex(elements.video.currentTime) + offset, state.timeline.length - 1));
-  seekToFrame(state.timeline[target].frame_idx);
+  seekToTimelineIndex(target);
 }
 
 function setBoundary(name) {
@@ -444,6 +548,8 @@ function setSaveState(message, status) {
 
 elements.video.addEventListener("play", watchPlayback);
 elements.video.addEventListener("timeupdate", updateReadout);
+elements.video.addEventListener("seeking", updateReadout);
+elements.video.addEventListener("seeked", updateReadout);
 elements.video.addEventListener("loadedmetadata", updateNavigation);
 elements.previousMove.addEventListener("click", () => playMove(state.selectedIndex <= 0 ? 0 : state.selectedIndex - 1));
 elements.replayMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : state.selectedIndex));
