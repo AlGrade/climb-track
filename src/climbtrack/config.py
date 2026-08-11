@@ -272,6 +272,14 @@ class MoveDetectionConfig(StrictModel):
     fall_minimum_drop_body_lengths: float = Field(default=0.50, gt=0.0, le=5.0)
 
 
+class MoveMetricsConfig(StrictModel):
+    """Smoothing and quality thresholds for per-move kinematics."""
+
+    position_smoothing_radius: int = Field(default=4, ge=1, le=30)
+    speed_window_radius: int = Field(default=7, ge=1, le=60)
+    minimum_valid_fraction: float = Field(default=0.80, ge=0.5, le=1.0)
+
+
 class RenderConfig(StrictModel):
     """Tracking quality-control video settings."""
 
@@ -300,6 +308,7 @@ class AppConfig(StrictModel):
     refine: RefineConfig = RefineConfig()
     move_player: MovePlayerConfig = MovePlayerConfig()
     move_detection: MoveDetectionConfig = MoveDetectionConfig()
+    move_metrics: MoveMetricsConfig = MoveMetricsConfig()
     models: ModelsConfig
 
 

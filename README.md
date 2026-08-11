@@ -45,9 +45,10 @@ Die Milestones 1 bis 5 sind implementiert, am Video `best go.mp4` ausgeführt un
 | 6 – übersprungen | ViTPose-Vergleichsbackend | Wird vorerst nicht gebaut; Phase 2 verwendet die vorhandenen refined Sapiens-Daten. |
 
 Phase 2 hat begonnen. **P2.1 – Zugdefinition, Datenformat und lokaler Zug-Player** ist
-implementiert; die Grenzen wurden in **P2.2** am Referenzvideo kontrolliert und nachgeschärft. Der
-Player wird aus dem refined Skelett automatisch mit Zugkandidaten befüllt; manuelle Bearbeitung ist
-nur noch eine optionale Kontrolle.
+implementiert; die Grenzen wurden in **P2.2** am Referenzvideo kontrolliert und nachgeschärft.
+**P2.3** berechnet und zeigt Hand- und Körpergeschwindigkeiten je Zug. Der Player wird aus dem
+refined Skelett automatisch mit Zugkandidaten befüllt; manuelle Bearbeitung ist nur noch eine
+optionale Kontrolle.
 
 ### Resultat am Referenzvideo
 
@@ -230,6 +231,9 @@ uv run climbtrack player "/path/to/video.mp4" --config configs/default.yaml
 
 # Nur die automatische Zugerkennung ausführen
 uv run climbtrack detect-moves "/path/to/video.mp4" --config configs/default.yaml
+
+# Hand- und Körpergeschwindigkeiten je Zug berechnen
+uv run climbtrack measure-moves "/path/to/video.mp4" --config configs/default.yaml
 ```
 
 ## Falls die falsche Person ausgewählt wird
@@ -411,6 +415,10 @@ cache/
 ├── 70_moves/<key>/
 │   ├── moves_auto.parquet
 │   └── summary.json
+├── 80_move_metrics/<key>/
+│   ├── move_metrics.parquet
+│   ├── move_metrics.json
+│   └── summary.json
 ├── 50_render_tracks/<key>/tracking_overlay.mp4
 ├── 50_render_pose/<key>/skeleton_raw_overlay.mp4
 └── 50_render_compare/<key>/raw_vs_refined.mp4
@@ -543,7 +551,7 @@ uv run ruff format --check .
 uv run pytest
 ```
 
-Aktueller Stand: 65 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
+Aktueller Stand: 66 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
 Zeitstempel, Schemas, Scoring, ByteTrack, Pose-Crops, Pose-Resume, Keypoint-Registry, VFR-Rendering,
 Annotation/Evaluation, Move-Schema, Video-Range-Streaming, revisionssicheres Speichern,
 Confidence-Gating, Interpolation, Swap-/Ausreißerlogik und One-Euro-Filter. Neuronale Vollinferenz
@@ -705,7 +713,7 @@ Sturzes festgelegt. Ergebnis sind zwei abgeschlossene Züge und ein als `fall` m
 Für weitere Videos bleibt die manuelle Kontrolle als Sicherheitsnetz bestehen; beidhändige
 Überlappung und explizite Unsicherheitswarnungen sind mögliche spätere Erweiterungen.
 
-#### P2.3 – Geschwindigkeiten pro Zug
+#### P2.3 – Geschwindigkeiten pro Zug (implementiert)
 
 Für die **bewegte Hand** werden pro Zug berechnet:
 
@@ -735,6 +743,26 @@ bleibt selbst dann eine Einschränkung.
 Für Ableitungen wird eine eigene, vorsichtige Glättung verwendet. Geschwindigkeit verstärkt kleine
 Positionsfehler stark; einfach rohe Frame-Differenzen zu bilden wäre fachlich falsch.
 
+Die Berechnung ist als reproduzierbare Cache-Stufe `80_move_metrics` implementiert. Eingaben sind
+`pose_refined.parquet` und der aktuelle korrigierbare Stand in `annotations/.../moves.parquet`.
+Ändern sich Zuggrenzen, entsteht beim nächsten Start automatisch ein neuer Metrik-Cache; Sapiens
+wird dafür nicht erneut ausgeführt. Neben Parquet wird zur einfachen Einsicht dasselbe Ergebnis als
+JSON gespeichert.
+
+Der Player zeigt für den ausgewählten Zug bereits mittlere und maximale Hand- und
+Körpergeschwindigkeit sowie die geschätzten Wege. Am Referenzvideo ergeben sich:
+
+| Zug | Ergebnis | Hand max. | Hand Ø | Körper max. | Körper Ø |
+|---:|---|---:|---:|---:|---:|
+| 1 | abgeschlossen | 4,32 KL/s | 0,85 KL/s | 1,44 KL/s | 0,45 KL/s |
+| 2 | abgeschlossen | 2,11 KL/s | 0,42 KL/s | 0,32 KL/s | 0,10 KL/s |
+| 3 | Sturz | 8,97 KL/s | 1,51 KL/s | 3,70 KL/s | 1,03 KL/s |
+
+`KL/s` bedeutet geschätzte Körperlängen pro Sekunde. Der Sturz zeigt erwartungsgemäß die
+höchste Körpergeschwindigkeit. Die absoluten `px/s` bleiben ebenfalls im Datensatz. Weil das eine
+2D-Messung mit Modellunsicherheit ist, sind kleine Unterschiede nicht automatisch sportlich
+bedeutsam; die Werte sind zunächst für den Vergleich von Zügen im selben Kamerabild gedacht.
+
 #### P2.4 – Gelenkwinkel pro Zug
 
 Als erste sinnvolle 2D-Winkel werden berechnet:
@@ -752,13 +780,11 @@ gekennzeichnet.
 Alle Werte sind **2D-Bildwinkel**. Dreht sich der Kletterer zur Wand oder aus der Bildebene, sind sie
 nicht identisch mit echten anatomischen 3D-Gelenkwinkeln.
 
-#### P2.5 – Ergebnisansicht und Export
+#### P2.5 – Erweiterte Ergebnisansicht und Export
 
-Der Player zeigt danach optional die wichtigsten Werte direkt beim Zug:
+Die erste Geschwindigkeitskarte ist bereits in P2.3 enthalten. P2.5 erweitert den Player um:
 
-- bewegte Hand und Zugdauer;
-- Hand- und Körpergeschwindigkeit;
-- Weg und Höhengewinn;
+- detaillierte Wege und den Höhengewinn;
 - ausgewählte Winkel und Bewegungsumfang;
 - Warnungen bei fehlenden oder unsicheren Daten.
 

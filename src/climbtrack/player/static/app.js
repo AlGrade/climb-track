@@ -7,7 +7,9 @@ const elements = Object.fromEntries(
     "moveCount", "previousMove", "replayMove", "nextMove", "playAll", "previousFrame",
     "nextFrame", "togglePlayback", "playbackRate", "editorTitle", "resetDraft", "setStart",
     "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
-    "emptyMoves", "moveList",
+    "emptyMoves", "moveList", "metricsTitle", "metricsEmpty", "metricsGrid", "metricsNote",
+    "handMaxSpeed", "handMaxSpeedPx", "bodyMaxSpeed", "bodyMaxSpeedPx",
+    "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
@@ -15,6 +17,7 @@ const state = {
   session: null,
   timeline: [],
   settings: null,
+  metrics: [],
   selectedIndex: -1,
   draft: { start_frame: null, end_frame: null, moving_hand: null, outcome: "completed" },
   playbackEnd: null,
@@ -36,6 +39,7 @@ async function initialize() {
     state.session = payload.session;
     state.timeline = payload.timeline;
     state.settings = payload.settings;
+    state.metrics = payload.metrics || [];
     elements.videoName.textContent = payload.video.name;
     elements.video.src = payload.video.url;
     elements.video.playbackRate = Number(elements.playbackRate.value);
@@ -49,8 +53,45 @@ async function initialize() {
 function renderAll() {
   renderMoveList();
   renderDraft();
+  renderMetrics();
   updateReadout();
   updateNavigation();
+}
+
+function renderMetrics() {
+  if (state.selectedIndex < 0 || !state.session.moves.length) {
+    elements.metricsTitle.textContent = "Zug auswählen";
+    elements.metricsEmpty.hidden = false;
+    elements.metricsGrid.hidden = true;
+    elements.metricsEmpty.textContent = "Spiele einen Zug ab oder wähle ihn unten aus.";
+    elements.metricsNote.textContent = "";
+    return;
+  }
+  const move = state.session.moves[state.selectedIndex];
+  const metrics = state.metrics.find((row) => row.move_id === move.move_id);
+  elements.metricsTitle.textContent = `Zug ${move.move_id} · ${outcomeLabels[move.outcome]}`;
+  if (!metrics) {
+    elements.metricsEmpty.hidden = false;
+    elements.metricsGrid.hidden = true;
+    elements.metricsEmpty.textContent = "Nach einer Grenzänderung Player neu starten, um neu zu messen.";
+    elements.metricsNote.textContent = "";
+    return;
+  }
+  elements.metricsEmpty.hidden = true;
+  elements.metricsGrid.hidden = false;
+  elements.handMaxSpeed.textContent = formatRelativeSpeed(metrics.hand_max_speed_body_lengths_s);
+  elements.handMaxSpeedPx.textContent = `${metrics.hand_max_speed_px_s.toFixed(0)} px/s`;
+  elements.bodyMaxSpeed.textContent = formatRelativeSpeed(metrics.body_max_speed_body_lengths_s);
+  elements.bodyMaxSpeedPx.textContent = `${metrics.body_max_speed_px_s.toFixed(0)} px/s`;
+  elements.handMeanSpeed.textContent = formatRelativeSpeed(metrics.hand_mean_speed_body_lengths_s);
+  elements.handPath.textContent = `Weg ${metrics.hand_path_length_px.toFixed(0)} px`;
+  elements.bodyMeanSpeed.textContent = formatRelativeSpeed(metrics.body_mean_speed_body_lengths_s);
+  elements.bodyPath.textContent = `Weg ${metrics.body_path_length_px.toFixed(0)} px`;
+  elements.metricsNote.textContent = "Körperlängen/s ist relativ; echte m/s erfordern Kalibrierung.";
+}
+
+function formatRelativeSpeed(value) {
+  return `${value.toFixed(2)} KL/s`;
 }
 
 function renderMoveList() {
@@ -276,6 +317,7 @@ async function persistMoves(edits, selectedEdit) {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || `Speichern fehlgeschlagen (${response.status})`);
     state.session = payload.session;
+    state.metrics = [];
     if (selectedEdit) {
       state.selectedIndex = state.session.moves.findIndex((move) =>
         move.start_frame === selectedEdit.start_frame
@@ -333,7 +375,7 @@ elements.playAll.addEventListener("click", async () => {
   state.selectedIndex = -1;
   elements.activeMove.textContent = "Gesamtvideo";
   elements.video.currentTime = 0;
-  renderMoveList();
+  renderAll();
   await elements.video.play();
 });
 elements.previousFrame.addEventListener("click", () => stepFrame(-1));

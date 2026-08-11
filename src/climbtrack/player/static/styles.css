@@ -255,11 +255,54 @@ select {
 }
 
 .editor-card,
+.metrics-card,
 .moves-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 20px;
   background: rgba(21, 26, 24, 0.93);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.metrics-grid div {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px;
+  background: var(--surface-raised);
+}
+
+.metrics-grid span,
+.metrics-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.metrics-grid strong {
+  display: block;
+  margin: 5px 0 3px;
+  color: var(--accent);
+  font-size: 1.08rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics-note {
+  min-height: 17px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.empty-state.compact {
+  margin-top: 14px;
+  padding: 12px;
 }
 
 .moves-card {

@@ -58,6 +58,7 @@ models:
     assert config.move_player.host == "127.0.0.1"
     assert config.move_player.port == 8765
     assert config.move_detection.minimum_stable_seconds == 0.5
+    assert config.move_metrics.minimum_valid_fraction == 0.8
     assert resolve_cache_dir(config, config_path) == tmp_path / "cache"
 
 

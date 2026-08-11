@@ -35,11 +35,13 @@ from climbtrack.player import create_player_server, run_player_server
 from climbtrack.provenance import executable_version
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.keypoints import read_registry
+from climbtrack.schema.move_metrics import read_move_metrics_parquet
 from climbtrack.schema.moves import read_moves_parquet
 from climbtrack.schema.tracks import read_tracks
 from climbtrack.selection.click import choose_track_by_click
 from climbtrack.stages.detect import detect_people
 from climbtrack.stages.ingest import ingest_video
+from climbtrack.stages.move_metrics import measure_moves as measure_move_metrics
 from climbtrack.stages.moves import detect_moves
 from climbtrack.stages.pose import estimate_pose
 from climbtrack.stages.refine import refine_pose
@@ -389,6 +391,39 @@ def detect_moves_command(
         _abort(exc)
 
 
+@app.command("measure-moves")
+def measure_moves_command(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    force: ForceOption = False,
+) -> None:
+    """Calculate hand and body speeds for the current move annotations."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        refined = _run_refine(selection, pose_result, context, False)
+        automatic = _run_moves(refined, context, False)
+        session_path, _, _ = prepare_move_session(
+            ingest_result,
+            annotation_root=resolve_annotation_dir(context.config, context.config_path),
+            automatic_moves=read_moves_parquet(automatic.path / "moves_auto.parquet"),
+            automatic_moves_cache_key=automatic.manifest.cache_key,
+        )
+        result = _run_move_metrics(refined, session_path.with_name("moves.parquet"), context, force)
+        metrics = read_move_metrics_parquet(result.path / "move_metrics.parquet")
+        _report("80_move_metrics", result)
+        console.print(_move_metrics_table(metrics))
+        console.print(f"[bold green]Metrics:[/bold green] {result.path / 'move_metrics.parquet'}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except (ClimbTrackError, OSError) as exc:
+        _abort(exc)
+
+
 @app.command("render-comparison")
 def render_comparison(
     video: VideoArgument,
@@ -497,12 +532,20 @@ def player(
             automatic_moves=automatic_moves,
             automatic_moves_cache_key=automatic.manifest.cache_key,
         )
+        metrics_result = _run_move_metrics(
+            refined,
+            session_path.with_name("moves.parquet"),
+            context,
+            False,
+        )
+        move_metrics = read_move_metrics_parquet(metrics_result.path / "move_metrics.parquet")
         frames = read_frame_index(ingest_result.path / "frames.parquet")
         server = create_player_server(
             skeleton.path / "skeleton_raw_overlay.mp4",
             session_path,
             frames,
             context.config.move_player,
+            move_metrics=move_metrics,
             port=port,
         )
         state = "created" if created else "resumed"
@@ -511,6 +554,7 @@ def player(
             f"[bold green]Automatic moves:[/bold green] {len(session.moves)} "
             "(manual correction is optional)"
         )
+        console.print(f"[bold green]Move metrics:[/bold green] {len(move_metrics)}")
         console.print(f"[bold green]Player:[/bold green] {server.url}")
         console.print("Press Ctrl+C in this terminal to stop the local player.")
         run_player_server(server, open_browser=open_browser)
@@ -823,6 +867,38 @@ def _run_moves(
         project_root=context.project_root,
         force=force,
     )
+
+
+def _run_move_metrics(
+    refined: CacheResult,
+    moves_path: Path,
+    context: PipelineContext,
+    force: bool,
+) -> CacheResult:
+    return measure_move_metrics(
+        refined,
+        moves_path,
+        config=context.config,
+        cache_root=context.cache_root,
+        project_root=context.project_root,
+        force=force,
+    )
+
+
+def _move_metrics_table(metrics: list[dict[str, object]]) -> Table:
+    table = Table(title="Per-move speed (relative to estimated body length)")
+    for column in ("Move", "Result", "Hand max", "Hand mean", "Body max", "Body mean"):
+        table.add_column(column)
+    for row in metrics:
+        table.add_row(
+            str(row["move_id"]),
+            str(row["outcome"]),
+            f"{float(row['hand_max_speed_body_lengths_s']):.2f} KL/s",
+            f"{float(row['hand_mean_speed_body_lengths_s']):.2f} KL/s",
+            f"{float(row['body_max_speed_body_lengths_s']):.2f} KL/s",
+            f"{float(row['body_mean_speed_body_lengths_s']):.2f} KL/s",
+        )
+    return table
 
 
 def _resolve_manual_track(

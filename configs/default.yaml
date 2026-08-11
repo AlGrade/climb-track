@@ -121,6 +121,11 @@ move_detection:
   minimum_body_stable_seconds: 0.50
   fall_minimum_drop_body_lengths: 0.50
 
+move_metrics:
+  position_smoothing_radius: 4
+  speed_window_radius: 7
+  minimum_valid_fraction: 0.80
+
 models:
   primary_pose_backend: sapiens2
   yolo11:
