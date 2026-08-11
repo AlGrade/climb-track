@@ -22,6 +22,7 @@ const state = {
   selectedIndex: -1,
   draft: { start_frame: null, end_frame: null, moving_hand: null, outcome: "completed" },
   playbackEnd: null,
+  playbackReady: true,
   watcherRunning: false,
 };
 
@@ -185,10 +186,12 @@ function renderDraft() {
 }
 
 function updateNavigation() {
-  const hasMoves = state.session && state.session.moves.length > 0;
+  const videoReady = elements.video.readyState > 0;
+  const hasMoves = state.session && state.session.moves.length > 0 && videoReady;
   elements.previousMove.disabled = !hasMoves;
   elements.replayMove.disabled = !hasMoves;
   elements.nextMove.disabled = !hasMoves;
+  elements.playAll.disabled = !videoReady;
 }
 
 function selectMove(index, options = {}) {
@@ -206,7 +209,7 @@ function selectMove(index, options = {}) {
   renderAll();
 }
 
-async function playMove(index) {
+function playMove(index) {
   if (!state.session.moves.length) return;
   selectMove(index, { seek: false });
   const move = state.session.moves[state.selectedIndex];
@@ -217,9 +220,39 @@ async function playMove(index) {
   );
   const nextMove = state.session.moves[state.selectedIndex + 1];
   if (nextMove) end = Math.min(end, mediaTime(nextMove.start_frame));
-  elements.video.currentTime = start;
+  startPlayback(start, end);
+}
+
+function startPlayback(start, end) {
+  state.playbackEnd = null;
+  state.playbackReady = false;
   state.playbackEnd = end;
-  await elements.video.play();
+
+  // Keep play() in the original click task, then seek once Chrome has accepted
+  // playback. Seeking first can make Chrome interrupt the play request.
+  elements.video.play()
+    .then(() => {
+      const needsSeek = Math.abs(elements.video.currentTime - start) >= 0.01 || elements.video.seeking;
+      if (needsSeek) {
+        elements.video.addEventListener("seeked", () => {
+          state.playbackReady = true;
+          window.requestAnimationFrame(() => {
+            elements.video.play().catch(reportPlaybackError);
+          });
+        }, { once: true });
+        elements.video.currentTime = start;
+      } else {
+        state.playbackReady = true;
+      }
+    })
+    .catch(reportPlaybackError);
+}
+
+function reportPlaybackError(error) {
+  state.playbackEnd = null;
+  state.playbackReady = true;
+  elements.activeMove.textContent = `Playback failed: ${error.message}`;
+  console.error("Video playback failed", error);
 }
 
 function watchPlayback() {
@@ -227,7 +260,11 @@ function watchPlayback() {
   state.watcherRunning = true;
   const tick = () => {
     updateReadout();
-    if (state.playbackEnd !== null && elements.video.currentTime >= state.playbackEnd) {
+    if (
+      state.playbackReady
+      && state.playbackEnd !== null
+      && elements.video.currentTime >= state.playbackEnd
+    ) {
       elements.video.pause();
       elements.video.currentTime = state.playbackEnd;
       state.playbackEnd = null;
@@ -270,6 +307,7 @@ function mediaTime(frameIdx) {
 function seekToFrame(frameIdx) {
   elements.video.pause();
   state.playbackEnd = null;
+  state.playbackReady = true;
   elements.video.currentTime = mediaTime(frameIdx);
   updateReadout();
 }
@@ -406,16 +444,15 @@ function setSaveState(message, status) {
 
 elements.video.addEventListener("play", watchPlayback);
 elements.video.addEventListener("timeupdate", updateReadout);
+elements.video.addEventListener("loadedmetadata", updateNavigation);
 elements.previousMove.addEventListener("click", () => playMove(state.selectedIndex <= 0 ? 0 : state.selectedIndex - 1));
 elements.replayMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : state.selectedIndex));
 elements.nextMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : Math.min(state.selectedIndex + 1, state.session.moves.length - 1)));
-elements.playAll.addEventListener("click", async () => {
-  state.playbackEnd = null;
+elements.playAll.addEventListener("click", () => {
   state.selectedIndex = -1;
   elements.activeMove.textContent = "Full video";
-  elements.video.currentTime = 0;
   renderAll();
-  await elements.video.play();
+  startPlayback(0, null);
 });
 elements.previousFrame.addEventListener("click", () => stepFrame(-1));
 elements.nextFrame.addEventListener("click", () => stepFrame(1));
