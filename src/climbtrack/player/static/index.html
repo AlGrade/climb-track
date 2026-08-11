@@ -9,14 +9,20 @@
   <body>
     <main class="workspace">
       <section class="video-column" aria-label="Video player">
-        <div class="video-shell">
+        <div id="videoShell" class="video-shell">
           <video id="video" preload="auto" playsinline tabindex="0" aria-label="Climbing video"></video>
           <div class="video-label">
             <strong id="activeMove">Full video</strong>
           </div>
-          <button id="layoutToggle" class="layout-toggle" type="button" aria-pressed="false">
-            <span id="layoutToggleIcon" aria-hidden="true">▯</span>
-            <span id="layoutToggleLabel">Portrait layout</span>
+          <button
+            id="layoutToggle"
+            class="layout-toggle"
+            type="button"
+            aria-pressed="false"
+            aria-label="Switch to portrait layout"
+          >
+            <span id="layoutToggleIcon" aria-hidden="true">▭</span>
+            <span id="layoutToggleLabel">Landscape layout</span>
           </button>
           <div class="video-controls" aria-label="Video controls">
             <button id="videoToggle" class="video-control-button" aria-label="Play video" disabled>▶</button>
@@ -75,19 +81,19 @@
       </section>
 
       <aside class="side-panel">
-        <section class="moves-card">
+        <section id="movesCard" class="moves-card">
           <div id="emptyMoves" class="empty-state">No moves detected.</div>
           <ol id="moveList" class="move-list"></ol>
         </section>
 
-        <div class="transport" aria-label="Move navigation">
+        <div id="transport" class="transport" aria-label="Move navigation">
           <button id="replayMove" class="primary">▶ Play move</button>
           <button id="previousMove" class="secondary">← Previous move</button>
           <button id="nextMove" class="secondary">Next move →</button>
           <button id="playAll" class="ghost">Full video</button>
         </div>
 
-        <details class="editor-card">
+        <details id="editorCard" class="editor-card">
           <summary>Edit boundaries</summary>
           <div class="editor-content">
             <div class="editor-heading">

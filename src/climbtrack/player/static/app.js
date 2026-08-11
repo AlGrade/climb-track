@@ -2,6 +2,7 @@
 
 const elements = Object.fromEntries(
   [
+    "videoShell", "movesCard", "transport", "editorCard",
     "video", "videoToggle", "videoScrubber", "videoTime", "videoMute", "activeMove",
     "layoutToggle", "layoutToggleIcon", "layoutToggleLabel", "saveState", "currentTime",
     "currentFrame", "previousMove",
@@ -39,6 +40,7 @@ const state = {
   heldFrameDirection: 0,
   frameHoldTimer: null,
   layoutMode: "landscape",
+  selectionFollowsTimeline: false,
 };
 
 const handLabels = { left: "Left hand", right: "Right hand", both: "Both hands" };
@@ -313,7 +315,25 @@ function updateNavigation() {
 
 function selectMove(index, options = {}) {
   if (!state.session.moves.length) return;
-  state.selectedIndex = Math.max(0, Math.min(index, state.session.moves.length - 1));
+  state.selectionFollowsTimeline = false;
+  setSelectedMove(Math.max(0, Math.min(index, state.session.moves.length - 1)));
+  const move = state.session.moves[state.selectedIndex];
+  if (options.seek) seekToFrame(move.start_frame);
+  renderAll();
+}
+
+function setSelectedMove(index) {
+  state.selectedIndex = index;
+  if (index < 0) {
+    state.draft = {
+      start_frame: null,
+      end_frame: null,
+      moving_hand: null,
+      outcome: "completed",
+    };
+    elements.activeMove.textContent = "Full video";
+    return;
+  }
   const move = state.session.moves[state.selectedIndex];
   state.draft = {
     start_frame: move.start_frame,
@@ -322,8 +342,29 @@ function selectMove(index, options = {}) {
     outcome: move.outcome,
   };
   elements.activeMove.textContent = `Move ${move.move_id} · ${handLabels[move.moving_hand]} · ${outcomeLabels[move.outcome]}`;
-  if (options.seek) seekToFrame(move.start_frame);
-  renderAll();
+}
+
+function syncMoveSelection(frameIdx) {
+  if (!state.selectionFollowsTimeline) return;
+  const matchingIndex = moveIndexForFrame(frameIdx);
+  if (matchingIndex === state.selectedIndex) return;
+  setSelectedMove(matchingIndex);
+  renderMoveList();
+  renderDraft();
+  renderMetrics();
+  updateNavigation();
+}
+
+function moveIndexForFrame(frameIdx) {
+  let matchingIndex = -1;
+  for (let index = state.session.moves.length - 1; index >= 0; index -= 1) {
+    const move = state.session.moves[index];
+    if (move.start_frame <= frameIdx && frameIdx <= move.end_frame) {
+      matchingIndex = index;
+      break;
+    }
+  }
+  return matchingIndex;
 }
 
 function playMove(index) {
@@ -479,6 +520,7 @@ function cancelFrameStepping() {
 function setBoundary(name) {
   const frame = nearestFrame();
   if (!frame) return;
+  state.selectionFollowsTimeline = false;
   state.draft[`${name}_frame`] = frame.frame_idx;
   renderDraft();
 }
@@ -489,13 +531,13 @@ function boundaryText(frameIdx) {
 }
 
 function resetDraft() {
-  state.selectedIndex = -1;
-  state.draft = { start_frame: null, end_frame: null, moving_hand: null, outcome: "completed" };
-  elements.activeMove.textContent = "Full video";
+  state.selectionFollowsTimeline = false;
+  setSelectedMove(-1);
   renderAll();
 }
 
 async function saveDraft() {
+  state.selectionFollowsTimeline = false;
   const edit = {
     start_frame: state.draft.start_frame,
     end_frame: state.draft.end_frame,
@@ -522,6 +564,7 @@ async function saveDraft() {
 
 async function deleteSelected() {
   if (state.selectedIndex < 0) return;
+  state.selectionFollowsTimeline = false;
   const edits = state.session.moves
     .filter((_, index) => index !== state.selectedIndex)
     .map((move) => ({
@@ -602,6 +645,7 @@ function updateReadoutForTimelineIndex(timelineIndex) {
     ? elements.video.duration
     : state.timeline[state.timeline.length - 1].media_time;
   elements.videoTime.textContent = `${formatControlTime(frame.media_time)} / ${formatControlTime(duration)}`;
+  syncMoveSelection(frame.frame_idx);
   updateChartCursor(frame.media_time);
 }
 
@@ -624,6 +668,7 @@ function toggleVideoPlayback() {
   cancelFrameStepping();
   state.playbackEnd = null;
   if (elements.video.paused) {
+    state.selectionFollowsTimeline = true;
     if (elements.video.ended) startPlayback(0, null);
     else elements.video.play().catch(reportPlaybackError);
   } else {
@@ -761,9 +806,14 @@ function applyLayout(layout, options = {}) {
   state.layoutMode = layout;
   document.documentElement.dataset.layout = layout;
   const portrait = layout === "portrait";
+  arrangeLayout(layout);
   elements.layoutToggle.setAttribute("aria-pressed", String(portrait));
-  elements.layoutToggleIcon.textContent = portrait ? "▭" : "▯";
-  elements.layoutToggleLabel.textContent = portrait ? "Landscape layout" : "Portrait layout";
+  elements.layoutToggle.setAttribute(
+    "aria-label",
+    portrait ? "Switch to landscape layout" : "Switch to portrait layout",
+  );
+  elements.layoutToggleIcon.textContent = portrait ? "▯" : "▭";
+  elements.layoutToggleLabel.textContent = portrait ? "Portrait layout" : "Landscape layout";
   if (options.persist !== false) {
     try {
       window.localStorage.setItem(layoutStorageKey, layout);
@@ -772,6 +822,16 @@ function applyLayout(layout, options = {}) {
     }
   }
   window.requestAnimationFrame(updateReadout);
+}
+
+function arrangeLayout(layout) {
+  if (layout === "portrait") {
+    elements.videoShell.after(elements.transport);
+    elements.editorCard.after(elements.metricsCard);
+  } else {
+    elements.videoShell.after(elements.metricsCard);
+    elements.movesCard.after(elements.transport);
+  }
 }
 
 elements.video.addEventListener("play", () => {
@@ -802,8 +862,8 @@ elements.previousMove.addEventListener("click", () => playMove(state.selectedInd
 elements.replayMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : state.selectedIndex));
 elements.nextMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : Math.min(state.selectedIndex + 1, state.session.moves.length - 1)));
 elements.playAll.addEventListener("click", () => {
-  state.selectedIndex = -1;
-  elements.activeMove.textContent = "Full video";
+  state.selectionFollowsTimeline = true;
+  setSelectedMove(-1);
   renderAll();
   startPlayback(0, null);
 });
@@ -816,6 +876,7 @@ elements.saveMove.addEventListener("click", saveDraft);
 elements.deleteMove.addEventListener("click", deleteSelected);
 document.querySelectorAll("[data-hand]").forEach((button) => {
   button.addEventListener("click", () => {
+    state.selectionFollowsTimeline = false;
     state.draft.moving_hand = button.dataset.hand;
     renderDraft();
   });

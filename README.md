@@ -631,7 +631,8 @@ Erstes sichtbares Ergebnis ist ein lokaler Player, der das Video mit eingezeichn
 und zwei Betriebsarten anbietet:
 
 - **Zugmodus:** genau einen Zug abspielen und am Ende automatisch pausieren;
-- **Gesamtvideo:** das komplette Video normal abspielen.
+- **Gesamtvideo:** das komplette Video normal abspielen; aktive Zugmarkierung und
+  Geschwindigkeitskurve folgen dabei automatisch dem aktuellen Frame.
 
 Die englische Player-Oberfläche bietet **Previous move**, **Play move**, **Next move** und **Full
 video**. Sie ist bewusst auf Video, Zugliste und Messwerte reduziert. Frame-Schritte sowie die
@@ -676,12 +677,14 @@ Video-Umwandlung, verändert weder Analyse noch Originaldateien und wird danach 
 wiederverwendet. Dadurch starten Wiedergabe und Frame-Sprünge insbesondere in Chrome deutlich
 schneller.
 
-Der Umschalter oben rechts im Video wechselt zwischen zwei lokal gespeicherten Desktop-Layouts.
-`Landscape layout` zeigt Video und Kurve kompakt untereinander. `Portrait layout` gibt dem
-9:16-Video ein passendes Fenster ohne breite schwarze Seitenflächen, setzt die Zugsteuerung unter
-das Video und nutzt die rechte Bildschirmhälfte für Zugliste, Kurve und Messwerte. Beide Varianten
-sind auf einen Desktop-Viewport ohne Seiten-Scrollbar ausgelegt; auf schmalen Geräten bleibt
-normales Scrollen als sichere responsive Darstellung erhalten.
+Der Umschalter oben rechts im Video zeigt das aktuelle Layout und wechselt zwischen zwei lokal
+gespeicherten Desktop-Ansichten. `Landscape layout` zeigt Video und Kurve kompakt untereinander.
+`Portrait layout` gibt dem 9:16-Video ein passendes Fenster ohne breite schwarze Seitenflächen und
+setzt die Zugsteuerung direkt darunter. Rechts stehen Zugliste und **Edit boundaries** nebeneinander;
+Kurve und Messwerte folgen darunter über die volle Breite. Ein geöffneter Editor vergrößert diese
+Zeile oder lässt die rechte Spalte intern scrollen, überlagert aber keine Kurve. Beide Varianten sind
+auf einen Desktop-Viewport ohne Seiten-Scrollbar ausgelegt; auf schmalen Geräten bleibt normales
+Scrollen als sichere responsive Darstellung erhalten.
 
 Der Player speichert jede Änderung sofort und atomar in:
 

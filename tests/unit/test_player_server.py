@@ -69,12 +69,17 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
         assert 'id="videoScrubber"' in player_html
         assert 'id="videoToggle"' in player_html
         assert 'id="layoutToggle"' in player_html
+        assert 'id="movesCard"' in player_html
+        assert 'id="transport"' in player_html
+        assert 'id="editorCard"' in player_html
 
         with urlopen(f"{origin}/assets/app.js") as response:
             player_javascript = response.read().decode("utf-8")
         assert "previewScrub" in player_javascript
         assert "finishFrameStep" in player_javascript
         assert "initializeLayout" in player_javascript
+        assert "arrangeLayout" in player_javascript
+        assert "syncMoveSelection" in player_javascript
 
         with urlopen(f"{origin}/api/session") as response:
             payload = json.load(response)
