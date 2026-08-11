@@ -1,0 +1,4192 @@
+{
+  "created_at": "2026-08-11T12:31:08.130808+00:00",
+  "frames": [
+    {
+      "crop": {
+        "x1": 1152.5501708984375,
+        "x2": 1693.7266845703125,
+        "y1": 1887.29736328125,
+        "y2": 2608.8662109375
+      },
+      "frame_idx": 199,
+      "image_path": "frames/000000199.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.5397650003433228,
+          "predicted_x": 1314.1829833984375,
+          "predicted_y": 2237.302734375,
+          "visible": true,
+          "x": 1314.1829833984375,
+          "y": 2237.302734375
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.361271470785141,
+          "predicted_x": 1442.5015869140625,
+          "predicted_y": 2321.585693359375,
+          "visible": true,
+          "x": 1442.5015869140625,
+          "y": 2321.585693359375
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.2678605914115906,
+          "predicted_x": 1459.0552978515625,
+          "predicted_y": 2302.481689453125,
+          "visible": true,
+          "x": 1459.0552978515625,
+          "y": 2302.481689453125
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.7965984344482422,
+          "predicted_x": 1337.6832275390625,
+          "predicted_y": 2157.446533203125,
+          "visible": true,
+          "x": 1337.6832275390625,
+          "y": 2157.446533203125
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.8294419646263123,
+          "predicted_x": 1305.1771240234375,
+          "predicted_y": 2197.71533203125,
+          "visible": true,
+          "x": 1305.1771240234375,
+          "y": 2197.71533203125
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.922559916973114,
+          "predicted_x": 1336.0318603515625,
+          "predicted_y": 2156.494140625,
+          "visible": true,
+          "x": 1336.0318603515625,
+          "y": 2156.494140625
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.9703958034515381,
+          "predicted_x": 1321.9984130859375,
+          "predicted_y": 2165.06298828125,
+          "visible": true,
+          "x": 1321.9984130859375,
+          "y": 2165.06298828125
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.3061274290084839,
+          "predicted_x": 1380.6212158203125,
+          "predicted_y": 2054.56201171875,
+          "visible": true,
+          "x": 1373.9175889686635,
+          "y": 2057.417900002592
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.2976788580417633,
+          "predicted_x": 1450.4342041015625,
+          "predicted_y": 2340.236328125,
+          "visible": true,
+          "x": 1450.4342041015625,
+          "y": 2340.236328125
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.7627258896827698,
+          "predicted_x": 1405.81494140625,
+          "predicted_y": 2342.380615234375,
+          "visible": true,
+          "x": 1405.81494140625,
+          "y": 2342.380615234375
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.3102715313434601,
+          "predicted_x": 1401.28955078125,
+          "predicted_y": 2250.3349609375,
+          "visible": true,
+          "x": 1401.28955078125,
+          "y": 2250.3349609375
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.2808654308319092,
+          "predicted_x": 1377.4066162109375,
+          "predicted_y": 2056.0029296875,
+          "visible": true,
+          "x": 1367.3677328218555,
+          "y": 2057.417900002592
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.7648727893829346,
+          "predicted_x": 1335.94140625,
+          "predicted_y": 2157.2998046875,
+          "visible": true,
+          "x": 1335.94140625,
+          "y": 2157.2998046875
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.2939814329147339,
+          "predicted_x": 1367.6534423828125,
+          "predicted_y": 2063.205810546875,
+          "visible": true,
+          "x": 1358.0107954692726,
+          "y": 2064.9034498846586
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.27093708515167236,
+          "predicted_x": 1372.8372802734375,
+          "predicted_y": 2059.08447265625,
+          "visible": true,
+          "x": 1360.8178766750475,
+          "y": 2059.2892874731087
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8594730496406555,
+          "predicted_x": 1315.1163330078125,
+          "predicted_y": 2241.8876953125,
+          "visible": true,
+          "x": 1315.1163330078125,
+          "y": 2241.8876953125
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.2804532051086426,
+          "predicted_x": 1438.1114501953125,
+          "predicted_y": 2307.66552734375,
+          "visible": true,
+          "x": 1438.1114501953125,
+          "y": 2307.66552734375
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.35640448331832886,
+          "predicted_x": 1383.2835693359375,
+          "predicted_y": 2057.38330078125,
+          "visible": true,
+          "x": 1378.5960576449547,
+          "y": 2060.224981208367
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.9740679264068604,
+          "predicted_x": 1361.2908935546875,
+          "predicted_y": 2089.31689453125,
+          "visible": true,
+          "x": 1361.2908935546875,
+          "y": 2089.31689453125
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.8996328115463257,
+          "predicted_x": 1355.475341796875,
+          "predicted_y": 2227.004638671875,
+          "visible": true,
+          "x": 1355.475341796875,
+          "y": 2227.004638671875
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.972215473651886,
+          "predicted_x": 1337.628173828125,
+          "predicted_y": 2159.34619140625,
+          "visible": true,
+          "x": 1337.628173828125,
+          "y": 2159.34619140625
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.5520501136779785,
+          "predicted_x": 1393.601318359375,
+          "predicted_y": 2220.8310546875,
+          "visible": true,
+          "x": 1393.601318359375,
+          "y": 2220.8310546875
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.9358441233634949,
+          "predicted_x": 1578.3226318359375,
+          "predicted_y": 2306.73046875,
+          "visible": true,
+          "x": 1578.3226318359375,
+          "y": 2306.73046875
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.851732611656189,
+          "predicted_x": 1628.43603515625,
+          "predicted_y": 2292.8974609375,
+          "visible": true,
+          "x": 1628.43603515625,
+          "y": 2292.8974609375
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.8126752376556396,
+          "predicted_x": 1440.4796142578125,
+          "predicted_y": 2171.518798828125,
+          "visible": true,
+          "x": 1440.4796142578125,
+          "y": 2171.518798828125
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.9861658811569214,
+          "predicted_x": 1356.0994873046875,
+          "predicted_y": 2206.619140625,
+          "visible": true,
+          "x": 1356.0994873046875,
+          "y": 2206.619140625
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.9757503867149353,
+          "predicted_x": 1443.7257080078125,
+          "predicted_y": 2172.498046875,
+          "visible": true,
+          "x": 1443.7257080078125,
+          "y": 2172.498046875
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.9843053221702576,
+          "predicted_x": 1340.1351318359375,
+          "predicted_y": 2171.859375,
+          "visible": true,
+          "x": 1340.1351318359375,
+          "y": 2171.859375
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.2933693528175354,
+          "predicted_x": 1410.6142578125,
+          "predicted_y": 2068.933837890625,
+          "visible": true,
+          "x": 1410.6142578125,
+          "y": 2068.933837890625
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.9132423400878906,
+          "predicted_x": 1571.3966064453125,
+          "predicted_y": 2323.716064453125,
+          "visible": true,
+          "x": 1571.3966064453125,
+          "y": 2323.716064453125
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.7916238903999329,
+          "predicted_x": 1463.052734375,
+          "predicted_y": 2331.073974609375,
+          "visible": true,
+          "x": 1463.052734375,
+          "y": 2331.073974609375
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.9499558210372925,
+          "predicted_x": 1571.409912109375,
+          "predicted_y": 2220.720458984375,
+          "visible": true,
+          "x": 1571.409912109375,
+          "y": 2220.720458984375
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.22893384099006653,
+          "predicted_x": 1414.224609375,
+          "predicted_y": 2071.034912109375,
+          "visible": true,
+          "x": 1417.895194525803,
+          "y": 2071.453306031466
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.7706667184829712,
+          "predicted_x": 1446.034423828125,
+          "predicted_y": 2173.20703125,
+          "visible": true,
+          "x": 1446.034423828125,
+          "y": 2173.20703125
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.27028971910476685,
+          "predicted_x": 1422.3341064453125,
+          "predicted_y": 2082.79541015625,
+          "visible": true,
+          "x": 1430.0592130841605,
+          "y": 2076.131774707758
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.23967483639717102,
+          "predicted_x": 1418.5426025390625,
+          "predicted_y": 2077.10205078125,
+          "visible": true,
+          "x": 1422.5736632020944,
+          "y": 2073.324693501983
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.9120492339134216,
+          "predicted_x": 1405.51025390625,
+          "predicted_y": 2220.489013671875,
+          "visible": true,
+          "x": 1405.51025390625,
+          "y": 2220.489013671875
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.8916398286819458,
+          "predicted_x": 1628.0894775390625,
+          "predicted_y": 2308.64453125,
+          "visible": true,
+          "x": 1628.0894775390625,
+          "y": 2308.64453125
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.2851695120334625,
+          "predicted_x": 1406.9031982421875,
+          "predicted_y": 2074.1103515625,
+          "visible": true,
+          "x": 1406.9031982421875,
+          "y": 2074.1103515625
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.9885528087615967,
+          "predicted_x": 1416.426513671875,
+          "predicted_y": 2107.220703125,
+          "visible": true,
+          "x": 1416.426513671875,
+          "y": 2107.220703125
+        }
+      },
+      "reviewed": true,
+      "timestamp": 3.336289
+    },
+    {
+      "crop": {
+        "x1": 999.6744384765625,
+        "x2": 1772.3436279296875,
+        "y1": 1625.6177978515625,
+        "y2": 2655.84326171875
+      },
+      "frame_idx": 412,
+      "image_path": "frames/000000412.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.549075722694397,
+          "predicted_x": 1282.826416015625,
+          "predicted_y": 2040.4654541015625,
+          "visible": true,
+          "x": 1282.826416015625,
+          "y": 2040.4654541015625
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.9496483206748962,
+          "predicted_x": 1432.802734375,
+          "predicted_y": 2356.856689453125,
+          "visible": true,
+          "x": 1432.802734375,
+          "y": 2356.856689453125
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.968903660774231,
+          "predicted_x": 1471.007568359375,
+          "predicted_y": 2434.32177734375,
+          "visible": true,
+          "x": 1471.007568359375,
+          "y": 2434.32177734375
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.6827143430709839,
+          "predicted_x": 1311.2412109375,
+          "predicted_y": 2086.526611328125,
+          "visible": true,
+          "x": 1311.2412109375,
+          "y": 2086.526611328125
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.7285107374191284,
+          "predicted_x": 1302.567138671875,
+          "predicted_y": 1977.2506103515625,
+          "visible": true,
+          "x": 1302.567138671875,
+          "y": 1977.2506103515625
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.7790167331695557,
+          "predicted_x": 1306.552001953125,
+          "predicted_y": 2094.316162109375,
+          "visible": true,
+          "x": 1306.552001953125,
+          "y": 2094.316162109375
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.7408790588378906,
+          "predicted_x": 1332.2479248046875,
+          "predicted_y": 1965.30078125,
+          "visible": true,
+          "x": 1332.2479248046875,
+          "y": 1965.30078125
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.48742008209228516,
+          "predicted_x": 1367.696044921875,
+          "predicted_y": 2052.944091796875,
+          "visible": true,
+          "x": 1367.696044921875,
+          "y": 2052.944091796875
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.9659157395362854,
+          "predicted_x": 1423.3990478515625,
+          "predicted_y": 2375.4658203125,
+          "visible": true,
+          "x": 1423.3990478515625,
+          "y": 2375.4658203125
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.8045293688774109,
+          "predicted_x": 1322.0404052734375,
+          "predicted_y": 2203.619140625,
+          "visible": true,
+          "x": 1322.0404052734375,
+          "y": 2203.619140625
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.9558129906654358,
+          "predicted_x": 1439.26953125,
+          "predicted_y": 2269.176025390625,
+          "visible": true,
+          "x": 1439.26953125,
+          "y": 2269.176025390625
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.5104362964630127,
+          "predicted_x": 1370.65771484375,
+          "predicted_y": 2057.171630859375,
+          "visible": true,
+          "x": 1370.65771484375,
+          "y": 2057.171630859375
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.6740937829017639,
+          "predicted_x": 1305.21142578125,
+          "predicted_y": 2100.246337890625,
+          "visible": true,
+          "x": 1305.21142578125,
+          "y": 2100.246337890625
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.4501054286956787,
+          "predicted_x": 1368.390625,
+          "predicted_y": 2061.081787109375,
+          "visible": true,
+          "x": 1368.390625,
+          "y": 2061.081787109375
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.5110139846801758,
+          "predicted_x": 1369.4007568359375,
+          "predicted_y": 2059.13232421875,
+          "visible": true,
+          "x": 1369.4007568359375,
+          "y": 2059.13232421875
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8523658514022827,
+          "predicted_x": 1282.960205078125,
+          "predicted_y": 2050.1181640625,
+          "visible": true,
+          "x": 1282.960205078125,
+          "y": 2050.1181640625
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.9704679846763611,
+          "predicted_x": 1450.97802734375,
+          "predicted_y": 2434.385986328125,
+          "visible": true,
+          "x": 1450.97802734375,
+          "y": 2434.385986328125
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.38952183723449707,
+          "predicted_x": 1374.910400390625,
+          "predicted_y": 2047.76904296875,
+          "visible": true,
+          "x": 1374.910400390625,
+          "y": 2047.76904296875
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.803630530834198,
+          "predicted_x": 1360.7005615234375,
+          "predicted_y": 2061.094482421875,
+          "visible": true,
+          "x": 1360.7005615234375,
+          "y": 2061.094482421875
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.8875029683113098,
+          "predicted_x": 1296.319091796875,
+          "predicted_y": 2003.3590087890625,
+          "visible": true,
+          "x": 1296.319091796875,
+          "y": 2003.3590087890625
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.7397710084915161,
+          "predicted_x": 1341.072998046875,
+          "predicted_y": 1974.3724365234375,
+          "visible": true,
+          "x": 1341.072998046875,
+          "y": 1974.3724365234375
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.5774078369140625,
+          "predicted_x": 1310.012939453125,
+          "predicted_y": 1998.527099609375,
+          "visible": true,
+          "x": 1310.012939453125,
+          "y": 1998.527099609375
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.9629691243171692,
+          "predicted_x": 1304.366943359375,
+          "predicted_y": 2308.71240234375,
+          "visible": true,
+          "x": 1304.366943359375,
+          "y": 2308.71240234375
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.9345866441726685,
+          "predicted_x": 1275.2044677734375,
+          "predicted_y": 2357.40966796875,
+          "visible": true,
+          "x": 1275.2044677734375,
+          "y": 2357.40966796875
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.8731822967529297,
+          "predicted_x": 1314.355712890625,
+          "predicted_y": 1930.70068359375,
+          "visible": true,
+          "x": 1314.355712890625,
+          "y": 1930.70068359375
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.7496896982192993,
+          "predicted_x": 1310.8631591796875,
+          "predicted_y": 1969.1734619140625,
+          "visible": true,
+          "x": 1310.8631591796875,
+          "y": 1969.1734619140625
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 1.0050716400146484,
+          "predicted_x": 1312.9835205078125,
+          "predicted_y": 1933.788818359375,
+          "visible": true,
+          "x": 1312.9835205078125,
+          "y": 1933.788818359375
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.7884904146194458,
+          "predicted_x": 1334.61962890625,
+          "predicted_y": 1962.583251953125,
+          "visible": true,
+          "x": 1334.61962890625,
+          "y": 1962.583251953125
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.6534844040870667,
+          "predicted_x": 1327.1927490234375,
+          "predicted_y": 1767.2679443359375,
+          "visible": true,
+          "x": 1315.2660895259326,
+          "y": 1771.6726108706357
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.9085651636123657,
+          "predicted_x": 1290.538330078125,
+          "predicted_y": 2312.8125,
+          "visible": true,
+          "x": 1290.538330078125,
+          "y": 2312.8125
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.8610438108444214,
+          "predicted_x": 1340.306396484375,
+          "predicted_y": 2159.368408203125,
+          "visible": true,
+          "x": 1340.306396484375,
+          "y": 2159.368408203125
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.9630129933357239,
+          "predicted_x": 1441.880859375,
+          "predicted_y": 2223.55322265625,
+          "visible": true,
+          "x": 1441.880859375,
+          "y": 2223.55322265625
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.6685211658477783,
+          "predicted_x": 1329.1751708984375,
+          "predicted_y": 1767.43603515625,
+          "visible": true,
+          "x": 1329.1751708984375,
+          "y": 1767.43603515625
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.9167284369468689,
+          "predicted_x": 1311.9134521484375,
+          "predicted_y": 1937.240234375,
+          "visible": true,
+          "x": 1311.9134521484375,
+          "y": 1937.240234375
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.5692152976989746,
+          "predicted_x": 1331.74267578125,
+          "predicted_y": 1788.8465576171875,
+          "visible": true,
+          "x": 1335.288898680698,
+          "y": 1785.0211503071457
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.6393501162528992,
+          "predicted_x": 1329.66064453125,
+          "predicted_y": 1775.510986328125,
+          "visible": true,
+          "x": 1329.66064453125,
+          "y": 1775.510986328125
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.9017773270606995,
+          "predicted_x": 1315.8359375,
+          "predicted_y": 2001.2164306640625,
+          "visible": true,
+          "x": 1315.8359375,
+          "y": 2001.2164306640625
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.9472576379776001,
+          "predicted_x": 1265.361328125,
+          "predicted_y": 2336.874755859375,
+          "visible": true,
+          "x": 1265.361328125,
+          "y": 2336.874755859375
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.7112390995025635,
+          "predicted_x": 1310.9840087890625,
+          "predicted_y": 1786.019287109375,
+          "visible": true,
+          "x": 1310.9840087890625,
+          "y": 1786.019287109375
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.9841095209121704,
+          "predicted_x": 1320.732421875,
+          "predicted_y": 1833.6434326171875,
+          "visible": true,
+          "x": 1320.732421875,
+          "y": 1833.6434326171875
+        }
+      },
+      "reviewed": true,
+      "timestamp": 6.894622
+    },
+    {
+      "crop": {
+        "x1": 1093.12109375,
+        "x2": 1668.4483642578125,
+        "y1": 1604.8819580078125,
+        "y2": 2371.98486328125
+      },
+      "frame_idx": 620,
+      "image_path": "frames/000000620.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.6054428219795227,
+          "predicted_x": 1257.22412109375,
+          "predicted_y": 2023.1534423828125,
+          "visible": true,
+          "x": 1257.22412109375,
+          "y": 2023.1534423828125
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.31865373253822327,
+          "predicted_x": 1369.2681884765625,
+          "predicted_y": 2118.64013671875,
+          "visible": true,
+          "x": 1369.2681884765625,
+          "y": 2118.64013671875
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.2578144967556,
+          "predicted_x": 1380.1143798828125,
+          "predicted_y": 2096.24365234375,
+          "visible": true,
+          "x": 1380.1143798828125,
+          "y": 2096.24365234375
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.48726266622543335,
+          "predicted_x": 1294.2403564453125,
+          "predicted_y": 2053.0654296875,
+          "visible": true,
+          "x": 1294.2403564453125,
+          "y": 2053.0654296875
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.7056658267974854,
+          "predicted_x": 1262.663818359375,
+          "predicted_y": 1966.4937744140625,
+          "visible": true,
+          "x": 1262.663818359375,
+          "y": 1966.4937744140625
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.5339843034744263,
+          "predicted_x": 1291.720458984375,
+          "predicted_y": 2060.708251953125,
+          "visible": true,
+          "x": 1291.720458984375,
+          "y": 2060.708251953125
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.681612491607666,
+          "predicted_x": 1283.4249267578125,
+          "predicted_y": 1944.1900634765625,
+          "visible": true,
+          "x": 1283.4249267578125,
+          "y": 1944.1900634765625
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.12615570425987244,
+          "predicted_x": 1307.813720703125,
+          "predicted_y": 1987.32080078125,
+          "visible": true,
+          "x": 1307.813720703125,
+          "y": 1987.32080078125
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.2959182858467102,
+          "predicted_x": 1369.1058349609375,
+          "predicted_y": 2125.25,
+          "visible": true,
+          "x": 1369.1058349609375,
+          "y": 2125.25
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.707914412021637,
+          "predicted_x": 1346.6009521484375,
+          "predicted_y": 2154.9033203125,
+          "visible": true,
+          "x": 1346.6009521484375,
+          "y": 2154.9033203125
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.3074454069137573,
+          "predicted_x": 1328.5035400390625,
+          "predicted_y": 2074.640869140625,
+          "visible": true,
+          "x": 1328.5035400390625,
+          "y": 2074.640869140625
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.1444014012813568,
+          "predicted_x": 1306.8594970703125,
+          "predicted_y": 1979.173095703125,
+          "visible": true,
+          "x": 1306.8594970703125,
+          "y": 1979.173095703125
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.424837589263916,
+          "predicted_x": 1293.55224609375,
+          "predicted_y": 2066.337890625,
+          "visible": true,
+          "x": 1293.55224609375,
+          "y": 2066.337890625
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.1644616425037384,
+          "predicted_x": 1313.8984375,
+          "predicted_y": 1978.212158203125,
+          "visible": true,
+          "x": 1313.8984375,
+          "y": 1978.212158203125
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.1680915504693985,
+          "predicted_x": 1307.7169189453125,
+          "predicted_y": 1974.298828125,
+          "visible": true,
+          "x": 1307.7169189453125,
+          "y": 1974.298828125
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8889107704162598,
+          "predicted_x": 1259.4639892578125,
+          "predicted_y": 2031.8441162109375,
+          "visible": true,
+          "x": 1259.4639892578125,
+          "y": 2031.8441162109375
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.25248897075653076,
+          "predicted_x": 1367.64794921875,
+          "predicted_y": 2104.948974609375,
+          "visible": true,
+          "x": 1367.64794921875,
+          "y": 2104.948974609375
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.1281941533088684,
+          "predicted_x": 1307.55810546875,
+          "predicted_y": 1970.41455078125,
+          "visible": true,
+          "x": 1307.55810546875,
+          "y": 1970.41455078125
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.3517957627773285,
+          "predicted_x": 1309.3375244140625,
+          "predicted_y": 2001.33447265625,
+          "visible": true,
+          "x": 1309.3375244140625,
+          "y": 2001.33447265625
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.9150757789611816,
+          "predicted_x": 1270.900634765625,
+          "predicted_y": 2001.829345703125,
+          "visible": true,
+          "x": 1270.900634765625,
+          "y": 2001.829345703125
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.6601338982582092,
+          "predicted_x": 1296.26025390625,
+          "predicted_y": 1950.9512939453125,
+          "visible": true,
+          "x": 1296.26025390625,
+          "y": 1950.9512939453125
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.5428538918495178,
+          "predicted_x": 1290.5137939453125,
+          "predicted_y": 1996.806396484375,
+          "visible": true,
+          "x": 1290.5137939453125,
+          "y": 1996.806396484375
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.9369115233421326,
+          "predicted_x": 1526.4996337890625,
+          "predicted_y": 2163.61376953125,
+          "visible": true,
+          "x": 1526.4996337890625,
+          "y": 2163.61376953125
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.9798819422721863,
+          "predicted_x": 1576.6978759765625,
+          "predicted_y": 2153.98779296875,
+          "visible": true,
+          "x": 1576.6978759765625,
+          "y": 2153.98779296875
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.8292603492736816,
+          "predicted_x": 1325.21240234375,
+          "predicted_y": 1925.2279052734375,
+          "visible": true,
+          "x": 1325.21240234375,
+          "y": 1925.2279052734375
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.7938344478607178,
+          "predicted_x": 1279.3026123046875,
+          "predicted_y": 1965.586669921875,
+          "visible": true,
+          "x": 1279.3026123046875,
+          "y": 1965.586669921875
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.9749695062637329,
+          "predicted_x": 1326.397216796875,
+          "predicted_y": 1925.8193359375,
+          "visible": true,
+          "x": 1326.397216796875,
+          "y": 1925.8193359375
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.7213455438613892,
+          "predicted_x": 1290.4114990234375,
+          "predicted_y": 1943.811279296875,
+          "visible": true,
+          "x": 1290.4114990234375,
+          "y": 1943.811279296875
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.7291574478149414,
+          "predicted_x": 1324.8292236328125,
+          "predicted_y": 1767.96484375,
+          "visible": true,
+          "x": 1324.8292236328125,
+          "y": 1767.96484375
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.9017060995101929,
+          "predicted_x": 1515.73828125,
+          "predicted_y": 2178.348876953125,
+          "visible": true,
+          "x": 1515.73828125,
+          "y": 2178.348876953125
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.8135222792625427,
+          "predicted_x": 1395.6943359375,
+          "predicted_y": 2146.24365234375,
+          "visible": true,
+          "x": 1395.6943359375,
+          "y": 2146.24365234375
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.940310001373291,
+          "predicted_x": 1534.4051513671875,
+          "predicted_y": 2079.97021484375,
+          "visible": true,
+          "x": 1534.4051513671875,
+          "y": 2079.97021484375
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.7777416706085205,
+          "predicted_x": 1330.943115234375,
+          "predicted_y": 1765.97705078125,
+          "visible": true,
+          "x": 1330.943115234375,
+          "y": 1765.97705078125
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.7796648144721985,
+          "predicted_x": 1329.9571533203125,
+          "predicted_y": 1927.7386474609375,
+          "visible": true,
+          "x": 1329.9571533203125,
+          "y": 1927.7386474609375
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.5946277976036072,
+          "predicted_x": 1338.3284912109375,
+          "predicted_y": 1788.0238037109375,
+          "visible": true,
+          "x": 1343.7314740416268,
+          "y": 1799.955690624919
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.7223328351974487,
+          "predicted_x": 1334.2464599609375,
+          "predicted_y": 1771.9425048828125,
+          "visible": true,
+          "x": 1334.2464599609375,
+          "y": 1771.9425048828125
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.897212564945221,
+          "predicted_x": 1302.3973388671875,
+          "predicted_y": 1997.3057861328125,
+          "visible": true,
+          "x": 1302.3973388671875,
+          "y": 1997.3057861328125
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.9761337041854858,
+          "predicted_x": 1577.683349609375,
+          "predicted_y": 2167.193603515625,
+          "visible": true,
+          "x": 1577.683349609375,
+          "y": 2167.193603515625
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.7066449522972107,
+          "predicted_x": 1310.583984375,
+          "predicted_y": 1789.9580078125,
+          "visible": true,
+          "x": 1310.583984375,
+          "y": 1789.9580078125
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.9746513366699219,
+          "predicted_x": 1322.1038818359375,
+          "predicted_y": 1840.1705322265625,
+          "visible": true,
+          "x": 1322.1038818359375,
+          "y": 1840.1705322265625
+        }
+      },
+      "reviewed": true,
+      "timestamp": 10.369489
+    },
+    {
+      "crop": {
+        "x1": 1099.28173828125,
+        "x2": 1553.8255615234375,
+        "y1": 1668.3857421875,
+        "y2": 2274.444091796875
+      },
+      "frame_idx": 1186,
+      "image_path": "frames/000001186.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.506722092628479,
+          "predicted_x": 1277.4246826171875,
+          "predicted_y": 2032.9071044921875,
+          "visible": true,
+          "x": 1277.4246826171875,
+          "y": 2032.9071044921875
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.4941093325614929,
+          "predicted_x": 1237.716064453125,
+          "predicted_y": 2050.903076171875,
+          "visible": true,
+          "x": 1237.716064453125,
+          "y": 2050.903076171875
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.6068623065948486,
+          "predicted_x": 1213.07421875,
+          "predicted_y": 2023.8238525390625,
+          "visible": true,
+          "x": 1213.07421875,
+          "y": 2023.8238525390625
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.7733124494552612,
+          "predicted_x": 1267.87646484375,
+          "predicted_y": 1910.1798095703125,
+          "visible": true,
+          "x": 1267.87646484375,
+          "y": 1910.1798095703125
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.892547607421875,
+          "predicted_x": 1291.362060546875,
+          "predicted_y": 1989.8782958984375,
+          "visible": true,
+          "x": 1291.362060546875,
+          "y": 1989.8782958984375
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.9713973999023438,
+          "predicted_x": 1264.77978515625,
+          "predicted_y": 1909.3157958984375,
+          "visible": true,
+          "x": 1264.77978515625,
+          "y": 1909.3157958984375
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.8302586078643799,
+          "predicted_x": 1301.271240234375,
+          "predicted_y": 1959.8209228515625,
+          "visible": true,
+          "x": 1301.271240234375,
+          "y": 1959.8209228515625
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.31605422496795654,
+          "predicted_x": 1308.3529052734375,
+          "predicted_y": 1764.09130859375,
+          "visible": true,
+          "x": 1303.7323941836655,
+          "y": 1768.6282626163138
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.5024778842926025,
+          "predicted_x": 1238.857421875,
+          "predicted_y": 2064.82470703125,
+          "visible": true,
+          "x": 1238.857421875,
+          "y": 2064.82470703125
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.762519359588623,
+          "predicted_x": 1317.544189453125,
+          "predicted_y": 2147.837158203125,
+          "visible": true,
+          "x": 1317.544189453125,
+          "y": 2147.837158203125
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.4293310046195984,
+          "predicted_x": 1265.180419921875,
+          "predicted_y": 2041.1505126953125,
+          "visible": true,
+          "x": 1265.180419921875,
+          "y": 2041.1505126953125
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.2621349096298218,
+          "predicted_x": 1306.355712890625,
+          "predicted_y": 1765.1907958984375,
+          "visible": true,
+          "x": 1285.669098779192,
+          "y": 1758.4185739094373
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.7408254742622375,
+          "predicted_x": 1263.2008056640625,
+          "predicted_y": 1908.970947265625,
+          "visible": true,
+          "x": 1263.2008056640625,
+          "y": 1908.970947265625
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.184505894780159,
+          "predicted_x": 1293.694580078125,
+          "predicted_y": 1772.9639892578125,
+          "visible": true,
+          "x": 1274.6740494025557,
+          "y": 1763.1307379279956
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.21714597940444946,
+          "predicted_x": 1301.8841552734375,
+          "predicted_y": 1768.1292724609375,
+          "visible": true,
+          "x": 1277.8154920815946,
+          "y": 1757.6332132396776
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8161662817001343,
+          "predicted_x": 1271.187744140625,
+          "predicted_y": 2031.6204833984375,
+          "visible": true,
+          "x": 1271.187744140625,
+          "y": 2031.6204833984375
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.6220564842224121,
+          "predicted_x": 1205.65771484375,
+          "predicted_y": 2037.4776611328125,
+          "visible": true,
+          "x": 1205.65771484375,
+          "y": 2037.4776611328125
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.7387373447418213,
+          "predicted_x": 1308.4278564453125,
+          "predicted_y": 1761.3028564453125,
+          "visible": true,
+          "x": 1295.8787874860682,
+          "y": 1762.345377258236
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.9481588006019592,
+          "predicted_x": 1284.544189453125,
+          "predicted_y": 1808.2386474609375,
+          "visible": true,
+          "x": 1284.544189453125,
+          "y": 1808.2386474609375
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.9246647953987122,
+          "predicted_x": 1323.7142333984375,
+          "predicted_y": 2031.4873046875,
+          "visible": true,
+          "x": 1323.7142333984375,
+          "y": 2031.4873046875
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.7253340482711792,
+          "predicted_x": 1316.252197265625,
+          "predicted_y": 1957.3280029296875,
+          "visible": true,
+          "x": 1316.252197265625,
+          "y": 1957.3280029296875
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.5465353727340698,
+          "predicted_x": 1369.7459716796875,
+          "predicted_y": 2032.070556640625,
+          "visible": true,
+          "x": 1369.7459716796875,
+          "y": 2032.070556640625
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.2145596146583557,
+          "predicted_x": 1391.13818359375,
+          "predicted_y": 2046.76708984375,
+          "visible": true,
+          "x": 1391.13818359375,
+          "y": 2046.76708984375
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.16226314008235931,
+          "predicted_x": 1372.6673583984375,
+          "predicted_y": 1999.324951171875,
+          "visible": true,
+          "x": 1372.6673583984375,
+          "y": 1999.324951171875
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.7510457038879395,
+          "predicted_x": 1352.875732421875,
+          "predicted_y": 1915.1070556640625,
+          "visible": true,
+          "x": 1352.875732421875,
+          "y": 1915.1070556640625
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.8741450905799866,
+          "predicted_x": 1351.03173828125,
+          "predicted_y": 1979.538818359375,
+          "visible": true,
+          "x": 1351.03173828125,
+          "y": 1979.538818359375
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.9487240314483643,
+          "predicted_x": 1356.305419921875,
+          "predicted_y": 1914.2933349609375,
+          "visible": true,
+          "x": 1356.305419921875,
+          "y": 1914.2933349609375
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.8379100561141968,
+          "predicted_x": 1331.1986083984375,
+          "predicted_y": 1955.08837890625,
+          "visible": true,
+          "x": 1331.1986083984375,
+          "y": 1955.08837890625
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.38270676136016846,
+          "predicted_x": 1316.434814453125,
+          "predicted_y": 1764.859619140625,
+          "visible": true,
+          "x": 1317.8688862393406,
+          "y": 1764.7014592675152
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.19026339054107666,
+          "predicted_x": 1391.7056884765625,
+          "predicted_y": 2046.484130859375,
+          "visible": true,
+          "x": 1391.7056884765625,
+          "y": 2046.484130859375
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.7141456604003906,
+          "predicted_x": 1375.9603271484375,
+          "predicted_y": 2135.156982421875,
+          "visible": true,
+          "x": 1375.9603271484375,
+          "y": 2135.156982421875
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.38988977670669556,
+          "predicted_x": 1382.9150390625,
+          "predicted_y": 1986.8604736328125,
+          "visible": true,
+          "x": 1382.9150390625,
+          "y": 1986.8604736328125
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.31417346000671387,
+          "predicted_x": 1321.451904296875,
+          "predicted_y": 1764.2928466796875,
+          "visible": true,
+          "x": 1328.8639356159767,
+          "y": 1763.1307379279956
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.7424256205558777,
+          "predicted_x": 1359.0169677734375,
+          "predicted_y": 1914.144287109375,
+          "visible": true,
+          "x": 1359.0169677734375,
+          "y": 1914.144287109375
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.3224218487739563,
+          "predicted_x": 1341.2034912109375,
+          "predicted_y": 1772.6611328125,
+          "visible": true,
+          "x": 1345.3565096809311,
+          "y": 1769.4136232860735
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.2958911657333374,
+          "predicted_x": 1330.259521484375,
+          "predicted_y": 1767.255126953125,
+          "visible": true,
+          "x": 1338.2882636530935,
+          "y": 1766.2721806070347
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.8107658624649048,
+          "predicted_x": 1378.7122802734375,
+          "predicted_y": 2027.306396484375,
+          "visible": true,
+          "x": 1378.7122802734375,
+          "y": 2027.306396484375
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.17398810386657715,
+          "predicted_x": 1398.835693359375,
+          "predicted_y": 2050.03955078125,
+          "visible": true,
+          "x": 1398.835693359375,
+          "y": 2050.03955078125
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.5013937950134277,
+          "predicted_x": 1314.2696533203125,
+          "predicted_y": 1765.0133056640625,
+          "visible": true,
+          "x": 1312.3713615510226,
+          "y": 1775.6965086441514
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.9618120193481445,
+          "predicted_x": 1334.99609375,
+          "predicted_y": 1813.2301025390625,
+          "visible": true,
+          "x": 1334.99609375,
+          "y": 1813.2301025390625
+        }
+      },
+      "reviewed": true,
+      "timestamp": 19.825256
+    },
+    {
+      "crop": {
+        "x1": 1108.6563720703125,
+        "x2": 1566.1943359375,
+        "y1": 1667.103515625,
+        "y2": 2277.154052734375
+      },
+      "frame_idx": 1235,
+      "image_path": "frames/000001235.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.5325371623039246,
+          "predicted_x": 1292.92724609375,
+          "predicted_y": 2030.4337158203125,
+          "visible": true,
+          "x": 1292.92724609375,
+          "y": 2030.4337158203125
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.6692385673522949,
+          "predicted_x": 1255.9881591796875,
+          "predicted_y": 2034.9573974609375,
+          "visible": true,
+          "x": 1255.9881591796875,
+          "y": 2034.9573974609375
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.7173608541488647,
+          "predicted_x": 1236.690673828125,
+          "predicted_y": 2003.3646240234375,
+          "visible": true,
+          "x": 1236.690673828125,
+          "y": 2003.3646240234375
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.7781474590301514,
+          "predicted_x": 1276.4132080078125,
+          "predicted_y": 1908.1107177734375,
+          "visible": true,
+          "x": 1276.4132080078125,
+          "y": 1908.1107177734375
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.9394024610519409,
+          "predicted_x": 1310.4486083984375,
+          "predicted_y": 1984.9371337890625,
+          "visible": true,
+          "x": 1310.4486083984375,
+          "y": 1984.9371337890625
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.9819326996803284,
+          "predicted_x": 1273.5452880859375,
+          "predicted_y": 1907.8514404296875,
+          "visible": true,
+          "x": 1273.5452880859375,
+          "y": 1907.8514404296875
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.8503884673118591,
+          "predicted_x": 1321.0849609375,
+          "predicted_y": 1952.8675537109375,
+          "visible": true,
+          "x": 1321.0849609375,
+          "y": 1952.8675537109375
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.27570009231567383,
+          "predicted_x": 1307.35107421875,
+          "predicted_y": 1765.6343994140625,
+          "visible": true,
+          "x": 1297.1901324486148,
+          "y": 1764.3397527280267
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.5925885438919067,
+          "predicted_x": 1264.315673828125,
+          "predicted_y": 2052.89599609375,
+          "visible": true,
+          "x": 1264.315673828125,
+          "y": 2052.89599609375
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.7054963111877441,
+          "predicted_x": 1335.3961181640625,
+          "predicted_y": 2144.037109375,
+          "visible": true,
+          "x": 1335.3961181640625,
+          "y": 2144.037109375
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.8592745065689087,
+          "predicted_x": 1228.360107421875,
+          "predicted_y": 1964.9696044921875,
+          "visible": true,
+          "x": 1228.360107421875,
+          "y": 1964.9696044921875
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.24737514555454254,
+          "predicted_x": 1305.307373046875,
+          "predicted_y": 1766.406982421875,
+          "visible": true,
+          "x": 1290.8657759000546,
+          "y": 1761.1775744537467
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.7388094663619995,
+          "predicted_x": 1271.686279296875,
+          "predicted_y": 1907.6439208984375,
+          "visible": true,
+          "x": 1271.686279296875,
+          "y": 1907.6439208984375
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.18898522853851318,
+          "predicted_x": 1292.9527587890625,
+          "predicted_y": 1773.18798828125,
+          "visible": true,
+          "x": 1275.0548845286542,
+          "y": 1761.9681190223168
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.21469464898109436,
+          "predicted_x": 1300.6805419921875,
+          "predicted_y": 1769.0455322265625,
+          "visible": true,
+          "x": 1282.9603302143544,
+          "y": 1761.1775744537467
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8320671916007996,
+          "predicted_x": 1286.3043212890625,
+          "predicted_y": 2028.7735595703125,
+          "visible": true,
+          "x": 1286.3043212890625,
+          "y": 2028.7735595703125
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.730258584022522,
+          "predicted_x": 1233.0687255859375,
+          "predicted_y": 2017.7220458984375,
+          "visible": true,
+          "x": 1233.0687255859375,
+          "y": 2017.7220458984375
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.7279630899429321,
+          "predicted_x": 1308.375244140625,
+          "predicted_y": 1761.848876953125,
+          "visible": true,
+          "x": 1303.5144889971748,
+          "y": 1771.454653845157
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.9690560102462769,
+          "predicted_x": 1284.062744140625,
+          "predicted_y": 1809.666259765625,
+          "visible": true,
+          "x": 1284.062744140625,
+          "y": 1809.666259765625
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.9287232160568237,
+          "predicted_x": 1343.445556640625,
+          "predicted_y": 2026.7955322265625,
+          "visible": true,
+          "x": 1343.445556640625,
+          "y": 2026.7955322265625
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.7577649354934692,
+          "predicted_x": 1335.3878173828125,
+          "predicted_y": 1949.1922607421875,
+          "visible": true,
+          "x": 1335.3878173828125,
+          "y": 1949.1922607421875
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.5607115030288696,
+          "predicted_x": 1393.6268310546875,
+          "predicted_y": 2023.025634765625,
+          "visible": true,
+          "x": 1393.6268310546875,
+          "y": 2023.025634765625
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.43664485216140747,
+          "predicted_x": 1409.001708984375,
+          "predicted_y": 2075.73779296875,
+          "visible": true,
+          "x": 1409.001708984375,
+          "y": 2075.73779296875
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.38952744007110596,
+          "predicted_x": 1406.664306640625,
+          "predicted_y": 2050.564208984375,
+          "visible": true,
+          "x": 1406.664306640625,
+          "y": 2050.564208984375
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.7403749227523804,
+          "predicted_x": 1359.3555908203125,
+          "predicted_y": 1909.29052734375,
+          "visible": true,
+          "x": 1359.3555908203125,
+          "y": 1909.29052734375
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.8977599740028381,
+          "predicted_x": 1371.2508544921875,
+          "predicted_y": 1973.4188232421875,
+          "visible": true,
+          "x": 1371.2508544921875,
+          "y": 1973.4188232421875
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.9417538046836853,
+          "predicted_x": 1362.09912109375,
+          "predicted_y": 1908.7955322265625,
+          "visible": true,
+          "x": 1362.09912109375,
+          "y": 1908.7955322265625
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.8479884266853333,
+          "predicted_x": 1350.783447265625,
+          "predicted_y": 1947.2705078125,
+          "visible": true,
+          "x": 1350.783447265625,
+          "y": 1947.2705078125
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.28597530722618103,
+          "predicted_x": 1317.86083984375,
+          "predicted_y": 1766.43994140625,
+          "visible": true,
+          "x": 1317.86083984375,
+          "y": 1766.43994140625
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.3877181112766266,
+          "predicted_x": 1412.4306640625,
+          "predicted_y": 2088.097412109375,
+          "visible": true,
+          "x": 1412.4306640625,
+          "y": 2088.097412109375
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.6922744512557983,
+          "predicted_x": 1395.61962890625,
+          "predicted_y": 2131.87939453125,
+          "visible": true,
+          "x": 1395.61962890625,
+          "y": 2131.87939453125
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.33339983224868774,
+          "predicted_x": 1391.6710205078125,
+          "predicted_y": 1999.38232421875,
+          "visible": true,
+          "x": 1391.6710205078125,
+          "y": 1999.38232421875
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.2534978985786438,
+          "predicted_x": 1323.4478759765625,
+          "predicted_y": 1765.06396484375,
+          "visible": true,
+          "x": 1323.4478759765625,
+          "y": 1765.06396484375
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.7497806549072266,
+          "predicted_x": 1363.67431640625,
+          "predicted_y": 1908.9112548828125,
+          "visible": true,
+          "x": 1363.67431640625,
+          "y": 1908.9112548828125
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.30883607268333435,
+          "predicted_x": 1341.7156982421875,
+          "predicted_y": 1772.05517578125,
+          "visible": true,
+          "x": 1341.7156982421875,
+          "y": 1772.05517578125
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.2638610601425171,
+          "predicted_x": 1332.4788818359375,
+          "predicted_y": 1767.7840576171875,
+          "visible": true,
+          "x": 1332.4788818359375,
+          "y": 1767.7840576171875
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.8533098101615906,
+          "predicted_x": 1401.0592041015625,
+          "predicted_y": 2019.9112548828125,
+          "visible": true,
+          "x": 1401.0592041015625,
+          "y": 2019.9112548828125
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.4159216284751892,
+          "predicted_x": 1420.3865966796875,
+          "predicted_y": 2054.385986328125,
+          "visible": true,
+          "x": 1420.3865966796875,
+          "y": 2054.385986328125
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.44505107402801514,
+          "predicted_x": 1313.5775146484375,
+          "predicted_y": 1765.7672119140625,
+          "visible": true,
+          "x": 1313.5775146484375,
+          "y": 1765.7672119140625
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.975618839263916,
+          "predicted_x": 1334.8292236328125,
+          "predicted_y": 1811.247314453125,
+          "visible": true,
+          "x": 1334.8292236328125,
+          "y": 1811.247314453125
+        }
+      },
+      "reviewed": true,
+      "timestamp": 20.643811
+    },
+    {
+      "crop": {
+        "x1": 1097.593505859375,
+        "x2": 1560.01220703125,
+        "y1": 1666.034423828125,
+        "y2": 2282.5927734375
+      },
+      "frame_idx": 1311,
+      "image_path": "frames/000001311.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.524448037147522,
+          "predicted_x": 1290.15771484375,
+          "predicted_y": 2015.7730712890625,
+          "visible": true,
+          "x": 1290.15771484375,
+          "y": 2015.7730712890625
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.380398154258728,
+          "predicted_x": 1232.0050048828125,
+          "predicted_y": 1953.312255859375,
+          "visible": true,
+          "x": 1232.0050048828125,
+          "y": 1953.312255859375
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.6634231209754944,
+          "predicted_x": 1219.553466796875,
+          "predicted_y": 1906.6741943359375,
+          "visible": true,
+          "x": 1219.553466796875,
+          "y": 1906.6741943359375
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.7685254812240601,
+          "predicted_x": 1271.84521484375,
+          "predicted_y": 1907.2783203125,
+          "visible": true,
+          "x": 1271.84521484375,
+          "y": 1907.2783203125
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.9093994498252869,
+          "predicted_x": 1322.78662109375,
+          "predicted_y": 1962.0994873046875,
+          "visible": true,
+          "x": 1322.78662109375,
+          "y": 1962.0994873046875
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.9790560603141785,
+          "predicted_x": 1270.8134765625,
+          "predicted_y": 1906.343505859375,
+          "visible": true,
+          "x": 1270.8134765625,
+          "y": 1906.343505859375
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.8253152966499329,
+          "predicted_x": 1343.650146484375,
+          "predicted_y": 1938.2198486328125,
+          "visible": true,
+          "x": 1343.650146484375,
+          "y": 1938.2198486328125
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.22144383192062378,
+          "predicted_x": 1309.705322265625,
+          "predicted_y": 1767.58837890625,
+          "visible": true,
+          "x": 1301.0214224618335,
+          "y": 1765.2563826754104
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.4246838092803955,
+          "predicted_x": 1227.095703125,
+          "predicted_y": 1970.2825927734375,
+          "visible": true,
+          "x": 1227.095703125,
+          "y": 1970.2825927734375
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.7802028656005859,
+          "predicted_x": 1329.25146484375,
+          "predicted_y": 2158.08984375,
+          "visible": true,
+          "x": 1329.25146484375,
+          "y": 2158.08984375
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.2936598062515259,
+          "predicted_x": 1284.60107421875,
+          "predicted_y": 2023.0469970703125,
+          "visible": true,
+          "x": 1284.60107421875,
+          "y": 2023.0469970703125
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.1956697702407837,
+          "predicted_x": 1308.349365234375,
+          "predicted_y": 1768.9993896484375,
+          "visible": true,
+          "x": 1294.6244913299292,
+          "y": 1765.2563826754104
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.727806031703949,
+          "predicted_x": 1268.41357421875,
+          "predicted_y": 1905.7708740234375,
+          "visible": true,
+          "x": 1268.41357421875,
+          "y": 1905.7708740234375
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.1495126187801361,
+          "predicted_x": 1298.353515625,
+          "predicted_y": 1778.359375,
+          "visible": true,
+          "x": 1282.6302454576087,
+          "y": 1762.0579171094582
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.16902855038642883,
+          "predicted_x": 1304.3226318359375,
+          "predicted_y": 1772.491943359375,
+          "visible": true,
+          "x": 1289.826792981001,
+          "y": 1761.25830071797
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8309342265129089,
+          "predicted_x": 1282.7974853515625,
+          "predicted_y": 2016.130859375,
+          "visible": true,
+          "x": 1282.7974853515625,
+          "y": 2016.130859375
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.6483782529830933,
+          "predicted_x": 1205.7091064453125,
+          "predicted_y": 1917.460205078125,
+          "visible": true,
+          "x": 1205.7091064453125,
+          "y": 1917.460205078125
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.6127692461013794,
+          "predicted_x": 1310.0738525390625,
+          "predicted_y": 1762.33251953125,
+          "visible": true,
+          "x": 1307.418353593738,
+          "y": 1771.6533138073146
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.961135983467102,
+          "predicted_x": 1286.76416015625,
+          "predicted_y": 1809.4210205078125,
+          "visible": true,
+          "x": 1286.76416015625,
+          "y": 1809.4210205078125
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.9318338632583618,
+          "predicted_x": 1345.731201171875,
+          "predicted_y": 2018.18115234375,
+          "visible": true,
+          "x": 1345.731201171875,
+          "y": 2018.18115234375
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.729850709438324,
+          "predicted_x": 1358.08349609375,
+          "predicted_y": 1941.7509765625,
+          "visible": true,
+          "x": 1358.08349609375,
+          "y": 1941.7509765625
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.5117444396018982,
+          "predicted_x": 1399.7003173828125,
+          "predicted_y": 2016.1353759765625,
+          "visible": true,
+          "x": 1399.7003173828125,
+          "y": 2016.1353759765625
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.2591778337955475,
+          "predicted_x": 1373.3216552734375,
+          "predicted_y": 2100.17626953125,
+          "visible": true,
+          "x": 1373.3216552734375,
+          "y": 2100.17626953125
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.23021161556243896,
+          "predicted_x": 1365.4989013671875,
+          "predicted_y": 2089.92724609375,
+          "visible": true,
+          "x": 1365.4989013671875,
+          "y": 2089.92724609375
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.7035790085792542,
+          "predicted_x": 1364.70703125,
+          "predicted_y": 1908.1558837890625,
+          "visible": true,
+          "x": 1364.70703125,
+          "y": 1908.1558837890625
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.9103646278381348,
+          "predicted_x": 1384.331298828125,
+          "predicted_y": 1972.1781005859375,
+          "visible": true,
+          "x": 1384.331298828125,
+          "y": 1972.1781005859375
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.9167961478233337,
+          "predicted_x": 1367.438232421875,
+          "predicted_y": 1907.223876953125,
+          "visible": true,
+          "x": 1367.438232421875,
+          "y": 1907.223876953125
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.8201401233673096,
+          "predicted_x": 1373.477294921875,
+          "predicted_y": 1943.0133056640625,
+          "visible": true,
+          "x": 1373.477294921875,
+          "y": 1943.0133056640625
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.30148690938949585,
+          "predicted_x": 1319.4005126953125,
+          "predicted_y": 1767.6212158203125,
+          "visible": true,
+          "x": 1319.4005126953125,
+          "y": 1767.6212158203125
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.21449509263038635,
+          "predicted_x": 1373.8074951171875,
+          "predicted_y": 2109.238525390625,
+          "visible": true,
+          "x": 1373.8074951171875,
+          "y": 2109.238525390625
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.7787613868713379,
+          "predicted_x": 1388.7115478515625,
+          "predicted_y": 2154.474853515625,
+          "visible": true,
+          "x": 1388.7115478515625,
+          "y": 2154.474853515625
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.26924896240234375,
+          "predicted_x": 1381.9185791015625,
+          "predicted_y": 2055.236572265625,
+          "visible": true,
+          "x": 1381.9185791015625,
+          "y": 2055.236572265625
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.2596438229084015,
+          "predicted_x": 1324.394775390625,
+          "predicted_y": 1766.3421630859375,
+          "visible": true,
+          "x": 1324.394775390625,
+          "y": 1766.3421630859375
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.7202131748199463,
+          "predicted_x": 1369.319091796875,
+          "predicted_y": 1907.186767578125,
+          "visible": true,
+          "x": 1369.319091796875,
+          "y": 1907.186767578125
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.25913405418395996,
+          "predicted_x": 1339.7569580078125,
+          "predicted_y": 1771.4149169921875,
+          "visible": true,
+          "x": 1339.7569580078125,
+          "y": 1771.4149169921875
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.2564460039138794,
+          "predicted_x": 1331.4542236328125,
+          "predicted_y": 1768.1951904296875,
+          "visible": true,
+          "x": 1331.4542236328125,
+          "y": 1768.1951904296875
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.8547666668891907,
+          "predicted_x": 1406.9376220703125,
+          "predicted_y": 2015.3948974609375,
+          "visible": true,
+          "x": 1406.9376220703125,
+          "y": 2015.3948974609375
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.22055253386497498,
+          "predicted_x": 1380.5068359375,
+          "predicted_y": 2084.426513671875,
+          "visible": true,
+          "x": 1380.5068359375,
+          "y": 2084.426513671875
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.4334639310836792,
+          "predicted_x": 1314.48388671875,
+          "predicted_y": 1765.1807861328125,
+          "visible": true,
+          "x": 1314.48388671875,
+          "y": 1765.1807861328125
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.9751580357551575,
+          "predicted_x": 1337.951904296875,
+          "predicted_y": 1810.2940673828125,
+          "visible": true,
+          "x": 1337.951904296875,
+          "y": 1810.2940673828125
+        }
+      },
+      "reviewed": true,
+      "timestamp": 21.913467
+    },
+    {
+      "crop": {
+        "x1": 1077.0374755859375,
+        "x2": 1698.6287841796875,
+        "y1": 1559.30517578125,
+        "y2": 2388.093505859375
+      },
+      "frame_idx": 1344,
+      "image_path": "frames/000001344.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.46089786291122437,
+          "predicted_x": 1267.9188232421875,
+          "predicted_y": 1985.9073486328125,
+          "visible": true,
+          "x": 1267.9188232421875,
+          "y": 1985.9073486328125
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.42492520809173584,
+          "predicted_x": 1220.99853515625,
+          "predicted_y": 1950.68798828125,
+          "visible": true,
+          "x": 1220.99853515625,
+          "y": 1950.68798828125
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.4383544921875,
+          "predicted_x": 1218.212158203125,
+          "predicted_y": 1901.975830078125,
+          "visible": true,
+          "x": 1218.212158203125,
+          "y": 1901.975830078125
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.7196248769760132,
+          "predicted_x": 1260.159912109375,
+          "predicted_y": 1894.3643798828125,
+          "visible": true,
+          "x": 1260.159912109375,
+          "y": 1894.3643798828125
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.7759373188018799,
+          "predicted_x": 1333.494140625,
+          "predicted_y": 1931.550537109375,
+          "visible": true,
+          "x": 1333.494140625,
+          "y": 1931.550537109375
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.8896855115890503,
+          "predicted_x": 1258.349365234375,
+          "predicted_y": 1893.175048828125,
+          "visible": true,
+          "x": 1258.349365234375,
+          "y": 1893.175048828125
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.7249898910522461,
+          "predicted_x": 1372.0697021484375,
+          "predicted_y": 1927.5443115234375,
+          "visible": true,
+          "x": 1372.0697021484375,
+          "y": 1927.5443115234375
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.32313966751098633,
+          "predicted_x": 1307.9141845703125,
+          "predicted_y": 1762.8792724609375,
+          "visible": true,
+          "x": 1296.6898862134212,
+          "y": 1762.1942795676625
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.47792044281959534,
+          "predicted_x": 1216.0269775390625,
+          "predicted_y": 1956.30908203125,
+          "visible": true,
+          "x": 1216.0269775390625,
+          "y": 1956.30908203125
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.7697586417198181,
+          "predicted_x": 1278.5350341796875,
+          "predicted_y": 2139.752197265625,
+          "visible": true,
+          "x": 1278.5350341796875,
+          "y": 2139.752197265625
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.25905534625053406,
+          "predicted_x": 1251.3990478515625,
+          "predicted_y": 2022.0242919921875,
+          "visible": true,
+          "x": 1251.3990478515625,
+          "y": 2022.0242919921875
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.26095595955848694,
+          "predicted_x": 1305.532470703125,
+          "predicted_y": 1763.565185546875,
+          "visible": true,
+          "x": 1289.1693450143853,
+          "y": 1760.0455535107951
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.6555419564247131,
+          "predicted_x": 1252.33349609375,
+          "predicted_y": 1893.0736083984375,
+          "visible": true,
+          "x": 1252.33349609375,
+          "y": 1893.0736083984375
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.21493923664093018,
+          "predicted_x": 1296.931396484375,
+          "predicted_y": 1773.2266845703125,
+          "visible": true,
+          "x": 1275.2026256447475,
+          "y": 1765.4173686529634
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.23617976903915405,
+          "predicted_x": 1300.934814453125,
+          "predicted_y": 1766.07958984375,
+          "visible": true,
+          "x": 1280.574440786916,
+          "y": 1762.1942795676625
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8164942860603333,
+          "predicted_x": 1261.679931640625,
+          "predicted_y": 1986.3516845703125,
+          "visible": true,
+          "x": 1261.679931640625,
+          "y": 1986.3516845703125
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.4226827621459961,
+          "predicted_x": 1205.4635009765625,
+          "predicted_y": 1911.1068115234375,
+          "visible": true,
+          "x": 1205.4635009765625,
+          "y": 1911.1068115234375
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.6253608465194702,
+          "predicted_x": 1307.528076171875,
+          "predicted_y": 1762.9698486328125,
+          "visible": true,
+          "x": 1300.987338327156,
+          "y": 1769.7148207666983
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.8975606560707092,
+          "predicted_x": 1285.4185791015625,
+          "predicted_y": 1808.895263671875,
+          "visible": true,
+          "x": 1285.4185791015625,
+          "y": 1808.895263671875
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.8705858588218689,
+          "predicted_x": 1327.2135009765625,
+          "predicted_y": 1995.372314453125,
+          "visible": true,
+          "x": 1327.2135009765625,
+          "y": 1995.372314453125
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.6855965852737427,
+          "predicted_x": 1382.480224609375,
+          "predicted_y": 1939.7479248046875,
+          "visible": true,
+          "x": 1382.480224609375,
+          "y": 1939.7479248046875
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.4112322926521301,
+          "predicted_x": 1385.3018798828125,
+          "predicted_y": 2007.5283203125,
+          "visible": true,
+          "x": 1385.3018798828125,
+          "y": 2007.5283203125
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.1679578572511673,
+          "predicted_x": 1375.39599609375,
+          "predicted_y": 2094.721923828125,
+          "visible": true,
+          "x": 1375.39599609375,
+          "y": 2094.721923828125
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.1846037209033966,
+          "predicted_x": 1375.212158203125,
+          "predicted_y": 2076.206787109375,
+          "visible": true,
+          "x": 1375.212158203125,
+          "y": 2076.206787109375
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.6643906235694885,
+          "predicted_x": 1356.1116943359375,
+          "predicted_y": 1907.0704345703125,
+          "visible": true,
+          "x": 1356.1116943359375,
+          "y": 1907.0704345703125
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.8721363544464111,
+          "predicted_x": 1375.6273193359375,
+          "predicted_y": 1980.83203125,
+          "visible": true,
+          "x": 1375.6273193359375,
+          "y": 1980.83203125
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.8599653244018555,
+          "predicted_x": 1356.0638427734375,
+          "predicted_y": 1903.866455078125,
+          "visible": true,
+          "x": 1356.0638427734375,
+          "y": 1903.866455078125
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.7752721309661865,
+          "predicted_x": 1390.8544921875,
+          "predicted_y": 1952.302978515625,
+          "visible": true,
+          "x": 1390.8544921875,
+          "y": 1952.302978515625
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.4466760754585266,
+          "predicted_x": 1320.4117431640625,
+          "predicted_y": 1761.214111328125,
+          "visible": true,
+          "x": 1320.4117431640625,
+          "y": 1761.214111328125
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.21067167818546295,
+          "predicted_x": 1372.66162109375,
+          "predicted_y": 2108.13427734375,
+          "visible": true,
+          "x": 1372.66162109375,
+          "y": 2108.13427734375
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.7742725014686584,
+          "predicted_x": 1341.34130859375,
+          "predicted_y": 2140.4736328125,
+          "visible": true,
+          "x": 1341.34130859375,
+          "y": 2140.4736328125
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.3475800156593323,
+          "predicted_x": 1386.78857421875,
+          "predicted_y": 2043.85791015625,
+          "visible": true,
+          "x": 1386.78857421875,
+          "y": 2043.85791015625
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.3926942050457001,
+          "predicted_x": 1325.8692626953125,
+          "predicted_y": 1760.2060546875,
+          "visible": true,
+          "x": 1325.8692626953125,
+          "y": 1760.2060546875
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.6503057479858398,
+          "predicted_x": 1357.99169921875,
+          "predicted_y": 1904.3712158203125,
+          "visible": true,
+          "x": 1357.99169921875,
+          "y": 1904.3712158203125
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.41232040524482727,
+          "predicted_x": 1341.2164306640625,
+          "predicted_y": 1768.577880859375,
+          "visible": true,
+          "x": 1341.2164306640625,
+          "y": 1768.577880859375
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.4000806510448456,
+          "predicted_x": 1333.0216064453125,
+          "predicted_y": 1762.6029052734375,
+          "visible": true,
+          "x": 1333.0216064453125,
+          "y": 1762.6029052734375
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.7939717769622803,
+          "predicted_x": 1390.0306396484375,
+          "predicted_y": 2010.493408203125,
+          "visible": true,
+          "x": 1390.0306396484375,
+          "y": 2010.493408203125
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.18190844357013702,
+          "predicted_x": 1387.1944580078125,
+          "predicted_y": 2087.957763671875,
+          "visible": true,
+          "x": 1387.1944580078125,
+          "y": 2087.957763671875
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.5523247718811035,
+          "predicted_x": 1315.6201171875,
+          "predicted_y": 1764.6053466796875,
+          "visible": true,
+          "x": 1315.6201171875,
+          "y": 1764.6053466796875
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.8923049569129944,
+          "predicted_x": 1335.5113525390625,
+          "predicted_y": 1811.7327880859375,
+          "visible": true,
+          "x": 1335.5113525390625,
+          "y": 1811.7327880859375
+        }
+      },
+      "reviewed": true,
+      "timestamp": 22.464767
+    },
+    {
+      "crop": {
+        "x1": 679.207275390625,
+        "x2": 1941.8905029296875,
+        "y1": 1267.9215087890625,
+        "y2": 2951.499267578125
+      },
+      "frame_idx": 1544,
+      "image_path": "frames/000001544.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.2619074583053589,
+          "predicted_x": 1227.2662353515625,
+          "predicted_y": 1785.2620849609375,
+          "visible": true,
+          "x": 1227.2662353515625,
+          "y": 1785.2620849609375
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.05548997223377228,
+          "predicted_x": 1466.6754150390625,
+          "predicted_y": 2018.92919921875,
+          "visible": true,
+          "x": 1466.6754150390625,
+          "y": 2018.92919921875
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.07098814845085144,
+          "predicted_x": 1520.741455078125,
+          "predicted_y": 1988.997802734375,
+          "visible": true,
+          "x": 1520.741455078125,
+          "y": 1988.997802734375
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.41278767585754395,
+          "predicted_x": 1151.3223876953125,
+          "predicted_y": 1674.887451171875,
+          "visible": true,
+          "x": 1151.3223876953125,
+          "y": 1674.887451171875
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.5752763152122498,
+          "predicted_x": 1271.64306640625,
+          "predicted_y": 1794.3968505859375,
+          "visible": true,
+          "x": 1271.64306640625,
+          "y": 1794.3968505859375
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.6033772826194763,
+          "predicted_x": 1147.38671875,
+          "predicted_y": 1676.463134765625,
+          "visible": true,
+          "x": 1147.38671875,
+          "y": 1676.463134765625
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.5707933902740479,
+          "predicted_x": 1290.005126953125,
+          "predicted_y": 1752.6253662109375,
+          "visible": true,
+          "x": 1290.005126953125,
+          "y": 1752.6253662109375
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.4819292426109314,
+          "predicted_x": 1124.0216064453125,
+          "predicted_y": 1494.989013671875,
+          "visible": true,
+          "x": 1124.0216064453125,
+          "y": 1494.989013671875
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.0674896091222763,
+          "predicted_x": 1473.2208251953125,
+          "predicted_y": 2036.0355224609375,
+          "visible": true,
+          "x": 1473.2208251953125,
+          "y": 2036.0355224609375
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.4141865372657776,
+          "predicted_x": 1132.9393310546875,
+          "predicted_y": 1995.6826171875,
+          "visible": true,
+          "x": 1132.9393310546875,
+          "y": 1995.6826171875
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.07793916016817093,
+          "predicted_x": 1270.2216796875,
+          "predicted_y": 1953.3294677734375,
+          "visible": false,
+          "x": null,
+          "y": null
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.3792179226875305,
+          "predicted_x": 1121.9696044921875,
+          "predicted_y": 1499.8551025390625,
+          "visible": true,
+          "x": 1121.9696044921875,
+          "y": 1499.8551025390625
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.43542587757110596,
+          "predicted_x": 1142.6552734375,
+          "predicted_y": 1678.6246337890625,
+          "visible": true,
+          "x": 1142.6552734375,
+          "y": 1678.6246337890625
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.2997758388519287,
+          "predicted_x": 1120.686279296875,
+          "predicted_y": 1522.2900390625,
+          "visible": true,
+          "x": 1120.686279296875,
+          "y": 1522.2900390625
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.35314372181892395,
+          "predicted_x": 1121.53076171875,
+          "predicted_y": 1509.2099609375,
+          "visible": true,
+          "x": 1121.53076171875,
+          "y": 1509.2099609375
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.5369206666946411,
+          "predicted_x": 1212.9122314453125,
+          "predicted_y": 1781.38232421875,
+          "visible": true,
+          "x": 1212.9122314453125,
+          "y": 1781.38232421875
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.062154874205589294,
+          "predicted_x": 1525.5194091796875,
+          "predicted_y": 1996.7401123046875,
+          "visible": true,
+          "x": 1525.5194091796875,
+          "y": 1996.7401123046875
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.6124545335769653,
+          "predicted_x": 1155.5660400390625,
+          "predicted_y": 1524.4454345703125,
+          "visible": true,
+          "x": 1155.5660400390625,
+          "y": 1524.4454345703125
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.5288852453231812,
+          "predicted_x": 1134.0223388671875,
+          "predicted_y": 1572.2518310546875,
+          "visible": true,
+          "x": 1134.0223388671875,
+          "y": 1572.2518310546875
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.5542380809783936,
+          "predicted_x": 1273.028564453125,
+          "predicted_y": 1815.30322265625,
+          "visible": true,
+          "x": 1273.028564453125,
+          "y": 1815.30322265625
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.6108582019805908,
+          "predicted_x": 1287.6585693359375,
+          "predicted_y": 1736.5465087890625,
+          "visible": true,
+          "x": 1287.6585693359375,
+          "y": 1736.5465087890625
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.2578401267528534,
+          "predicted_x": 1313.876220703125,
+          "predicted_y": 1847.3624267578125,
+          "visible": true,
+          "x": 1313.876220703125,
+          "y": 1847.3624267578125
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.13370683789253235,
+          "predicted_x": 1469.6343994140625,
+          "predicted_y": 2016.95556640625,
+          "visible": true,
+          "x": 1469.6343994140625,
+          "y": 2016.95556640625
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.1872483342885971,
+          "predicted_x": 1518.0587158203125,
+          "predicted_y": 1985.0767822265625,
+          "visible": true,
+          "x": 1518.0587158203125,
+          "y": 1985.0767822265625
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.23060373961925507,
+          "predicted_x": 1288.12060546875,
+          "predicted_y": 1877.920166015625,
+          "visible": true,
+          "x": 1288.12060546875,
+          "y": 1877.920166015625
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.4960886240005493,
+          "predicted_x": 1313.827880859375,
+          "predicted_y": 1794.6163330078125,
+          "visible": true,
+          "x": 1313.827880859375,
+          "y": 1794.6163330078125
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.31637874245643616,
+          "predicted_x": 1294.0491943359375,
+          "predicted_y": 1885.9620361328125,
+          "visible": true,
+          "x": 1294.0491943359375,
+          "y": 1885.9620361328125
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.5805792808532715,
+          "predicted_x": 1309.338623046875,
+          "predicted_y": 1747.921630859375,
+          "visible": true,
+          "x": 1309.338623046875,
+          "y": 1747.921630859375
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.07668451219797134,
+          "predicted_x": 1207.950439453125,
+          "predicted_y": 1639.6895751953125,
+          "visible": false,
+          "x": null,
+          "y": null
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.15779057145118713,
+          "predicted_x": 1475.6800537109375,
+          "predicted_y": 2035.25634765625,
+          "visible": true,
+          "x": 1475.6800537109375,
+          "y": 2035.25634765625
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.3733466565608978,
+          "predicted_x": 1197.6934814453125,
+          "predicted_y": 2013.2706298828125,
+          "visible": true,
+          "x": 1197.6934814453125,
+          "y": 2013.2706298828125
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.22226360440254211,
+          "predicted_x": 1364.168212890625,
+          "predicted_y": 1981.1314697265625,
+          "visible": true,
+          "x": 1364.168212890625,
+          "y": 1981.1314697265625
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.07625913619995117,
+          "predicted_x": 1270.5084228515625,
+          "predicted_y": 1798.47021484375,
+          "visible": false,
+          "x": null,
+          "y": null
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.24052593111991882,
+          "predicted_x": 1296.170166015625,
+          "predicted_y": 1890.5194091796875,
+          "visible": true,
+          "x": 1296.170166015625,
+          "y": 1890.5194091796875
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.07523475587368011,
+          "predicted_x": 1385.1829833984375,
+          "predicted_y": 1902.1019287109375,
+          "visible": false,
+          "x": null,
+          "y": null
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.09522181749343872,
+          "predicted_x": 1269.1915283203125,
+          "predicted_y": 1799.9735107421875,
+          "visible": false,
+          "x": null,
+          "y": null
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.49041831493377686,
+          "predicted_x": 1314.1505126953125,
+          "predicted_y": 1858.94140625,
+          "visible": true,
+          "x": 1314.1505126953125,
+          "y": 1858.94140625
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.16324803233146667,
+          "predicted_x": 1525.494140625,
+          "predicted_y": 1997.9315185546875,
+          "visible": true,
+          "x": 1525.494140625,
+          "y": 1997.9315185546875
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.1347711980342865,
+          "predicted_x": 1280.3858642578125,
+          "predicted_y": 1784.5806884765625,
+          "visible": false,
+          "x": null,
+          "y": null
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.18129879236221313,
+          "predicted_x": 1269.1138916015625,
+          "predicted_y": 1821.2801513671875,
+          "visible": true,
+          "x": 1269.1138916015625,
+          "y": 1821.2801513671875
+        }
+      },
+      "reviewed": true,
+      "timestamp": 25.806033
+    },
+    {
+      "crop": {
+        "x1": 661.0115966796875,
+        "x2": 1950.19189453125,
+        "y1": 1263.341796875,
+        "y2": 2982.248779296875
+      },
+      "frame_idx": 1574,
+      "image_path": "frames/000001574.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.24283263087272644,
+          "predicted_x": 1259.74609375,
+          "predicted_y": 1962.5555419921875,
+          "visible": true,
+          "x": 1259.74609375,
+          "y": 1962.5555419921875
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.2764700651168823,
+          "predicted_x": 1314.5269775390625,
+          "predicted_y": 2379.646484375,
+          "visible": true,
+          "x": 1314.5269775390625,
+          "y": 2379.646484375
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.17872734367847443,
+          "predicted_x": 1273.1563720703125,
+          "predicted_y": 2431.04931640625,
+          "visible": true,
+          "x": 1273.1563720703125,
+          "y": 2431.04931640625
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.37608253955841064,
+          "predicted_x": 1217.9979248046875,
+          "predicted_y": 2059.056640625,
+          "visible": true,
+          "x": 1217.9979248046875,
+          "y": 2059.056640625
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.4272820055484772,
+          "predicted_x": 1242.788330078125,
+          "predicted_y": 1932.0450439453125,
+          "visible": true,
+          "x": 1242.788330078125,
+          "y": 1932.0450439453125
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.5165690183639526,
+          "predicted_x": 1223.5810546875,
+          "predicted_y": 2058.619140625,
+          "visible": true,
+          "x": 1223.5810546875,
+          "y": 2058.619140625
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.4533655643463135,
+          "predicted_x": 1200.760498046875,
+          "predicted_y": 1952.621337890625,
+          "visible": true,
+          "x": 1200.760498046875,
+          "y": 1952.621337890625
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.16149500012397766,
+          "predicted_x": 1063.6903076171875,
+          "predicted_y": 2115.314697265625,
+          "visible": true,
+          "x": 1063.6903076171875,
+          "y": 2115.314697265625
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.2930518090724945,
+          "predicted_x": 1339.51416015625,
+          "predicted_y": 2400.146728515625,
+          "visible": true,
+          "x": 1339.51416015625,
+          "y": 2400.146728515625
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.475604772567749,
+          "predicted_x": 1371.465576171875,
+          "predicted_y": 2157.8359375,
+          "visible": true,
+          "x": 1371.465576171875,
+          "y": 2157.8359375
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.39802345633506775,
+          "predicted_x": 1196.7420654296875,
+          "predicted_y": 2237.87109375,
+          "visible": true,
+          "x": 1196.7420654296875,
+          "y": 2237.87109375
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.13944444060325623,
+          "predicted_x": 1070.683837890625,
+          "predicted_y": 2118.021728515625,
+          "visible": true,
+          "x": 1070.683837890625,
+          "y": 2118.021728515625
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.36517393589019775,
+          "predicted_x": 1227.068603515625,
+          "predicted_y": 2061.99267578125,
+          "visible": true,
+          "x": 1227.068603515625,
+          "y": 2061.99267578125
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.16184023022651672,
+          "predicted_x": 1081.250732421875,
+          "predicted_y": 2123.537353515625,
+          "visible": true,
+          "x": 1081.250732421875,
+          "y": 2123.537353515625
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.16525474190711975,
+          "predicted_x": 1075.8607177734375,
+          "predicted_y": 2119.58056640625,
+          "visible": true,
+          "x": 1075.8607177734375,
+          "y": 2119.58056640625
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.5182622671127319,
+          "predicted_x": 1264.0548095703125,
+          "predicted_y": 1977.58251953125,
+          "visible": true,
+          "x": 1264.0548095703125,
+          "y": 1977.58251953125
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.16390776634216309,
+          "predicted_x": 1288.2337646484375,
+          "predicted_y": 2429.851318359375,
+          "visible": true,
+          "x": 1288.2337646484375,
+          "y": 2429.851318359375
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.22385458648204803,
+          "predicted_x": 1064.935546875,
+          "predicted_y": 2104.8232421875,
+          "visible": true,
+          "x": 1064.935546875,
+          "y": 2104.8232421875
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.43470725417137146,
+          "predicted_x": 1105.308837890625,
+          "predicted_y": 2096.230712890625,
+          "visible": true,
+          "x": 1105.308837890625,
+          "y": 2096.230712890625
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.5307878851890564,
+          "predicted_x": 1267.5543212890625,
+          "predicted_y": 1930.7939453125,
+          "visible": true,
+          "x": 1267.5543212890625,
+          "y": 1930.7939453125
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.4781922399997711,
+          "predicted_x": 1187.33447265625,
+          "predicted_y": 1966.9271240234375,
+          "visible": true,
+          "x": 1187.33447265625,
+          "y": 1966.9271240234375
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.2503502368927002,
+          "predicted_x": 1296.088623046875,
+          "predicted_y": 1899.347412109375,
+          "visible": true,
+          "x": 1296.088623046875,
+          "y": 1899.347412109375
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.33993786573410034,
+          "predicted_x": 1320.3814697265625,
+          "predicted_y": 2302.359130859375,
+          "visible": true,
+          "x": 1320.3814697265625,
+          "y": 2302.359130859375
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.2630576193332672,
+          "predicted_x": 1288.7078857421875,
+          "predicted_y": 2372.8916015625,
+          "visible": true,
+          "x": 1288.7078857421875,
+          "y": 2372.8916015625
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.3232634961605072,
+          "predicted_x": 1339.1302490234375,
+          "predicted_y": 1859.4154052734375,
+          "visible": true,
+          "x": 1339.1302490234375,
+          "y": 1859.4154052734375
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.3737761378288269,
+          "predicted_x": 1224.0546875,
+          "predicted_y": 1916.570556640625,
+          "visible": true,
+          "x": 1224.0546875,
+          "y": 1916.570556640625
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.48074719309806824,
+          "predicted_x": 1343.8466796875,
+          "predicted_y": 1858.382568359375,
+          "visible": true,
+          "x": 1343.8466796875,
+          "y": 1858.382568359375
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.4074386954307556,
+          "predicted_x": 1186.960693359375,
+          "predicted_y": 1947.0491943359375,
+          "visible": true,
+          "x": 1186.960693359375,
+          "y": 1947.0491943359375
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.13142699003219604,
+          "predicted_x": 1314.013427734375,
+          "predicted_y": 2381.82275390625,
+          "visible": true,
+          "x": 1318.8889608874838,
+          "y": 1771.2235685959406
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.3562941551208496,
+          "predicted_x": 1353.01416015625,
+          "predicted_y": 2314.8095703125,
+          "visible": true,
+          "x": 1353.01416015625,
+          "y": 2314.8095703125
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.4409754276275635,
+          "predicted_x": 1399.4815673828125,
+          "predicted_y": 2142.3662109375,
+          "visible": true,
+          "x": 1399.4815673828125,
+          "y": 2142.3662109375
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.4201805293560028,
+          "predicted_x": 1208.7381591796875,
+          "predicted_y": 2192.26220703125,
+          "visible": true,
+          "x": 1208.7381591796875,
+          "y": 2192.26220703125
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.12449078261852264,
+          "predicted_x": 1313.2562255859375,
+          "predicted_y": 2382.496826171875,
+          "visible": true,
+          "x": 1312.2056193463104,
+          "y": 1768.9957880822162
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.35037118196487427,
+          "predicted_x": 1348.18408203125,
+          "predicted_y": 1856.44140625,
+          "visible": true,
+          "x": 1348.18408203125,
+          "y": 1856.44140625
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.13606062531471252,
+          "predicted_x": 1323.693115234375,
+          "predicted_y": 2079.7509765625,
+          "visible": true,
+          "x": 1343.3945465384518,
+          "y": 1780.1346906508381
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.14788950979709625,
+          "predicted_x": 1314.5582275390625,
+          "predicted_y": 2379.281494140625,
+          "visible": true,
+          "x": 1330.0278634561055,
+          "y": 1777.9069101371138
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.5240382552146912,
+          "predicted_x": 1304.78271484375,
+          "predicted_y": 1902.0699462890625,
+          "visible": true,
+          "x": 1304.78271484375,
+          "y": 1902.0699462890625
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.23743097484111786,
+          "predicted_x": 1299.689208984375,
+          "predicted_y": 2362.4267578125,
+          "visible": true,
+          "x": 1299.689208984375,
+          "y": 2362.4267578125
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.11685062199831009,
+          "predicted_x": 1317.8265380859375,
+          "predicted_y": 2364.58154296875,
+          "visible": true,
+          "x": 1307.7500583188616,
+          "y": 1786.8180321920113
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.3416200876235962,
+          "predicted_x": 1323.2874755859375,
+          "predicted_y": 1804.115234375,
+          "visible": true,
+          "x": 1323.2874755859375,
+          "y": 1804.115234375
+        }
+      },
+      "reviewed": true,
+      "timestamp": 26.307056
+    },
+    {
+      "crop": {
+        "x1": 707.349609375,
+        "x2": 1889.76416015625,
+        "y1": 1431.710693359375,
+        "y2": 3008.263427734375
+      },
+      "frame_idx": 1612,
+      "image_path": "frames/000001612.png",
+      "points": {
+        "left_acromion": {
+          "group": "extra",
+          "name": "left_acromion",
+          "predicted_confidence": 0.3622739911079407,
+          "predicted_x": 1327.332763671875,
+          "predicted_y": 2191.82666015625,
+          "visible": true,
+          "x": 1327.332763671875,
+          "y": 2191.82666015625
+        },
+        "left_ankle": {
+          "group": "body",
+          "name": "left_ankle",
+          "predicted_confidence": 0.7677469253540039,
+          "predicted_x": 1409.0107421875,
+          "predicted_y": 2695.482666015625,
+          "visible": true,
+          "x": 1409.0107421875,
+          "y": 2695.482666015625
+        },
+        "left_big_toe": {
+          "group": "feet",
+          "name": "left_big_toe",
+          "predicted_confidence": 0.6447011232376099,
+          "predicted_x": 1401.58447265625,
+          "predicted_y": 2746.253662109375,
+          "visible": true,
+          "x": 1401.58447265625,
+          "y": 2746.253662109375
+        },
+        "left_cubital_fossa": {
+          "group": "extra",
+          "name": "left_cubital_fossa",
+          "predicted_confidence": 0.6078405380249023,
+          "predicted_x": 1403.406494140625,
+          "predicted_y": 2291.104248046875,
+          "visible": true,
+          "x": 1403.406494140625,
+          "y": 2291.104248046875
+        },
+        "left_ear": {
+          "group": "body",
+          "name": "left_ear",
+          "predicted_confidence": 0.6929754614830017,
+          "predicted_x": 1284.52490234375,
+          "predicted_y": 2154.118408203125,
+          "visible": true,
+          "x": 1284.52490234375,
+          "y": 2154.118408203125
+        },
+        "left_elbow": {
+          "group": "body",
+          "name": "left_elbow",
+          "predicted_confidence": 0.7754880785942078,
+          "predicted_x": 1407.2225341796875,
+          "predicted_y": 2290.03369140625,
+          "visible": true,
+          "x": 1407.2225341796875,
+          "y": 2290.03369140625
+        },
+        "left_eye": {
+          "group": "body",
+          "name": "left_eye",
+          "predicted_confidence": 0.7549008131027222,
+          "predicted_x": 1266.8095703125,
+          "predicted_y": 2177.36279296875,
+          "visible": true,
+          "x": 1266.8095703125,
+          "y": 2177.36279296875
+        },
+        "left_forefinger4": {
+          "group": "left_hand",
+          "name": "left_forefinger4",
+          "predicted_confidence": 0.10187944769859314,
+          "predicted_x": 1424.524658203125,
+          "predicted_y": 2451.7333984375,
+          "visible": true,
+          "x": 1424.524658203125,
+          "y": 2451.7333984375
+        },
+        "left_heel": {
+          "group": "feet",
+          "name": "left_heel",
+          "predicted_confidence": 0.7025046944618225,
+          "predicted_x": 1408.733154296875,
+          "predicted_y": 2711.522216796875,
+          "visible": true,
+          "x": 1408.733154296875,
+          "y": 2711.522216796875
+        },
+        "left_hip": {
+          "group": "body",
+          "name": "left_hip",
+          "predicted_confidence": 0.7886987924575806,
+          "predicted_x": 1358.56298828125,
+          "predicted_y": 2366.4775390625,
+          "visible": true,
+          "x": 1358.56298828125,
+          "y": 2366.4775390625
+        },
+        "left_knee": {
+          "group": "body",
+          "name": "left_knee",
+          "predicted_confidence": 0.788357675075531,
+          "predicted_x": 1390.7462158203125,
+          "predicted_y": 2547.84521484375,
+          "visible": true,
+          "x": 1390.7462158203125,
+          "y": 2547.84521484375
+        },
+        "left_middle_finger4": {
+          "group": "left_hand",
+          "name": "left_middle_finger4",
+          "predicted_confidence": 0.1014517992734909,
+          "predicted_x": 1420.5479736328125,
+          "predicted_y": 2444.2568359375,
+          "visible": true,
+          "x": 1420.5479736328125,
+          "y": 2444.2568359375
+        },
+        "left_olecranon": {
+          "group": "extra",
+          "name": "left_olecranon",
+          "predicted_confidence": 0.5580493807792664,
+          "predicted_x": 1408.343994140625,
+          "predicted_y": 2290.161865234375,
+          "visible": true,
+          "x": 1408.343994140625,
+          "y": 2290.161865234375
+        },
+        "left_pinky_finger4": {
+          "group": "left_hand",
+          "name": "left_pinky_finger4",
+          "predicted_confidence": 0.17815983295440674,
+          "predicted_x": 1421.9971923828125,
+          "predicted_y": 2442.541015625,
+          "visible": true,
+          "x": 1421.9971923828125,
+          "y": 2442.541015625
+        },
+        "left_ring_finger4": {
+          "group": "left_hand",
+          "name": "left_ring_finger4",
+          "predicted_confidence": 0.13809552788734436,
+          "predicted_x": 1420.7984619140625,
+          "predicted_y": 2443.239013671875,
+          "visible": true,
+          "x": 1420.7984619140625,
+          "y": 2443.239013671875
+        },
+        "left_shoulder": {
+          "group": "body",
+          "name": "left_shoulder",
+          "predicted_confidence": 0.8109802007675171,
+          "predicted_x": 1340.81787109375,
+          "predicted_y": 2202.44140625,
+          "visible": true,
+          "x": 1340.81787109375,
+          "y": 2202.44140625
+        },
+        "left_small_toe": {
+          "group": "feet",
+          "name": "left_small_toe",
+          "predicted_confidence": 0.6396699547767639,
+          "predicted_x": 1430.2958984375,
+          "predicted_y": 2742.678955078125,
+          "visible": true,
+          "x": 1430.2958984375,
+          "y": 2742.678955078125
+        },
+        "left_thumb4": {
+          "group": "left_hand",
+          "name": "left_thumb4",
+          "predicted_confidence": 0.1913975179195404,
+          "predicted_x": 1420.90673828125,
+          "predicted_y": 2447.21875,
+          "visible": true,
+          "x": 1420.90673828125,
+          "y": 2447.21875
+        },
+        "left_wrist": {
+          "group": "body",
+          "name": "left_wrist",
+          "predicted_confidence": 0.7328283190727234,
+          "predicted_x": 1423.1207275390625,
+          "predicted_y": 2403.5703125,
+          "visible": true,
+          "x": 1423.1207275390625,
+          "y": 2403.5703125
+        },
+        "neck": {
+          "group": "extra",
+          "name": "neck",
+          "predicted_confidence": 0.8391311764717102,
+          "predicted_x": 1257.8094482421875,
+          "predicted_y": 2193.05078125,
+          "visible": true,
+          "x": 1257.8094482421875,
+          "y": 2193.05078125
+        },
+        "nose": {
+          "group": "body",
+          "name": "nose",
+          "predicted_confidence": 0.7838739156723022,
+          "predicted_x": 1252.1846923828125,
+          "predicted_y": 2195.103515625,
+          "visible": true,
+          "x": 1252.1846923828125,
+          "y": 2195.103515625
+        },
+        "right_acromion": {
+          "group": "extra",
+          "name": "right_acromion",
+          "predicted_confidence": 0.4394267797470093,
+          "predicted_x": 1193.301513671875,
+          "predicted_y": 2193.307861328125,
+          "visible": true,
+          "x": 1193.301513671875,
+          "y": 2193.307861328125
+        },
+        "right_ankle": {
+          "group": "body",
+          "name": "right_ankle",
+          "predicted_confidence": 0.8014234900474548,
+          "predicted_x": 1263.822509765625,
+          "predicted_y": 2617.072021484375,
+          "visible": true,
+          "x": 1263.822509765625,
+          "y": 2617.072021484375
+        },
+        "right_big_toe": {
+          "group": "feet",
+          "name": "right_big_toe",
+          "predicted_confidence": 0.7358068227767944,
+          "predicted_x": 1220.5255126953125,
+          "predicted_y": 2678.92431640625,
+          "visible": true,
+          "x": 1220.5255126953125,
+          "y": 2678.92431640625
+        },
+        "right_cubital_fossa": {
+          "group": "extra",
+          "name": "right_cubital_fossa",
+          "predicted_confidence": 0.5974640846252441,
+          "predicted_x": 1190.5751953125,
+          "predicted_y": 2291.143798828125,
+          "visible": true,
+          "x": 1190.5751953125,
+          "y": 2291.143798828125
+        },
+        "right_ear": {
+          "group": "body",
+          "name": "right_ear",
+          "predicted_confidence": 0.6968346238136292,
+          "predicted_x": 1212.884765625,
+          "predicted_y": 2160.125,
+          "visible": true,
+          "x": 1212.884765625,
+          "y": 2160.125
+        },
+        "right_elbow": {
+          "group": "body",
+          "name": "right_elbow",
+          "predicted_confidence": 0.7574721574783325,
+          "predicted_x": 1191.586181640625,
+          "predicted_y": 2288.50146484375,
+          "visible": true,
+          "x": 1191.586181640625,
+          "y": 2288.50146484375
+        },
+        "right_eye": {
+          "group": "body",
+          "name": "right_eye",
+          "predicted_confidence": 0.7494980096817017,
+          "predicted_x": 1235.05712890625,
+          "predicted_y": 2180.461669921875,
+          "visible": true,
+          "x": 1235.05712890625,
+          "y": 2180.461669921875
+        },
+        "right_forefinger4": {
+          "group": "right_hand",
+          "name": "right_forefinger4",
+          "predicted_confidence": 0.21305051445960999,
+          "predicted_x": 1138.3712158203125,
+          "predicted_y": 2434.150146484375,
+          "visible": true,
+          "x": 1138.3712158203125,
+          "y": 2434.150146484375
+        },
+        "right_heel": {
+          "group": "feet",
+          "name": "right_heel",
+          "predicted_confidence": 0.7555694580078125,
+          "predicted_x": 1284.097900390625,
+          "predicted_y": 2631.577392578125,
+          "visible": true,
+          "x": 1284.097900390625,
+          "y": 2631.577392578125
+        },
+        "right_hip": {
+          "group": "body",
+          "name": "right_hip",
+          "predicted_confidence": 0.7637460231781006,
+          "predicted_x": 1275.62060546875,
+          "predicted_y": 2358.88623046875,
+          "visible": true,
+          "x": 1275.62060546875,
+          "y": 2358.88623046875
+        },
+        "right_knee": {
+          "group": "body",
+          "name": "right_knee",
+          "predicted_confidence": 0.7582404017448425,
+          "predicted_x": 1221.5914306640625,
+          "predicted_y": 2466.462890625,
+          "visible": true,
+          "x": 1221.5914306640625,
+          "y": 2466.462890625
+        },
+        "right_middle_finger4": {
+          "group": "right_hand",
+          "name": "right_middle_finger4",
+          "predicted_confidence": 0.17426452040672302,
+          "predicted_x": 1144.4525146484375,
+          "predicted_y": 2432.1171875,
+          "visible": true,
+          "x": 1144.4525146484375,
+          "y": 2432.1171875
+        },
+        "right_olecranon": {
+          "group": "extra",
+          "name": "right_olecranon",
+          "predicted_confidence": 0.5866872072219849,
+          "predicted_x": 1194.2176513671875,
+          "predicted_y": 2288.296875,
+          "visible": true,
+          "x": 1194.2176513671875,
+          "y": 2288.296875
+        },
+        "right_pinky_finger4": {
+          "group": "right_hand",
+          "name": "right_pinky_finger4",
+          "predicted_confidence": 0.2002505362033844,
+          "predicted_x": 1153.0084228515625,
+          "predicted_y": 2422.37646484375,
+          "visible": true,
+          "x": 1153.0084228515625,
+          "y": 2422.37646484375
+        },
+        "right_ring_finger4": {
+          "group": "right_hand",
+          "name": "right_ring_finger4",
+          "predicted_confidence": 0.1933840811252594,
+          "predicted_x": 1148.69482421875,
+          "predicted_y": 2428.533203125,
+          "visible": true,
+          "x": 1148.69482421875,
+          "y": 2428.533203125
+        },
+        "right_shoulder": {
+          "group": "body",
+          "name": "right_shoulder",
+          "predicted_confidence": 0.8675537109375,
+          "predicted_x": 1186.5653076171875,
+          "predicted_y": 2204.9609375,
+          "visible": true,
+          "x": 1186.5653076171875,
+          "y": 2204.9609375
+        },
+        "right_small_toe": {
+          "group": "feet",
+          "name": "right_small_toe",
+          "predicted_confidence": 0.7636828422546387,
+          "predicted_x": 1207.5228271484375,
+          "predicted_y": 2666.093994140625,
+          "visible": true,
+          "x": 1207.5228271484375,
+          "y": 2666.093994140625
+        },
+        "right_thumb4": {
+          "group": "right_hand",
+          "name": "right_thumb4",
+          "predicted_confidence": 0.22336699068546295,
+          "predicted_x": 1139.72607421875,
+          "predicted_y": 2427.0771484375,
+          "visible": true,
+          "x": 1139.72607421875,
+          "y": 2427.0771484375
+        },
+        "right_wrist": {
+          "group": "body",
+          "name": "right_wrist",
+          "predicted_confidence": 0.7308896780014038,
+          "predicted_x": 1162.662353515625,
+          "predicted_y": 2386.411865234375,
+          "visible": true,
+          "x": 1162.662353515625,
+          "y": 2386.411865234375
+        }
+      },
+      "reviewed": true,
+      "timestamp": 26.941889
+    }
+  ],
+  "ingest_cache_key": "c0ed8c9ed3ecd60618842b612490dba17d8d0077d9d61ea7e0eedadc95d4339f",
+  "keypoint_names": [
+    "nose",
+    "left_eye",
+    "right_eye",
+    "left_ear",
+    "right_ear",
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_hip",
+    "right_hip",
+    "left_knee",
+    "right_knee",
+    "left_ankle",
+    "right_ankle",
+    "left_big_toe",
+    "left_small_toe",
+    "left_heel",
+    "right_big_toe",
+    "right_small_toe",
+    "right_heel",
+    "right_thumb4",
+    "right_forefinger4",
+    "right_middle_finger4",
+    "right_ring_finger4",
+    "right_pinky_finger4",
+    "right_wrist",
+    "left_thumb4",
+    "left_forefinger4",
+    "left_middle_finger4",
+    "left_ring_finger4",
+    "left_pinky_finger4",
+    "left_wrist",
+    "left_olecranon",
+    "right_olecranon",
+    "left_cubital_fossa",
+    "right_cubital_fossa",
+    "left_acromion",
+    "right_acromion",
+    "neck"
+  ],
+  "pose_cache_key": "b82d42541b893ea5bc039ac1c2f6ebc047f88a2afe468cf80e8201e451110d14",
+  "schema_version": "1.0.0",
+  "selection_cache_key": "471d4f31b5c9e3b17a93912c2eb8e7f8419e6437fb0da53d6e4d5332289e6c88",
+  "source_video_name": "best go.mp4"
+}
