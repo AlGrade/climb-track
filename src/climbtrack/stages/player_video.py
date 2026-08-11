@@ -14,10 +14,10 @@ STAGE_VERSION = "1.0.0"
 OUTPUT_NAME = "player_video.mp4"
 
 PLAYER_VIDEO_CONFIG = {
-    "max_width": 1080,
+    "max_width": 1440,
     "codec": "libx264",
     "preset": "veryfast",
-    "crf": 22,
+    "crf": 21,
     "keyframe_interval_frames": 15,
     "pixel_format": "yuv420p",
     "audio": "copy",
@@ -101,7 +101,7 @@ def player_video_command(executable: Path, source: Path, destination: Path) -> l
         "-map",
         "0:a:0?",
         "-vf",
-        "scale=w='min(1080,iw)':h=-2",
+        f"scale=w='min({PLAYER_VIDEO_CONFIG['max_width']},iw)':h=-2",
         "-c:v",
         str(PLAYER_VIDEO_CONFIG["codec"]),
         "-preset",

@@ -11,7 +11,7 @@ def test_player_video_command_builds_short_gop_web_proxy() -> None:
     )
 
     assert command[0] == "/tools/ffmpeg"
-    assert "scale=w='min(1080,iw)':h=-2" in command
+    assert "scale=w='min(1440,iw)':h=-2" in command
     assert command[command.index("-g") + 1] == "15"
     assert command[command.index("-keyint_min") + 1] == "15"
     assert command[command.index("-pix_fmt") + 1] == "yuv420p"
