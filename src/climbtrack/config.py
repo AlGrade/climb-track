@@ -190,6 +190,7 @@ class PoseRenderConfig(StrictModel):
     line_thickness: int = Field(default=5, ge=1, le=30)
     show_face_keypoints: bool = False
     show_pose_crop: bool = False
+    comparison_panel_width: int = Field(default=1080, ge=320, le=2160, multiple_of=2)
 
 
 class AnnotationConfig(StrictModel):
@@ -200,6 +201,47 @@ class AnnotationConfig(StrictModel):
     confidence_threshold: float = Field(default=0.15, ge=0.0, le=1.0)
     pck_threshold: float = Field(default=0.20, gt=0.0, le=1.0)
     oks_sigma: float = Field(default=0.10, gt=0.0, le=1.0)
+
+
+class RefineConfig(StrictModel):
+    """Conservative temporal pose-repair settings."""
+
+    confidence_threshold: float = Field(default=0.15, ge=0.0, le=1.0)
+    confidence_threshold_overrides: dict[str, float] = Field(
+        default_factory=lambda: {
+            "body": 0.05,
+            "extra": 0.05,
+            "feet": 0.05,
+            "left_hand": 0.08,
+            "right_hand": 0.08,
+        }
+    )
+    smoothing_groups: tuple[str, ...] = ("left_hand", "right_hand")
+    maximum_interpolation_gap: int = Field(default=5, ge=0, le=60)
+    one_euro_min_cutoff: float = Field(default=12.0, gt=0.0, le=30.0)
+    one_euro_beta: float = Field(default=0.03, ge=0.0, le=5.0)
+    one_euro_derivative_cutoff: float = Field(default=1.0, gt=0.0, le=30.0)
+    segment_maximum_ratio: float = Field(default=2.5, gt=1.0, le=10.0)
+    outlier_confidence_ceiling: float = Field(default=0.50, ge=0.0, le=1.0)
+    swap_cost_ratio: float = Field(default=0.35, gt=0.0, lt=1.0)
+    swap_minimum_jump_scale: float = Field(default=0.20, ge=0.0, le=2.0)
+
+    @model_validator(mode="after")
+    def validate_group_settings(self) -> "RefineConfig":
+        """Limit group-specific behavior to canonical Sapiens groups."""
+        allowed = {"body", "extra", "face", "feet", "left_hand", "right_hand"}
+        unknown = (
+            self.confidence_threshold_overrides.keys() | set(self.smoothing_groups)
+        ) - allowed
+        if unknown:
+            raise ValueError(f"Unknown refinement groups: {sorted(unknown)}")
+        if any(
+            value < 0.0 or value > 1.0 for value in self.confidence_threshold_overrides.values()
+        ):
+            raise ValueError("Group confidence thresholds must be in [0, 1]")
+        if len(set(self.smoothing_groups)) != len(self.smoothing_groups):
+            raise ValueError("refine.smoothing_groups must be unique")
+        return self
 
 
 class RenderConfig(StrictModel):
@@ -227,6 +269,7 @@ class AppConfig(StrictModel):
     render: RenderConfig
     pose_render: PoseRenderConfig = PoseRenderConfig()
     annotation: AnnotationConfig = AnnotationConfig()
+    refine: RefineConfig = RefineConfig()
     models: ModelsConfig
 
 

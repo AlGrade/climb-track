@@ -53,6 +53,8 @@ models:
     assert config.project.device is Device.MPS
     assert config.pose.flip_tta is True
     assert config.pose.multi_scale_tta == (1.0, 1.125)
+    assert config.refine.smoothing_groups == ("left_hand", "right_hand")
+    assert config.refine.confidence_threshold_overrides["feet"] == 0.05
     assert resolve_cache_dir(config, config_path) == tmp_path / "cache"
 
 

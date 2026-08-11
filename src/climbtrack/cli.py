@@ -11,7 +11,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from climbtrack.annotation import evaluate_session, prepare_session
+from climbtrack.annotation import compare_pose_session, evaluate_session, prepare_session
 from climbtrack.annotation.tool import launch_annotation_tool
 from climbtrack.cache import CacheResult
 from climbtrack.cache.manifest import CacheManifest
@@ -38,6 +38,8 @@ from climbtrack.selection.click import choose_track_by_click
 from climbtrack.stages.detect import detect_people
 from climbtrack.stages.ingest import ingest_video
 from climbtrack.stages.pose import estimate_pose
+from climbtrack.stages.refine import refine_pose
+from climbtrack.stages.render_compare import render_pose_comparison
 from climbtrack.stages.render_pose import render_pose_overlay
 from climbtrack.stages.render_tracks import render_tracking_overlay
 from climbtrack.stages.select import select_climber
@@ -292,6 +294,31 @@ def pose(
         _abort(exc)
 
 
+@app.command("refine")
+def refine(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    force: ForceOption = False,
+) -> None:
+    """Run Stage 40 temporal repair using cached raw pose observations."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        result = _run_refine(selection, pose_result, context, force)
+        _report("40_refine", result)
+        console.print(
+            f"[bold green]Refined poses:[/bold green] {result.path / 'pose_refined.parquet'}"
+        )
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except ClimbTrackError as exc:
+        _abort(exc)
+
+
 @app.command("render-pose")
 def render_pose(
     video: VideoArgument,
@@ -317,6 +344,39 @@ def render_pose(
         )
         _report("50_render_pose", result)
         console.print(f"[bold green]Video:[/bold green] {result.path / 'skeleton_raw_overlay.mp4'}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except ClimbTrackError as exc:
+        _abort(exc)
+
+
+@app.command("render-comparison")
+def render_comparison(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    force: ForceOption = False,
+) -> None:
+    """Render raw and refined skeletons side by side."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        refined = _run_refine(selection, pose_result, context, False)
+        result = render_pose_comparison(
+            ingest_result,
+            selection,
+            pose_result,
+            refined,
+            config=context.config,
+            cache_root=context.cache_root,
+            project_root=context.project_root,
+            force=force,
+        )
+        _report("50_render_compare", result)
+        console.print(f"[bold green]Video:[/bold green] {result.path / 'raw_vs_refined.mp4'}")
     except SelectionUncertainError as exc:
         _abort_selection(exc)
     except ClimbTrackError as exc:
@@ -400,6 +460,53 @@ def evaluate(
         _abort(exc)
 
 
+@app.command("evaluate-refined")
+def evaluate_refined(
+    video: VideoArgument,
+    annotations: Annotated[
+        Path,
+        typer.Argument(help="Reviewed ground_truth.json.", dir_okay=False),
+    ],
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+) -> None:
+    """Compare raw and Stage-40 poses against the reviewed frames."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        refined = _run_refine(selection, pose_result, context, False)
+        output, metrics = compare_pose_session(
+            annotations.expanduser().resolve(),
+            refined.path / "pose_refined.parquet",
+            pck_threshold=context.config.annotation.pck_threshold,
+            oks_sigma=context.config.annotation.oks_sigma,
+            confidence_threshold=context.config.annotation.confidence_threshold,
+        )
+        table = Table(title="Raw versus refined ground truth")
+        for column in ("Group", "Raw px", "Refined px", "Raw PCK", "Refined PCK", "Missing"):
+            table.add_column(column)
+        for group in metrics["raw"]:
+            raw = metrics["raw"][group]
+            after = metrics["refined"][group]
+            table.add_row(
+                group,
+                f"{raw['mean_error_px']:.2f}",
+                f"{after['mean_error_px']:.2f}",
+                f"{raw['pck']:.1%}",
+                f"{after['pck']:.1%}",
+                f"{after['prediction_missing_rate']:.1%}",
+            )
+        console.print(table)
+        console.print(f"[bold green]Comparison:[/bold green] {output}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except (ClimbTrackError, OSError) as exc:
+        _abort(exc)
+
+
 @app.command("run-all")
 def run_all(
     video: VideoArgument,
@@ -408,7 +515,7 @@ def run_all(
     click: ClickOption = False,
     force: ForceOption = False,
 ) -> None:
-    """Run every stage through Milestone 3 in dependency order."""
+    """Run every stage through Milestone 5 in dependency order."""
     try:
         context, ingest_result, tracks_result, detections = _pipeline_to_tracks(
             video, config_path, force
@@ -449,9 +556,22 @@ def run_all(
             force=force,
         )
         _report("50_render_pose", skeleton)
+        refined = _run_refine(selection, pose_result, context, force)
+        _report("40_refine", refined)
+        comparison = render_pose_comparison(
+            ingest_result,
+            selection,
+            pose_result,
+            refined,
+            config=context.config,
+            cache_root=context.cache_root,
+            project_root=context.project_root,
+            force=force,
+        )
+        _report("50_render_compare", comparison)
         console.print(
-            f"[bold green]Milestone 3 complete:[/bold green] "
-            f"{skeleton.path / 'skeleton_raw_overlay.mp4'}"
+            f"[bold green]Milestone 5 complete:[/bold green] "
+            f"{comparison.path / 'raw_vs_refined.mp4'}"
         )
     except SelectionUncertainError as exc:
         _abort_selection(exc)
@@ -572,6 +692,22 @@ def _run_pose(
         ingest_result,
         selection,
         model_dir=model_dir,
+        config=context.config,
+        cache_root=context.cache_root,
+        project_root=context.project_root,
+        force=force,
+    )
+
+
+def _run_refine(
+    selection: CacheResult,
+    pose_result: CacheResult,
+    context: PipelineContext,
+    force: bool,
+) -> CacheResult:
+    return refine_pose(
+        selection,
+        pose_result,
         config=context.config,
         cache_root=context.cache_root,
         project_root=context.project_root,

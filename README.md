@@ -64,6 +64,26 @@ The resulting `evaluation.json` reports pixel error, normalized PCK@0.2, an OKS-
 low-confidence rate, and the share of predictions that required correction, overall and by
 keypoint group. This small set is a refinement guardrail, not a claim of dataset-wide accuracy.
 
+## Milestone 5 refinement
+
+Stage 40 is deterministic and uses only cached pose coordinates; it never invokes Sapiens again.
+The conservative default pipeline performs confidence gating with group-specific thresholds,
+short-gap interpolation, temporal left/right swap repair, segment-length outlier rejection, and
+an adaptive One Euro filter. Ground-truth tuning keeps already-correct body, extra, and foot
+landmarks unchanged by default; temporal smoothing targets the less stable detailed hand points.
+
+```bash
+climbtrack refine "/path/to/video.mp4" --config configs/default.yaml
+climbtrack evaluate-refined "/path/to/video.mp4" \
+  annotations/<video-session>/ground_truth.json --config configs/default.yaml
+climbtrack render-comparison "/path/to/video.mp4" --config configs/default.yaml
+```
+
+`pose_refined.parquet` preserves the canonical pose schema and explicitly records missing and
+interpolated observations. `raw_vs_refined.mp4` shows raw on the left and refined on the right,
+with all source timestamps and optional audio preserved. `run-all` now continues through this
+comparison output; every earlier stage remains independently cached.
+
 ## Requirements
 
 - macOS on Apple Silicon (other platforms are supported where the configured tools exist)

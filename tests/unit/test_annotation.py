@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from climbtrack.annotation.evaluation import evaluate_session
+from climbtrack.annotation.evaluation import compare_pose_session, evaluate_session
 from climbtrack.annotation.keypoints import ANNOTATED_KEYPOINTS
 from climbtrack.annotation.selection import select_annotation_frames
 from climbtrack.annotation.session import (
@@ -14,6 +14,7 @@ from climbtrack.annotation.session import (
     AnnotationSession,
     save_session,
 )
+from climbtrack.schema.pose import write_pose_parquet
 
 
 def test_annotation_subset_has_forty_movement_keypoints() -> None:
@@ -107,3 +108,46 @@ def test_evaluation_compares_predictions_with_reviewed_points(tmp_path: Path) ->
     assert overall["corrected_rate"] == 0.5
     assert overall["low_confidence_rate"] == 0.5
     assert json.loads(output.read_text(encoding="utf-8"))["reviewed_frames"] == 1
+
+    refined_path = tmp_path / "pose_refined.parquet"
+    write_pose_parquet(
+        [
+            {
+                "frame_idx": 1,
+                "timestamp": 0.1,
+                "track_id": 1,
+                "keypoint_name": "left_hip",
+                "x": 20.0,
+                "y": 10.0,
+                "confidence": 0.9,
+                "is_missing": False,
+                "is_interpolated": False,
+                "source_backend": "test",
+            },
+            {
+                "frame_idx": 1,
+                "timestamp": 0.1,
+                "track_id": 1,
+                "keypoint_name": "right_hip",
+                "x": None,
+                "y": None,
+                "confidence": None,
+                "is_missing": True,
+                "is_interpolated": False,
+                "source_backend": "test",
+            },
+        ],
+        refined_path,
+    )
+    _, comparison = compare_pose_session(
+        session_path,
+        refined_path,
+        pck_threshold=0.2,
+        oks_sigma=0.1,
+        confidence_threshold=0.15,
+    )
+
+    refined = comparison["refined"]["overall"]
+    assert refined["mean_error_px"] == 0.0
+    assert refined["pck"] == 0.5
+    assert refined["prediction_missing_rate"] == 0.5
