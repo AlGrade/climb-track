@@ -2,7 +2,8 @@
 
 const elements = Object.fromEntries(
   [
-    "video", "activeMove", "saveState", "currentTime", "currentFrame", "previousMove",
+    "video", "videoToggle", "videoScrubber", "videoTime", "videoMute", "activeMove",
+    "saveState", "currentTime", "currentFrame", "previousMove",
     "replayMove", "nextMove", "playAll", "previousFrame", "nextFrame", "editorTitle", "resetDraft", "setStart",
     "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
     "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
@@ -26,6 +27,16 @@ const state = {
   playbackEnd: null,
   playbackReady: true,
   watcherRunning: false,
+  scrubbing: false,
+  scrubTargetIndex: null,
+  scrubAppliedIndex: null,
+  scrubAnimationFrame: null,
+  scrubSeekInFlight: false,
+  scrubFinishing: false,
+  frameStepInFlight: false,
+  queuedFrameSteps: 0,
+  heldFrameDirection: 0,
+  frameHoldTimer: null,
 };
 
 const handLabels = { left: "Left hand", right: "Right hand", both: "Both hands" };
@@ -190,7 +201,7 @@ function formatAxisNumber(value) {
   return Number(value.toFixed(2)).toString();
 }
 
-function updateChartCursor() {
+function updateChartCursor(mediaTimeValue = elements.video.currentTime) {
   if (state.selectedIndex < 0 || state.chartSamples.length < 2) {
     elements.chartCursor.setAttribute("visibility", "hidden");
     elements.chartHandValue.textContent = "–";
@@ -199,7 +210,7 @@ function updateChartCursor() {
     return;
   }
   const move = state.session.moves[state.selectedIndex];
-  const offset = elements.video.currentTime - mediaTime(move.start_frame);
+  const offset = mediaTimeValue - mediaTime(move.start_frame);
   const duration = state.chartSamples[state.chartSamples.length - 1].offset_seconds;
   const clampedOffset = Math.max(0, Math.min(offset, duration));
   const x = chartLayout.left
@@ -292,6 +303,9 @@ function updateNavigation() {
   elements.replayMove.disabled = !hasMoves;
   elements.nextMove.disabled = !hasMoves;
   elements.playAll.disabled = !videoReady;
+  elements.videoToggle.disabled = !videoReady;
+  elements.videoScrubber.disabled = !videoReady;
+  elements.videoMute.disabled = !videoReady;
 }
 
 function selectMove(index, options = {}) {
@@ -324,6 +338,7 @@ function playMove(index) {
 }
 
 function startPlayback(start, end) {
+  cancelFrameStepping();
   state.playbackReady = false;
   state.playbackEnd = end;
 
@@ -394,8 +409,8 @@ function nearestTimelineIndex(time) {
   return low;
 }
 
-function nearestFrame() {
-  return state.timeline[nearestTimelineIndex(elements.video.currentTime)];
+function nearestFrame(time = elements.video.currentTime) {
+  return state.timeline[nearestTimelineIndex(time)];
 }
 
 function mediaTime(frameIdx) {
@@ -410,17 +425,52 @@ function seekToFrame(frameIdx) {
   seekToTimelineIndex(timelineIndex);
 }
 
-function seekToTimelineIndex(timelineIndex) {
+function seekToTimelineIndex(timelineIndex, options = {}) {
+  if (!options.frameStep) cancelFrameStepping();
   elements.video.pause();
   state.playbackEnd = null;
   state.playbackReady = true;
   elements.video.currentTime = state.timeline[timelineIndex].media_time;
-  updateReadout();
+  updateReadoutForTimelineIndex(timelineIndex);
 }
 
 function stepFrame(offset) {
-  const target = Math.max(0, Math.min(nearestTimelineIndex(elements.video.currentTime) + offset, state.timeline.length - 1));
-  seekToTimelineIndex(target);
+  if (!state.timeline.length) return;
+  if (state.frameStepInFlight) {
+    state.queuedFrameSteps = Math.max(-12, Math.min(12, state.queuedFrameSteps + offset));
+    return;
+  }
+  const current = nearestTimelineIndex(elements.video.currentTime);
+  const target = Math.max(0, Math.min(current + offset, state.timeline.length - 1));
+  if (target === current) return;
+  state.frameStepInFlight = true;
+  seekToTimelineIndex(target, { frameStep: true });
+}
+
+function finishFrameStep() {
+  if (!state.frameStepInFlight) return;
+  state.frameStepInFlight = false;
+  let nextDirection = state.heldFrameDirection;
+  if (nextDirection === 0 && state.queuedFrameSteps !== 0) {
+    nextDirection = Math.sign(state.queuedFrameSteps);
+    state.queuedFrameSteps -= nextDirection;
+  }
+  if (nextDirection !== 0) {
+    state.frameHoldTimer = window.setTimeout(() => {
+      state.frameHoldTimer = null;
+      stepFrame(nextDirection);
+    }, 0);
+  }
+}
+
+function cancelFrameStepping() {
+  state.frameStepInFlight = false;
+  state.queuedFrameSteps = 0;
+  state.heldFrameDirection = 0;
+  if (state.frameHoldTimer !== null) {
+    window.clearTimeout(state.frameHoldTimer);
+    state.frameHoldTimer = null;
+  }
 }
 
 function setBoundary(name) {
@@ -528,10 +578,117 @@ async function persistMoves(edits, selectedEdit) {
 
 function updateReadout() {
   if (!state.timeline.length) return;
-  const frame = nearestFrame();
-  elements.currentTime.textContent = formatTime(elements.video.currentTime);
-  elements.currentFrame.textContent = frame ? String(frame.frame_idx) : "–";
-  updateChartCursor();
+  if (state.scrubbing && state.scrubTargetIndex !== null) {
+    updateReadoutForTimelineIndex(state.scrubTargetIndex);
+    return;
+  }
+  updateReadoutForTimelineIndex(nearestTimelineIndex(elements.video.currentTime));
+}
+
+function updateReadoutForTimelineIndex(timelineIndex) {
+  const frame = state.timeline[timelineIndex];
+  if (!frame) return;
+  elements.currentTime.textContent = formatTime(frame.media_time);
+  elements.currentFrame.textContent = String(frame.frame_idx);
+  elements.videoScrubber.value = String(timelineIndex);
+  const progress = state.timeline.length <= 1
+    ? 0
+    : (timelineIndex / (state.timeline.length - 1)) * 100;
+  elements.videoScrubber.style.setProperty("--scrub-progress", `${progress.toFixed(3)}%`);
+  const duration = Number.isFinite(elements.video.duration)
+    ? elements.video.duration
+    : state.timeline[state.timeline.length - 1].media_time;
+  elements.videoTime.textContent = `${formatControlTime(frame.media_time)} / ${formatControlTime(duration)}`;
+  updateChartCursor(frame.media_time);
+}
+
+function configureVideoControls() {
+  elements.videoScrubber.max = String(Math.max(0, state.timeline.length - 1));
+  updateNavigation();
+  updatePlaybackControls();
+  updateReadout();
+}
+
+function updatePlaybackControls() {
+  const playing = !elements.video.paused && !elements.video.ended;
+  elements.videoToggle.textContent = playing ? "❚❚" : "▶";
+  elements.videoToggle.setAttribute("aria-label", playing ? "Pause video" : "Play video");
+  elements.videoMute.textContent = elements.video.muted ? "🔇" : "🔊";
+  elements.videoMute.setAttribute("aria-label", elements.video.muted ? "Unmute video" : "Mute video");
+}
+
+function toggleVideoPlayback() {
+  cancelFrameStepping();
+  state.playbackEnd = null;
+  if (elements.video.paused) {
+    if (elements.video.ended) startPlayback(0, null);
+    else elements.video.play().catch(reportPlaybackError);
+  } else {
+    elements.video.pause();
+  }
+}
+
+function beginScrub() {
+  if (state.scrubbing) return;
+  cancelFrameStepping();
+  elements.video.pause();
+  state.playbackEnd = null;
+  state.playbackReady = true;
+  state.scrubbing = true;
+  state.scrubTargetIndex = nearestTimelineIndex(elements.video.currentTime);
+  state.scrubAppliedIndex = state.scrubTargetIndex;
+  state.scrubFinishing = false;
+}
+
+function previewScrub() {
+  if (!state.scrubbing) beginScrub();
+  state.scrubTargetIndex = Number(elements.videoScrubber.value);
+  updateReadoutForTimelineIndex(state.scrubTargetIndex);
+  scheduleScrubSeek();
+}
+
+function scheduleScrubSeek() {
+  if (
+    state.scrubAnimationFrame !== null
+    || state.scrubSeekInFlight
+    || state.scrubTargetIndex === null
+  ) return;
+  state.scrubAnimationFrame = window.requestAnimationFrame(() => {
+    state.scrubAnimationFrame = null;
+    if (state.scrubTargetIndex === null) return;
+    const currentIndex = nearestTimelineIndex(elements.video.currentTime);
+    if (state.scrubTargetIndex === currentIndex && !elements.video.seeking) {
+      state.scrubAppliedIndex = state.scrubTargetIndex;
+      completeScrubIfReady();
+      return;
+    }
+    state.scrubSeekInFlight = true;
+    state.scrubAppliedIndex = state.scrubTargetIndex;
+    elements.video.currentTime = state.timeline[state.scrubTargetIndex].media_time;
+  });
+}
+
+function finishScrub() {
+  if (!state.scrubbing) return;
+  state.scrubTargetIndex ??= Number(elements.videoScrubber.value);
+  state.scrubFinishing = true;
+  scheduleScrubSeek();
+  completeScrubIfReady();
+}
+
+function completeScrubIfReady() {
+  if (
+    !state.scrubFinishing
+    || state.scrubSeekInFlight
+    || state.scrubAnimationFrame !== null
+    || state.scrubTargetIndex !== state.scrubAppliedIndex
+  ) return;
+  const target = state.scrubTargetIndex;
+  state.scrubbing = false;
+  state.scrubTargetIndex = null;
+  state.scrubAppliedIndex = null;
+  state.scrubFinishing = false;
+  updateReadoutForTimelineIndex(target);
 }
 
 function formatTime(seconds) {
@@ -541,16 +698,73 @@ function formatTime(seconds) {
   return `${String(minutes).padStart(2, "0")}:${remaining.toFixed(3).padStart(6, "0")}`;
 }
 
+function formatControlTime(seconds) {
+  if (!Number.isFinite(seconds)) return "00:00";
+  const minutes = Math.floor(seconds / 60);
+  const remaining = Math.floor(seconds - minutes * 60);
+  return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
+}
+
 function setSaveState(message, status) {
   elements.saveState.textContent = message;
   elements.saveState.dataset.state = status;
 }
 
-elements.video.addEventListener("play", watchPlayback);
+function handleVideoSeeked() {
+  updateReadout();
+  if (state.scrubbing) {
+    afterVideoFramePresented(() => {
+      if (!state.scrubbing) return;
+      state.scrubSeekInFlight = false;
+      if (state.scrubTargetIndex !== state.scrubAppliedIndex) scheduleScrubSeek();
+      else completeScrubIfReady();
+    });
+    return;
+  }
+  if (state.frameStepInFlight) afterVideoFramePresented(finishFrameStep);
+}
+
+function afterVideoFramePresented(callback) {
+  let completed = false;
+  let videoFrameCallback = null;
+  const finish = () => {
+    if (completed) return;
+    completed = true;
+    window.clearTimeout(fallbackTimer);
+    callback();
+  };
+  const fallbackTimer = window.setTimeout(() => {
+    if (videoFrameCallback !== null) {
+      elements.video.cancelVideoFrameCallback(videoFrameCallback);
+    }
+    finish();
+  }, 100);
+  if (typeof elements.video.requestVideoFrameCallback === "function") {
+    videoFrameCallback = elements.video.requestVideoFrameCallback(finish);
+  }
+}
+
+elements.video.addEventListener("play", () => {
+  updatePlaybackControls();
+  watchPlayback();
+});
+elements.video.addEventListener("pause", updatePlaybackControls);
+elements.video.addEventListener("ended", updatePlaybackControls);
+elements.video.addEventListener("volumechange", updatePlaybackControls);
 elements.video.addEventListener("timeupdate", updateReadout);
 elements.video.addEventListener("seeking", updateReadout);
-elements.video.addEventListener("seeked", updateReadout);
-elements.video.addEventListener("loadedmetadata", updateNavigation);
+elements.video.addEventListener("seeked", handleVideoSeeked);
+elements.video.addEventListener("loadedmetadata", configureVideoControls);
+elements.video.addEventListener("click", toggleVideoPlayback);
+elements.videoToggle.addEventListener("click", toggleVideoPlayback);
+elements.videoMute.addEventListener("click", () => {
+  elements.video.muted = !elements.video.muted;
+});
+elements.videoScrubber.addEventListener("pointerdown", beginScrub);
+elements.videoScrubber.addEventListener("input", previewScrub);
+elements.videoScrubber.addEventListener("pointerup", finishScrub);
+elements.videoScrubber.addEventListener("change", finishScrub);
+elements.videoScrubber.addEventListener("pointercancel", finishScrub);
 elements.previousMove.addEventListener("click", () => playMove(state.selectedIndex <= 0 ? 0 : state.selectedIndex - 1));
 elements.replayMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : state.selectedIndex));
 elements.nextMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : Math.min(state.selectedIndex + 1, state.session.moves.length - 1)));
@@ -578,15 +792,29 @@ document.addEventListener("keydown", (event) => {
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (event.code === "Space") {
     event.preventDefault();
-    state.playbackEnd = null;
-    if (elements.video.paused) elements.video.play();
-    else elements.video.pause();
+    if (!event.repeat) toggleVideoPlayback();
   } else if (event.key === "ArrowLeft") {
     event.preventDefault();
-    stepFrame(-1);
+    if (!event.repeat) {
+      state.heldFrameDirection = -1;
+      stepFrame(-1);
+    }
   } else if (event.key === "ArrowRight") {
     event.preventDefault();
-    stepFrame(1);
+    if (!event.repeat) {
+      state.heldFrameDirection = 1;
+      stepFrame(1);
+    }
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  const direction = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+  if (direction === 0 || state.heldFrameDirection !== direction) return;
+  state.heldFrameDirection = 0;
+  if (state.frameHoldTimer !== null) {
+    window.clearTimeout(state.frameHoldTimer);
+    state.frameHoldTimer = null;
   }
 });
 

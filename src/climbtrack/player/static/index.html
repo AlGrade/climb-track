@@ -10,9 +10,15 @@
     <main class="workspace">
       <section class="video-column" aria-label="Video player">
         <div class="video-shell">
-          <video id="video" preload="metadata" controls playsinline></video>
+          <video id="video" preload="auto" playsinline tabindex="0" aria-label="Climbing video"></video>
           <div class="video-label">
             <strong id="activeMove">Full video</strong>
+          </div>
+          <div class="video-controls" aria-label="Video controls">
+            <button id="videoToggle" class="video-control-button" aria-label="Play video" disabled>▶</button>
+            <input id="videoScrubber" class="video-scrubber" type="range" min="0" max="0" value="0" step="1" aria-label="Video frame" disabled>
+            <span id="videoTime" class="video-time">00:00 / 00:00</span>
+            <button id="videoMute" class="video-control-button" aria-label="Mute video" disabled>🔊</button>
           </div>
         </div>
 

@@ -46,6 +46,8 @@ from climbtrack.stages.detect import detect_people
 from climbtrack.stages.ingest import ingest_video
 from climbtrack.stages.move_metrics import measure_moves as measure_move_metrics
 from climbtrack.stages.moves import detect_moves
+from climbtrack.stages.player_video import OUTPUT_NAME as PLAYER_VIDEO_NAME
+from climbtrack.stages.player_video import prepare_player_video
 from climbtrack.stages.pose import estimate_pose
 from climbtrack.stages.refine import refine_pose
 from climbtrack.stages.render_compare import render_pose_comparison
@@ -528,6 +530,17 @@ def player(
             project_root=context.project_root,
             force=False,
         )
+        console.print("Preparing browser-optimized player video…")
+        player_video = prepare_player_video(
+            skeleton,
+            ffmpeg_path=context.config.render.ffmpeg_path,
+            cache_root=context.cache_root,
+            project_root=context.project_root,
+        )
+        player_video_state = "reused" if player_video.cache_hit else "created"
+        console.print(
+            f"Browser video {player_video_state}: {player_video.path / PLAYER_VIDEO_NAME}"
+        )
         automatic_moves = read_moves_parquet(automatic.path / "moves_auto.parquet")
         session_path, session, created = prepare_move_session(
             ingest_result,
@@ -547,7 +560,7 @@ def player(
         )
         frames = read_frame_index(ingest_result.path / "frames.parquet")
         server = create_player_server(
-            skeleton.path / "skeleton_raw_overlay.mp4",
+            player_video.path / PLAYER_VIDEO_NAME,
             session_path,
             frames,
             context.config.move_player,

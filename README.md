@@ -422,7 +422,8 @@ cache/
 │   └── summary.json
 ├── 50_render_tracks/<key>/tracking_overlay.mp4
 ├── 50_render_pose/<key>/skeleton_raw_overlay.mp4
-└── 50_render_compare/<key>/raw_vs_refined.mp4
+├── 50_render_compare/<key>/raw_vs_refined.mp4
+└── 90_player_video/<key>/player_video.mp4
 
 annotations/<video-session>/
 ├── ground_truth.json
@@ -669,6 +670,12 @@ automatisch geöffnet werden soll, `--no-open-browser` verwenden und den ausgege
 öffnen. Ist der konfigurierte Port belegt, probiert der Player automatisch den nächsten lokalen
 Port; mit `--port 9000` kann ein Port erzwungen werden.
 
+Beim ersten Start erzeugt Stufe `90_player_video` aus dem großen 4K-Skelettvideo eine
+browserfreundliche 1080-Pixel-Version mit kurzen Schlüsselbildabständen. Das dauert nur die
+Video-Umwandlung, verändert weder Analyse noch Originaldateien und wird danach aus dem Cache
+wiederverwendet. Dadurch starten Wiedergabe und Frame-Sprünge insbesondere in Chrome deutlich
+schneller.
+
 Der Player speichert jede Änderung sofort und atomar in:
 
 ```text
@@ -756,8 +763,10 @@ JSON gespeichert.
 Der Player zeigt direkt unter dem Video eine vergrößerte Kurve mit Hand- und
 Körpergeschwindigkeit pro Frame, beschrifteten Zeit- und BL/s-Achsen sowie den exakten Werten am
 aktuellen Frame. Darunter stehen mittlere und maximale Geschwindigkeiten sowie die geschätzten
-Wege. Der weiße Cursor folgt sowohl beim Abspielen als auch beim manuellen Spulen. Die Pfeiltasten
-und die beiden Frame-Buttons springen jeweils exakt einen Videoframe. Die zugweisen
+Wege. Die eigene framebasierte Video-Zeitleiste aktualisiert Bild, Frameanzeige und weißen Cursor
+bereits während des Ziehens. Die Pfeiltasten und die beiden Frame-Buttons springen jeweils exakt
+einen Videoframe; gehaltene Pfeiltasten warten auf den tatsächlich dargestellten Frame, bevor sie
+zum nächsten springen. Die zugweisen
 Zusammenfassungen stehen in `move_metrics.parquet`, die vollständigen Kurvenwerte in
 `move_speed_timeline.parquet`. Am Referenzvideo ergeben sich:
 
