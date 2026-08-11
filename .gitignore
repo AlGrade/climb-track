@@ -6,8 +6,11 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-cache/
-data/
-models/
-outputs/
+# Large generated artefacts in the project root only.
+# Keep the leading slash: an unanchored `cache/` would also ignore the
+# source package src/climbtrack/cache/.
+/cache/
+/data/
+/models/
+/outputs/
 
