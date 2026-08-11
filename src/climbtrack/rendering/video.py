@@ -10,6 +10,8 @@ from climbtrack.config import AppConfig
 from climbtrack.errors import ExternalToolError
 from climbtrack.provenance import resolve_executable
 
+CONCAT_IMAGE_FRAMERATE = 1_000_000
+
 
 def frame_durations(frames: list[dict[str, Any]]) -> list[float]:
     """Derive one positive display duration per variable-rate source frame."""
@@ -33,6 +35,28 @@ def frame_durations(frames: list[dict[str, Any]]) -> list[float]:
 def escape_concat_path(path: Path) -> str:
     """Escape one absolute path for FFmpeg's concat demuxer."""
     return str(path.resolve()).replace("'", "'\\''")
+
+
+def write_concat_manifest(
+    concat_path: Path,
+    frame_paths: list[Path],
+    durations: list[float],
+) -> None:
+    """Write a VFR concat manifest without FFmpeg's 25 fps image default."""
+    if not frame_paths:
+        raise ValueError("At least one frame path is required")
+    if len(frame_paths) != len(durations):
+        raise ValueError("Frame paths and durations must have the same length")
+
+    lines = ["ffconcat version 1.0"]
+    for path, duration in zip(frame_paths, durations, strict=True):
+        lines.append(f"file '{escape_concat_path(path)}'")
+        lines.append(f"option framerate {CONCAT_IMAGE_FRAMERATE}")
+        lines.append(f"duration {duration:.9f}")
+    # The concat demuxer ignores the final duration unless the last image is repeated.
+    lines.append(f"file '{escape_concat_path(frame_paths[-1])}'")
+    lines.append(f"option framerate {CONCAT_IMAGE_FRAMERATE}")
+    concat_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def encode_overlay(

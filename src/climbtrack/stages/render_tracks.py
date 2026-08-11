@@ -15,13 +15,13 @@ from climbtrack.config import AppConfig
 from climbtrack.errors import ExternalToolError
 from climbtrack.hashing import hash_json
 from climbtrack.provenance import executable_version, git_state, runtime_state
-from climbtrack.rendering.video import encode_overlay, escape_concat_path, frame_durations
+from climbtrack.rendering.video import encode_overlay, frame_durations, write_concat_manifest
 from climbtrack.schema.crops import read_pose_crops
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.tracks import read_tracks
 
 STAGE_NAME = "50_render_tracks"
-STAGE_VERSION = "2.0.0"
+STAGE_VERSION = "2.0.1"
 
 
 def render_tracking_overlay(
@@ -99,12 +99,7 @@ def render_tracking_overlay(
 
         durations = frame_durations(frames)
         concat_path = output / ".overlay-concat.txt"
-        lines = ["ffconcat version 1.0"]
-        for path, duration in zip(overlay_paths, durations, strict=True):
-            lines.append(f"file '{escape_concat_path(path)}'")
-            lines.append(f"duration {duration:.9f}")
-        lines.append(f"file '{escape_concat_path(overlay_paths[-1])}'")
-        concat_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        write_concat_manifest(concat_path, overlay_paths, durations)
 
         metadata = json.loads((ingest.path / "metadata.json").read_text(encoding="utf-8"))
         duration_seconds = float(metadata["video"]["duration_seconds"])

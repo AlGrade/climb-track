@@ -1,6 +1,8 @@
+from pathlib import Path
+
 import pytest
 
-from climbtrack.rendering.video import frame_durations
+from climbtrack.rendering.video import frame_durations, write_concat_manifest
 
 
 def test_frame_durations_preserve_variable_timestamps() -> None:
@@ -20,3 +22,15 @@ def test_single_frame_requires_its_own_duration() -> None:
 
     with pytest.raises(ValueError, match="positive duration"):
         frame_durations([{"timestamp": 0.0, "duration": None}])
+
+
+def test_concat_manifest_overrides_image_demuxer_framerate(tmp_path: Path) -> None:
+    frames = [tmp_path / "000.jpg", tmp_path / "001.jpg"]
+    manifest = tmp_path / "frames.ffconcat"
+
+    write_concat_manifest(manifest, frames, [0.0167, 0.0168])
+
+    text = manifest.read_text(encoding="utf-8")
+    assert text.count("option framerate 1000000") == 3
+    assert "duration 0.016700000" in text
+    assert text.count(f"file '{frames[-1]}'") == 2
