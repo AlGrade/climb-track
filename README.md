@@ -1,287 +1,518 @@
 # ClimbTrack
 
-ClimbTrack is an offline, quality-first pipeline for temporally stable 2D skeleton tracking in
-bouldering and climbing videos. Phase 1 deliberately excludes speed, movement metrics, 3D,
-hold detection, a server, and an end-user UI.
+ClimbTrack ist eine lokale Offline-Pipeline für möglichst genaues und zeitlich stabiles
+2D-Skeleton-Tracking in Boulder- und Klettervideos. Das Programm findet den Kletterer, verfolgt
+ihn durch das Video, berechnet 308 Körperpunkte mit Meta Sapiens2-1B und repariert vorsichtig
+kurze Modellfehler über die Zeit.
 
-The project is currently for private use only. Sapiens2-1B is the approved primary pose backend,
-subject to its license terms. Milestone 2 uses Ultralytics YOLO11x/ByteTrack; review the
-Ultralytics AGPL-3.0 terms before any use beyond this private project.
+Das Projekt ist derzeit ausschließlich für private Nutzung vorgesehen.
 
-## Current status
+## Projektziel und Grenzen
 
-Milestones 1 through 3 implement:
+Phase 1 beantwortet genau diese Frage:
 
-- strict YAML configuration with unknown-key rejection;
-- Stage 00 video probing and lossless PNG extraction;
-- source timestamps, VFR, rotation and HDR detection;
-- a content-addressed, atomic cache with checksum verification and resume;
-- provenance for inputs, tools, Python, OS and Git;
-- canonical frame and pose Parquet schemas with explicit missing keypoints;
-- pinned YOLO11x person detection at configurable inference resolution;
-- ByteTrack association with canonical detection and track Parquet schemas, including
-  confidence-aware containment suppression for duplicate partial-person boxes;
-- explainable climber ranking from track length, continuity, movement, position and area;
-- explicit `--track-id` and interactive `--click` selection;
-- a hard uncertainty stop when automatic selection is ambiguous;
-- a model-aspect pose crop with local motion context, temporal stabilization and short-gap
-  interpolation;
-- a VFR-aware MP4 overlay with bounding boxes, confidence, track IDs, frame numbers and audio;
-- pinned local Sapiens2-1B inference through the official Transformers implementation;
-- all 308 Sociopticon/Goliath keypoints with their original confidence values;
-- a canonical, versioned registry with official names, groups, symmetry pairs and skeleton edges;
-- horizontal-flip and multi-scale test-time augmentation with decoded-result averaging;
-- a separate raw-pose Parquet cache and VFR-aware skeleton overlay for visual inspection;
-- resumable CLI commands for each stage and `run-all`;
-- unit tests for hashing, cache behavior, timestamps, schemas, scoring, ByteTrack and VFR output.
+> Wo befinden sich die Körperpunkte des Kletterers in jedem einzelnen Videoframe?
 
-Temporal refinement is deliberately absent from the Milestone-3 output: `pose_raw.parquet` contains
-only model observations. Refinement, annotation and evaluation remain for later milestones.
+Die erzeugten Daten sind die Grundlage für spätere Geschwindigkeiten, Gelenkwinkel und
+Bewegungsmetriken. Solche Metriken sind aber bewusst noch nicht Teil dieses Projekts.
 
-## Lightweight Milestone 4 ground truth
+Nicht enthalten sind:
 
-Milestone 4 uses a deliberately small stress-test instead of asking for exhaustive annotation.
-Ten frames are selected deterministically: mostly low-confidence/high-motion cases plus two
-timeline coverage frames. The editor reviews 40 movement-relevant landmarks (body, feet,
-additional shoulder/elbow points, and fingertips); dense face landmarks are excluded.
+- Geschwindigkeits-, Winkel- oder Bewegungsmetriken;
+- 3D-Rekonstruktion und Weltkoordinaten;
+- Griff- oder Hold-Erkennung;
+- Web-UI, Server oder Datenbank;
+- Echtzeit- oder Mobile-Betrieb.
 
-```bash
-climbtrack annotate "/path/to/video.mp4" --config configs/default.yaml
+Qualität hat Vorrang vor Geschwindigkeit. Die komplette Pose-Berechnung eines kurzen Videos kann
+auf einem Mac mehrere Stunden dauern. Alle teuren Schritte sind deshalb gecacht und fortsetzbar.
+
+## Aktueller Stand
+
+Die Milestones 1 bis 5 sind implementiert, am Video `best go.mp4` ausgeführt und in Git gesichert.
+
+| Milestone | Ergebnis | Warum das nötig ist |
+|---|---|---|
+| 1 – Fundament | Video-Ingest, Metadaten, Frames, Konfiguration und Cache | Alle späteren Schritte erhalten reproduzierbare Bilder und korrekte Zeitstempel. |
+| 2 – Kletterer finden | YOLO11x, ByteTrack, Kletterer-Auswahl, stabiler Pose-Crop und Kontrollvideo | Sapiens soll nur die richtige Person und trotzdem alle ausgestreckten Gliedmaßen sehen. |
+| 3 – Rohes Skeleton | Sapiens2-1B, 308 Keypoints, TTA, Resume und Roh-Overlay | Liefert unveränderte Modellmessungen als überprüfbare Ausgangsbasis. |
+| 4 – Messen | Lokales Annotationstool, zehn schwierige Frames, Ground Truth, PCK und OKS | Qualität wird gemessen, nicht nur nach Gefühl beurteilt. |
+| 5 – Verbessern | Confidence-Gating, Ausreißer-/Swap-Erkennung, Interpolation und One-Euro-Filter | Kurze Fehler werden repariert, ohne schnelle echte Kletterbewegungen glattzubügeln. |
+| 6 – geplant | ViTPose-Vergleichsbackend und Backend-Benchmark | Prüft objektiv, ob ein zweites Modell auf unseren Videos besser ist. |
+
+### Resultat am Referenzvideo
+
+Das Referenzvideo hat 1.648 Frames, variable Framerate und eine Dauer von rund 27,5 Sekunden.
+Zehn gezielt schwierige Frames mit 40 bewegungsrelevanten Punkten wurden manuell kontrolliert.
+Davon waren 394 Punkte im Bild sichtbar und auswertbar.
+
+| Messwert | Roh | Nach Refinement |
+|---|---:|---:|
+| Mittlerer Fehler | 8,00 px | 3,31 px |
+| PCK@0.2 | 98,98 % | 100,00 % |
+| OKS-ähnlicher Score | 0,9859 | 0,9938 |
+| 95. Fehlerperzentil | 12,22 px | 11,50 px |
+| Rechter-Hand-Fehler | 61,94 px | 18,37 px |
+
+Körper, zusätzliche Gelenkpunkte und Füße blieben in diesem Ground-Truth-Set unverändert bei
+100 % PCK. Die linke Hand wurde durch das Refinement im Mittel leicht von 7,30 auf 9,56 Pixel
+schlechter, blieb aber bei 100 % PCK. Die starke Verbesserung der rechten Hand überwiegt deutlich.
+Zehn Stressframes sind eine sinnvolle Leitplanke, aber noch kein Beweis für jedes denkbare Video.
+
+## Gesamtarchitektur
+
+```text
+Video
+  │
+  ▼
+00_ingest ──► Frames + echte Quellzeitstempel + Metadaten
+  │
+  ▼
+10_detect ──► Personen-Boxen von YOLO11x
+  │
+  ▼
+20_track ───► stabile Personen-IDs von ByteTrack
+  │
+  ▼
+25_select ──► genau ein ausgewählter Kletterer + stabiler 3:4-Pose-Crop
+  │
+  ▼
+30_pose ────► 308 rohe Sapiens2-Keypoints pro Frame
+  │
+  ├─────────► Roh-Overlay zur Sichtkontrolle
+  │
+  ▼
+40_refine ──► reparierte und zeitlich stabilisierte Keypoints
+  │
+  ├─────────► Roh-vs.-Refined-Vergleichsvideo
+  │
+  ▼
+Annotation / Evaluation ──► Ground Truth, PCK und OKS
 ```
 
-Drag an incorrect point. Right-click it (or use **Unsichtbar**) if the image does not contain
-enough evidence to place it. **Bestätigen + weiter** marks the whole frame as reviewed. Work is
-saved after every edit and the command resumes the same session later.
+Alle neuronalen Modelle laufen lokal auf dem konfigurierten Gerät. In der aktuellen
+Standardkonfiguration ist das `mps`, also Apples GPU-Schnittstelle auf dem Mac. Das Video und die
+berechneten Posen werden nicht an einen Server geschickt. Eine Internetverbindung wird nur für den
+expliziten, einmaligen Modelldownload benötigt.
 
-After reviewing the selected frames, run the exact command printed by the editor, or:
+## Schnellstart
 
-```bash
-climbtrack evaluate annotations/<video-session>/ground_truth.json \
-  --config configs/default.yaml
-```
-
-The resulting `evaluation.json` reports pixel error, normalized PCK@0.2, an OKS-like score,
-low-confidence rate, and the share of predictions that required correction, overall and by
-keypoint group. This small set is a refinement guardrail, not a claim of dataset-wide accuracy.
-
-## Milestone 5 refinement
-
-Stage 40 is deterministic and uses only cached pose coordinates; it never invokes Sapiens again.
-The conservative default pipeline performs confidence gating with group-specific thresholds,
-short-gap interpolation, temporal left/right swap repair, segment-length outlier rejection, and
-an adaptive One Euro filter. Ground-truth tuning keeps already-correct body, extra, and foot
-landmarks unchanged by default; temporal smoothing targets the less stable detailed hand points.
+### 1. Projekt öffnen
 
 ```bash
-climbtrack refine "/path/to/video.mp4" --config configs/default.yaml
-climbtrack evaluate-refined "/path/to/video.mp4" \
-  annotations/<video-session>/ground_truth.json --config configs/default.yaml
-climbtrack render-comparison "/path/to/video.mp4" --config configs/default.yaml
+cd /Users/alexandergradenegger/IdeaProjects/klettervideo-skeleton-tracking
 ```
 
-`pose_refined.parquet` preserves the canonical pose schema and explicitly records missing and
-interpolated observations. `raw_vs_refined.mp4` shows raw on the left and refined on the right,
-with all source timestamps and optional audio preserved. `run-all` now continues through this
-comparison output; every earlier stage remains independently cached.
+### 2. Umgebung installieren
 
-## Requirements
+Voraussetzungen:
 
-- macOS on Apple Silicon (other platforms are supported where the configured tools exist)
-- `uv`
-- Python 3.12, managed by `uv`
-- `ffmpeg` and `ffprobe`
-- enough disk space for lossless PNG ingest, temporary overlay JPEGs and the 6.08-GB pose model
-
-Install ffmpeg with Homebrew if `climbtrack preflight` reports that it is missing:
+- macOS auf Apple Silicon; andere Plattformen funktionieren bei passenden Tools ebenfalls;
+- Python 3.12, verwaltet durch `uv`;
+- `ffmpeg` und `ffprobe`;
+- ausreichend Speicherplatz für Frames, Videos und das 6,08-GB-Posemodell.
 
 ```bash
 brew install ffmpeg
-```
-
-Create the environment and install the locked project dependencies:
-
-```bash
 uv sync --locked
 ```
 
-If no lockfile exists yet, use `uv sync` once and commit the resulting `uv.lock`.
+Falls noch kein Lockfile existiert, einmal `uv sync` ausführen und das erzeugte `uv.lock`
+committen.
 
-## Configuration
+### 3. Modelle herunterladen
 
-Copy `configs/default.yaml` for experiments instead of editing model or processing parameters in
-code. Relative cache paths are resolved against the project root containing `configs/`.
-
-Important ingest settings:
-
-- `ffmpeg_path` and `ffprobe_path` may be executable names in `PATH` or explicit paths.
-- `hdr_policy: fail` is the quality-safe default.
-- `hdr_policy: tonemap` performs an explicit Hable tone map through ffmpeg's `zscale`/`tonemap`
-  filters. The local ffmpeg build must provide those filters.
-- `hdr_policy: clip` explicitly accepts direct conversion to 8-bit RGB and can lose highlight
-  detail. It must never be selected implicitly.
-- `verify_cached_checksums: true` verifies every artifact before declaring a cache hit.
-
-`pose_crop` controls the model input region independently of the raw YOLO/ByteTrack box. It uses
-the official Sapiens 1024×768 (H×W) aspect ratio, a centered local motion envelope, 1.35 padding
-and a final 15-frame moving-average stabilization. Raw boxes remain unchanged in `tracks.parquet`; the
-derived crop is stored separately in `pose_crops.parquet`.
-
-`pose` controls raw Sapiens2 inference. The default performs full-resolution 1024×768 inference,
-an additional 1152×864 pass, and a horizontal-flip pass at each scale. The four forward passes per
-frame are intentionally expensive. `half_precision: false` preserves the checkpoint's FP32 path.
-
-No unavailable device or model is replaced automatically. A configured `mps`, `cpu`, or `cuda`
-device that cannot execute the selected backend fails clearly. Change the YAML explicitly if you
-intend to use CPU or a rented CUDA host.
-
-## Usage
-
-Download the pinned YOLO11x checkpoint explicitly (there are no implicit downloads):
+Die Downloads erfolgen absichtlich nie automatisch:
 
 ```bash
 uv run climbtrack download-yolo --config configs/default.yaml
-```
-
-Review Meta's Sapiens2 license, then explicitly download the pinned 6.08-GB Transformers snapshot:
-
-```bash
 uv run climbtrack download-sapiens --config configs/default.yaml
 ```
 
-Validate configuration, external tools, checkpoint and configured device:
+Vorher die Lizenzhinweise in `NOTICE.md` prüfen. Sapiens2-1B ist das freigegebene primäre
+Pose-Backend. Milestone 2 verwendet Ultralytics YOLO11x/ByteTrack; vor einer Nutzung außerhalb
+dieses privaten Projekts müssen insbesondere die jeweiligen Modell- und AGPL-3.0-Bedingungen neu
+geprüft werden.
+
+### 4. Installation prüfen
 
 ```bash
 uv run climbtrack preflight --config configs/default.yaml
 ```
 
-Run Stage 00:
+Der Befehl prüft Gerät, ffmpeg/ffprobe sowie Größe und SHA-256 der beiden Modelle. Ein fehlendes
+Modell oder nicht verfügbares Gerät führt zu einem klaren Fehler. Es gibt keinen stillen Wechsel
+auf CPU oder ein anderes Modell.
+
+### 5. Ein Video vollständig analysieren
+
+Für das vorhandene Referenzvideo:
 
 ```bash
-uv run climbtrack ingest /absolute/path/to/video.mov --config configs/default.yaml
+uv run climbtrack run-all \
+  "/Users/alexandergradenegger/Desktop/drive-download-20260810T065611Z-1-001/best go.mp4" \
+  --config configs/default.yaml
 ```
 
-Run individual Milestone-2 stages (prerequisites are resumed from cache):
+Für ein anderes Video muss nicht erneut entwickelt oder annotiert werden. Einfach denselben Befehl
+mit dem neuen absoluten Videopfad ausführen:
 
 ```bash
-uv run climbtrack detect /absolute/path/to/video.mov
-uv run climbtrack track /absolute/path/to/video.mov
-uv run climbtrack select /absolute/path/to/video.mov
-uv run climbtrack render-tracks /absolute/path/to/video.mov
-uv run climbtrack pose /absolute/path/to/video.mov
-uv run climbtrack render-pose /absolute/path/to/video.mov
+uv run climbtrack run-all "/absoluter/pfad/neues-video.mp4" \
+  --config configs/default.yaml
 ```
 
-Run every currently implemented stage:
+`run-all` arbeitet alle Stufen in Abhängigkeitsreihenfolge ab. Bereits vorhandene, gültige
+Ergebnisse werden aus dem Cache geladen. Das abschließende Terminal-Output nennt den Pfad zum
+Vergleichsvideo `raw_vs_refined.mp4`.
+
+## Lange Läufe stoppen und fortsetzen
+
+Ein langer Lauf kann mit `Ctrl+C` gestoppt werden. Danach exakt denselben Command erneut starten.
+Die besonders teure Sapiens-Stufe speichert jeden abgeschlossenen Frame in einem versteckten
+`.work-<cache-key>`-Ordner. Beim Neustart werden bereits fertige Frames geprüft und übersprungen.
+
+Wichtig:
+
+- Für normales Fortsetzen **kein** `--force` verwenden.
+- Video, Config, Modell und Code müssen gleich bleiben, damit derselbe Cache-Key entsteht.
+- `--force` baut eine Stufe bewusst neu und verschiebt das alte Ergebnis in ein wiederherstellbares
+  Backup.
+- Ein laufender Download verwendet ebenfalls eine partielle Datei und kann fortgesetzt werden.
+
+## Einzelne Befehle
+
+Jeder Schritt kann separat gestartet werden. Die nötigen Vorgänger werden automatisch aus dem
+Cache geladen oder ausgeführt.
 
 ```bash
-uv run climbtrack run-all /absolute/path/to/video.mov --config configs/default.yaml
-```
+# Video prüfen und verlustfreie Frames erzeugen
+uv run climbtrack ingest "/path/to/video.mp4" --config configs/default.yaml
 
-If automatic climber selection reports uncertainty, inspect the ranked IDs and confirm one:
+# Personen erkennen
+uv run climbtrack detect "/path/to/video.mp4" --config configs/default.yaml
 
-```bash
-uv run climbtrack run-all /absolute/path/to/video.mov --track-id 7
-```
+# Personen über die Zeit verfolgen
+uv run climbtrack track "/path/to/video.mp4" --config configs/default.yaml
 
-To create an overlay containing every candidate ID before deciding:
+# Kletterer auswählen
+uv run climbtrack select "/path/to/video.mp4" --config configs/default.yaml
 
-```bash
-uv run climbtrack render-tracks /absolute/path/to/video.mov --review-all
-```
+# Kontrollvideo mit Boxen und Track-IDs
+uv run climbtrack render-tracks "/path/to/video.mp4" --config configs/default.yaml
 
-On a local desktop session you can instead select a displayed box:
+# Rohe Sapiens-Pose berechnen
+uv run climbtrack pose "/path/to/video.mp4" --config configs/default.yaml
 
-```bash
-uv run climbtrack run-all /absolute/path/to/video.mov --click
-```
+# Rohes Skeleton-Video rendern
+uv run climbtrack render-pose "/path/to/video.mp4" --config configs/default.yaml
 
-Inspect all complete cache entries:
+# Zeitliches Refinement aus dem vorhandenen Pose-Cache berechnen
+uv run climbtrack refine "/path/to/video.mp4" --config configs/default.yaml
 
-```bash
+# Links roh, rechts refined rendern
+uv run climbtrack render-comparison "/path/to/video.mp4" --config configs/default.yaml
+
+# Vorhandene vollständige Cache-Einträge anzeigen
 uv run climbtrack cache-list --config configs/default.yaml
 ```
 
-`--force` rebuilds the same cache key but moves the previous entry to a recoverable hidden backup;
-it does not delete prior results.
+## Falls die falsche Person ausgewählt wird
 
-## Cache contract
+Die automatische Auswahl bewertet Track-Länge, Kontinuität, vertikale Bewegung, allgemeine
+Bewegung, Position und Bildfläche. Wenn die beiden besten Kandidaten zu ähnlich sind, bricht das
+Programm absichtlich ab, anstatt zu raten.
 
-Entries are stored by deterministic stage-specific cache key:
+Alle IDs in einem Kontrollvideo anzeigen:
 
-```text
-cache/00_ingest/<sha256-cache-key>/
-├── manifest.json
-├── metadata.json
-├── ffprobe.json
-├── frames.parquet
-└── frames/
-    ├── 000000000.png
-    └── ...
-cache/10_detect/<cache-key>/detections.parquet
-cache/20_track/<cache-key>/tracks.parquet
-cache/25_select/<cache-key>/{candidates.json,selection.json}
-cache/50_render_tracks/<cache-key>/tracking_overlay.mp4
-cache/30_pose/<cache-key>/{pose_raw.parquet,keypoints.json,summary.json}
-cache/50_render_pose/<cache-key>/skeleton_raw_overlay.mp4
+```bash
+uv run climbtrack render-tracks "/path/to/video.mp4" --review-all \
+  --config configs/default.yaml
 ```
 
-The cache key covers the source video's full SHA-256, the effective Stage-00 configuration, the
-stage implementation version, and the resolved ffmpeg/ffprobe versions. A complete manifest stores
-checksums for every artifact. Builds are published by atomic directory rename. Ordinary failed
-builds are retained under `.failed/` and are never treated as cache hits. The expensive `30_pose`
-stage additionally checkpoints each completed frame under a deterministic hidden `.work-<key>`
-directory. Re-running the same command validates and skips those frames; `--force` explicitly
-archives that work and starts again.
+Danach eine ID explizit verwenden:
 
-Only a stage's effective configuration participates in its cache key. A rendering change therefore
-cannot invalidate tracking or ingest artifacts. Downstream keys include the upstream artifact hash;
-detection also includes the exact checkpoint SHA-256 and package versions.
+```bash
+uv run climbtrack run-all "/path/to/video.mp4" --track-id 7 \
+  --config configs/default.yaml
+```
 
-## Timestamp and image policy
+Alternativ in einer lokalen Desktop-Sitzung auf die gewünschte Box klicken:
 
-ClimbTrack preserves `best_effort_timestamp_time` from ffprobe for each decoded source frame.
-It does not reconstruct timestamps from an assumed FPS. Missing or non-monotonic timestamps are a
-hard error. ffmpeg's default autorotation is applied during frame extraction; source rotation and
-both encoded and display dimensions are retained in `metadata.json`.
+```bash
+uv run climbtrack run-all "/path/to/video.mp4" --click \
+  --config configs/default.yaml
+```
 
-PNG is used to avoid adding JPEG artifacts before person detection and pose estimation. ffmpeg is
-run single-threaded for deterministic output and its exact version is part of the cache key.
+## Was in den Milestones passiert ist
 
-## Canonical pose schema
+### Milestone 1 – Projektfundament, Ingest und Cache
 
-The long-form Parquet schema is versioned and contains:
+- Python-3.12-Projekt mit `uv`, `pyproject.toml` und gelockten Abhängigkeiten aufgebaut.
+- Strikte YAML-Konfiguration implementiert. Unbekannte Optionen werden abgelehnt, damit Tippfehler
+  nicht unbemerkt falsche Ergebnisse erzeugen.
+- Video mit ffprobe analysiert: Auflösung, Rotation, HDR, variable Framerate und echte Zeitstempel.
+- Jeden Quellframe als PNG extrahiert. PNG vermeidet zusätzliche JPEG-Artefakte vor den Modellen.
+- Kanonisches Frame-Parquet und Provenance für Config, Tools, Python, Betriebssystem und Git erzeugt.
+- Inhaltsadressierten Cache mit SHA-256, atomarem Publish, Manifesten und Checksum-Prüfung gebaut.
+- Fehlgeschlagene Builds werden getrennt aufbewahrt und nie als gültiger Cache verwendet.
+
+Nutzen für das Endprodukt: Jeder spätere Messpunkt lässt sich exakt einem Frame und dessen echtem
+Zeitpunkt zuordnen. Ergebnisse sind reproduzierbar und lange Arbeit muss nicht wiederholt werden.
+
+### Milestone 2 – Detection, Tracking und Kletterer-Auswahl
+
+- YOLO11x erkennt alle Personen pro Frame, nicht nur die auffälligste.
+- ByteTrack verbindet die Boxen über die Zeit und vergibt stabile Track-IDs.
+- Überlappende Teilpersonen-Boxen werden confidence-bewusst unterdrückt.
+- Ein nachvollziehbares Scoring wählt den wahrscheinlichen Kletterer.
+- Manuelle Auswahl über `--track-id` oder `--click` ergänzt; bei Unsicherheit harter Stopp.
+- Kontrollvideo mit Box, Confidence, Track-ID, Framezahl und Originalaudio gebaut.
+- Pose-Crop auf das offizielle Sapiens-Seitenverhältnis 768×1024 beziehungsweise 3:4 gebracht.
+- Crop mit Bewegungsumfeld, 1,35-fachem Padding, kurzer Lückeninterpolation und 15-Frame-Glättung
+  stabilisiert. Das grüne Rechteck wurde bewusst etwas großzügiger gelassen, damit Hände und Füße
+  bei weiten Zügen nicht aus dem Modellbild fallen.
+
+Nutzen für das Endprodukt: Andere Personen verwirren die Pose-Schätzung nicht, und ausgestreckte
+Gliedmaßen bleiben im Sapiens-Eingabebild.
+
+### Milestone 3 – Rohe Sapiens2-Pose
+
+- Gepinntes Meta-Modell `facebook/sapiens2-pose-1b` lokal installiert und per SHA-256 verifiziert.
+- Offizielle Transformers-/Safetensors-Implementierung statt der problematischen alten
+  MMCV-Toolchain verwendet.
+- Sapiens läuft lokal über Torch/MPS in 1024×768 Eingabeauflösung.
+- Pro Frame werden alle 308 Goliath/Sociopticon-Keypoints samt unveränderter Confidence gespeichert.
+- Horizontal-Flip-TTA tauscht Links/Rechts-Indizes korrekt; Multi-Scale-TTA mittelt vier
+  Vorwärtsläufe pro Frame (`1.0` und `1.125`, jeweils normal und gespiegelt).
+- Rohe Pose wird als `pose_raw.parquet` gespeichert; es findet noch keine zeitliche Korrektur statt.
+- Framegenaues Resume für die mehrstündige Modellinferenz implementiert.
+- Skeleton-Overlay VFR-sicher gerendert. Ein früher Fehler, bei dem variable Framerate Frames
+  verlieren konnte, wurde korrigiert; das Referenzvideo enthält im Output wieder 1.648/1.648 Frames.
+
+Warum im Video nicht alle 308 Punkte sichtbar sind: 238 Punkte gehören zum sehr dichten Gesicht.
+Sie werden standardmäßig nicht gezeichnet, damit das Overlay lesbar bleibt. Von den 70 übrigen
+Körper-, Hand- und Fußpunkten erscheinen nur jene, deren Confidence die Zeichenschwelle erreicht.
+Die Parquet-Datei enthält trotzdem alle 308 Werte pro Frame.
+
+Nutzen für das Endprodukt: Wir besitzen hochauflösende, detaillierte Rohmessungen und können jede
+spätere Korrektur objektiv mit dem unveränderten Modelloutput vergleichen.
+
+### Milestone 4 – Ground Truth und Evaluation
+
+- Ein leichtgewichtiges lokales Matplotlib-Annotationstool gebaut.
+- Zehn Stressframes werden deterministisch gewählt: überwiegend niedrige Confidence und starke
+  Bewegung, ergänzt um Timeline-Abdeckung.
+- Pro Frame werden 40 bewegungsrelevante Punkte geprüft: 17 Körperpunkte, 6 Fußpunkte,
+  7 zusätzliche Schulter-/Ellbogen-/Nackenpunkte und 10 Fingerspitzen.
+- Punkte lassen sich ziehen oder als nicht sichtbar markieren. Jede Änderung wird sofort gespeichert
+  und eine abgebrochene Sitzung wird später fortgesetzt.
+- Auswertung nach Pixelabweichung, normalisiertem PCK@0.2 und OKS-ähnlichem Score, insgesamt und
+  getrennt nach Körper, Zusatzpunkten, Füßen und Händen.
+
+Annotation starten:
+
+```bash
+uv run climbtrack annotate "/path/to/video.mp4" --config configs/default.yaml
+```
+
+Bedienung:
+
+- Falschen Punkt mit der Maus verschieben.
+- Unsichtbaren Punkt rechtsklicken oder über **Unsichtbar** markieren.
+- Mit **Bestätigen + weiter** den gesamten Frame freigeben.
+
+Rohe Pose gegen Ground Truth auswerten:
+
+```bash
+uv run climbtrack evaluate annotations/<video-session>/ground_truth.json \
+  --config configs/default.yaml
+```
+
+Nutzen für das Endprodukt: Filter werden anhand echter Fehler eingestellt, nicht nach Bauchgefühl.
+
+### Milestone 5 – Konservatives zeitliches Refinement
+
+Stage 40 verwendet nur das bereits berechnete `pose_raw.parquet`; Sapiens wird dafür nicht erneut
+gestartet. Die Pipeline führt in dieser Reihenfolge aus:
+
+1. Confidence-Gating markiert unzuverlässige Punkte explizit als fehlend.
+2. Unplausible Segmentlängen erkennen Ausreißer an Armen und Beinen.
+3. Temporale Konsistenz entscheidet, welcher Endpunkt eines unplausiblen Segments verdächtig ist.
+4. Kurze Lücken bis maximal fünf Frames werden interpoliert; lange Lücken bleiben missing.
+5. Plötzliche Links/Rechts-Vertauschungen symmetrischer Punkte können repariert werden.
+6. Ein adaptiver One-Euro-Filter glättet standardmäßig nur die detaillierten Hände.
+
+Körper und Füße werden absichtlich nicht pauschal geglättet. Damit bleiben Dynos, Swings und Stürze
+echte schnelle Bewegungen. Die Problemstelle um Sekunde 26 im Referenzvideo wurde kontrolliert;
+der Sturz bleibt erhalten, während der kurze Handfehler deutlich reduziert wird.
+
+Refinement evaluieren:
+
+```bash
+uv run climbtrack evaluate-refined "/path/to/video.mp4" \
+  annotations/<video-session>/ground_truth.json \
+  --config configs/default.yaml
+```
+
+Vergleichsvideo erzeugen:
+
+```bash
+uv run climbtrack render-comparison "/path/to/video.mp4" \
+  --config configs/default.yaml
+```
+
+`raw_vs_refined.mp4` zeigt links die rohe und rechts die verbesserte Pose.
+
+Nutzen für das Endprodukt: Die Zeitreihe wird zuverlässiger für spätere Ableitungen, ohne echte
+schnelle Bewegungen künstlich zu verlangsamen.
+
+## Cache und Ausgabedateien
+
+Der Cache liegt standardmäßig im Projektordner unter `cache/`. Jeder Unterordnername ist ein
+deterministischer Hash aus Video, relevanter Konfiguration, Implementierung, Modellen und direkten
+Vorgängerartefakten.
+
+```text
+cache/
+├── 00_ingest/<key>/
+│   ├── frames/000000000.png
+│   ├── frames.parquet
+│   ├── metadata.json
+│   └── ffprobe.json
+├── 10_detect/<key>/detections.parquet
+├── 20_track/<key>/tracks.parquet
+├── 25_select/<key>/
+│   ├── candidates.json
+│   ├── selection.json
+│   └── pose_crops.parquet
+├── 30_pose/<key>/
+│   ├── pose_raw.parquet
+│   ├── keypoints.json
+│   └── summary.json
+├── 40_refine/<key>/
+│   ├── pose_refined.parquet
+│   └── summary.json
+├── 50_render_tracks/<key>/tracking_overlay.mp4
+├── 50_render_pose/<key>/skeleton_raw_overlay.mp4
+└── 50_render_compare/<key>/raw_vs_refined.mp4
+
+annotations/<video-session>/
+├── ground_truth.json
+├── evaluation.json
+└── evaluation_refined.json
+```
+
+Die großen PNG-Frames befinden sich also unter `cache/00_ingest/<key>/frames/`. Beim Referenzlauf
+belegt der gesamte Cache derzeit ungefähr 13 GB, davon rund 12 GB für verlustfreie Eingabeframes.
+Die Modelle benötigen zusätzlich ungefähr 5,8 GB. Cache- und Modellordner sind nicht für Git
+vorgesehen.
+
+Ändert sich nur das Rendering, bleiben Ingest, Detection, Tracking und Pose gültig. Ändert sich
+dagegen eine relevante Pose-Einstellung oder ein Vorgängerartefakt, entsteht absichtlich ein neuer
+Cache-Key. Vollständige Einträge enthalten ein Manifest und Checksums für alle Artefakte. Builds
+werden erst nach erfolgreichem Abschluss per atomarem Verzeichnis-Rename veröffentlicht.
+
+## Datenformat
+
+Pose-Daten werden zeilenweise als Parquet gespeichert:
 
 ```text
 frame_idx, timestamp, track_id, keypoint_name,
 x, y, confidence, is_missing, is_interpolated, source_backend
 ```
 
-A missing point must use Arrow nulls for `x`, `y`, and `confidence`; zero coordinates are invalid.
-The 308-keypoint registry versions backend mappings, symmetry partners, body groups and skeleton
-edges from the official model metadata.
+Wichtige Regeln:
 
-## Model download policy
+- Koordinaten liegen im Originalbild, nicht nur im Crop.
+- `timestamp` stammt aus dem Quellvideo und wird nicht aus einer angenommenen FPS rekonstruiert.
+- Fehlende Punkte verwenden echte Arrow-Nullwerte für `x`, `y` und `confidence`, niemals `(0, 0)`.
+- Roh-Confidence bleibt erhalten.
+- Registry, Gruppenzuordnung, Links/Rechts-Paare und Skeleton-Kanten sind versioniert.
+- Ein anderes Backend kann später in dasselbe kanonische Schema gemappt werden.
 
-YOLO11x is stored at `models/yolo11x.pt`, outside Git. The explicit `download-yolo` command uses
-the pinned URL, byte size and SHA-256 from YAML, writes to a temporary file, verifies it and then
-publishes atomically. Inference never triggers a download.
+## Konfiguration
 
-Pose models likewise remain outside Git and are never downloaded implicitly. The approved primary
-model is pinned to an immutable Hugging Face revision:
+Alle Parameter stehen in `configs/default.yaml`. Für Experimente die Datei kopieren und eine eigene
+Config an `--config` übergeben, statt Werte im Python-Code zu ändern.
+
+Wichtige Bereiche:
+
+- `project`: Cache, Annotationen, Seed und Gerät (`mps`, `cpu`, `cuda`).
+- `ingest`: ffmpeg/ffprobe, PNG, HDR-Policy und Cache-Prüfung.
+- `detection`: YOLO-Auflösung und Schwellenwerte.
+- `tracking`: ByteTrack-Matching und Track-Puffer.
+- `selection`: Mindestqualität und gewichtete Kletterer-Auswahl.
+- `pose_crop`: Seitenverhältnis, Padding und zeitliche Crop-Stabilisierung.
+- `pose`: Batchgröße, Präzision, Flip- und Multi-Scale-TTA.
+- `pose_render`: Sichtbarkeit von Gesicht, Crop, Punkten und Vergleichsbreite.
+- `annotation`: Anzahl Stressframes sowie PCK-/OKS-Parameter.
+- `refine`: Confidence-Schwellen, Lückengröße, One-Euro-, Segment- und Swap-Parameter.
+- `models`: unveränderliche Modellrevisionen, Dateigrößen und SHA-256-Hashes.
+
+HDR wird standardmäßig mit `hdr_policy: fail` abgelehnt. `tonemap` verlangt passende
+ffmpeg-Filter; `clip` akzeptiert bewusst möglichen Highlight-Verlust. Keine verlustbehaftete Policy
+wird stillschweigend gewählt.
+
+## Modell- und Download-Policy
+
+YOLO11x liegt unter `models/yolo11x.pt`. Das primäre Posemodell ist fest gepinnt:
 
 ```text
-repository: facebook/sapiens2-pose-1b
-revision:   f5fed8b97b99698d5eea1d14ff0855d0b4c3f000
-file:       model.safetensors (6.08 GB, Transformers-compatible)
+Repository: facebook/sapiens2-pose-1b
+Revision:   f5fed8b97b99698d5eea1d14ff0855d0b4c3f000
+Datei:      model.safetensors
+Größe:      6,08 GB
 ```
 
-The downloader fingerprints every local model file. Inference is local-only and fails instead of
-contacting Hugging Face or switching models. The official keypoint metadata is independently pinned
-to Sapiens2 commit `7e5bae88456ac418ff0e58e74106c9fe192055d4` and parsed as data without
-executing downloaded Python. ViTPose++ Huge will use the maintained Transformers/Safetensors path
-rather than legacy MMCV 1.3.9.
+Die offiziellen Keypoint-Metadaten sind separat auf Sapiens2-Commit
+`7e5bae88456ac418ff0e58e74106c9fe192055d4` gepinnt. Sie werden als Daten gelesen; heruntergeladener
+Python-Code wird nicht ausgeführt. Downloads landen zunächst in einer temporären Datei, werden
+gegen Größe und SHA-256 geprüft und erst danach atomar veröffentlicht. Inference arbeitet
+`local-only` und kontaktiert Hugging Face nicht.
 
-## Development
+## Projektstruktur
+
+```text
+configs/                    YAML-Konfiguration
+src/climbtrack/
+├── annotation/             Stressframe-Auswahl, Editor und Evaluation
+├── backends/               YOLO11x, ByteTrack und Sapiens2
+├── cache/                  Cache-Manifeste, atomare Speicherung und Abhängigkeiten
+├── model_downloads/        explizite, geprüfte Modelldownloads
+├── refinement/             One-Euro-Filter und zeitliche Reparaturlogik
+├── rendering/              gemeinsame Pose- und VFR-Videodarstellung
+├── schema/                 kanonische Parquet- und Keypoint-Schemas
+├── selection/              Kletterer-Scoring, Klickauswahl und Pose-Crops
+├── stages/                 klar getrennte Pipeline-Stufen
+├── video/                  ffprobe und deterministisches Frame-Decoding
+├── cli.py                  alle CLI-Commands
+├── config.py               strikte Config-Modelle
+└── provenance.py           reproduzierbare Herkunftsdaten
+tests/
+├── unit/                   Tests der reinen Logik
+└── integration/            kleiner synthetischer Video-Ingest-Test
+annotations/                kleine, versionierte Ground-Truth-Sets
+cache/                      große, reproduzierbare Resultate; nicht in Git
+models/                     große Modellgewichte; nicht in Git
+```
+
+Die Struktur trennt Modelladapter, Pipeline-Steuerung, Datenschemas, Rendering und reine
+Refinement-Logik. Es gibt keine vorgezogenen Abstraktionsebenen für hypothetische Backends; die
+Schnittstellen sind aber so angelegt, dass ViTPose in Milestone 6 ergänzt werden kann.
+
+## Reproduzierbarkeit und Sicherheitsentscheidungen
+
+- Seeds werden gesetzt, soweit die verwendeten Backends deterministisches Verhalten erlauben.
+- Configs lehnen unbekannte Keys ab.
+- Modell- und Ergebnisdateien werden per SHA-256 geprüft.
+- Cache-Einträge enthalten Config, Tool-/Paketversionen, Betriebssystem und Git-Provenance.
+- Source-Timestamps und VFR werden erhalten; fehlende oder nicht monotone Timestamps sind Fehler.
+- ffmpeg dekodiert deterministisch single-threaded und berücksichtigt Rotationsmetadaten.
+- Es gibt keine stillen Modell-, Device- oder HDR-Fallbacks.
+- Rohdaten und Refinement bleiben getrennt, damit Verbesserungen jederzeit überprüfbar sind.
+
+## Entwicklung und Qualitätssicherung
 
 ```bash
 uv run ruff check .
@@ -289,18 +520,25 @@ uv run ruff format --check .
 uv run pytest
 ```
 
-The integration test creates a tiny synthetic video and is skipped when ffmpeg or ffprobe is not
-installed. Tests cover pure processing logic, not neural-network inference.
+Aktueller Stand: 51 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
+Zeitstempel, Schemas, Scoring, ByteTrack, Pose-Crops, Pose-Resume, Keypoint-Registry, VFR-Rendering,
+Annotation/Evaluation, Confidence-Gating, Interpolation, Swap-/Ausreißerlogik und One-Euro-Filter.
+Neuronale Vollinferenz wird wegen Laufzeit und Modellgröße nicht im automatischen Test ausgeführt.
 
-## Planned stages
+## Bekannte Grenzen
 
-```text
-00_ingest  -> frames and source metadata
-10_detect  -> YOLO11 person detections
-20_track   -> ByteTrack tracklets
-25_select  -> explicit climber selection with uncertainty stop
-30_pose    -> Sapiens2 / ViTPose raw observations
-40_refine  -> gating, swap/outlier handling, interpolation, One-Euro filtering
-50_render  -> visual quality-control overlays
-60_eval    -> OKS, PCK and temporal/backend comparisons
-```
+- Sapiens2-1B mit vier TTA-Durchläufen pro Frame ist auf Apple Silicon sehr langsam.
+- Extreme Verdeckung kann keine Nachbearbeitung zuverlässig rekonstruieren.
+- Lange fehlende Abschnitte bleiben absichtlich missing.
+- Gesichtspunkte werden gespeichert, aber standardmäßig nicht gerendert oder annotiert.
+- Das Ground-Truth-Set besteht bisher aus einem Video und zehn Stressframes.
+- Refinement verbessert die rechte Hand deutlich, die linke Hand im Mittel jedoch nicht.
+- Noch gibt es keinen objektiven Vergleich mit ViTPose.
+- Perspektive, Weitwinkel und Kamerabewegung werden noch nicht in Weltkoordinaten umgerechnet.
+
+## Nächster Milestone
+
+Milestone 6 ergänzt ViTPose-H beziehungsweise ViTPose++ als zweites Backend, mappt dessen Punkte in
+das bestehende kanonische Schema und führt beide Modelle auf demselben Ground-Truth-Set aus. Erst
+die Messergebnisse entscheiden, ob ViTPose einen praktischen Vorteil bringt. Bis dahin ist
+Sapiens2-1B das einzige produktiv verwendete Posemodell.
