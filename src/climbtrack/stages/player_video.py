@@ -14,10 +14,10 @@ STAGE_VERSION = "1.0.0"
 OUTPUT_NAME = "player_video.mp4"
 
 PLAYER_VIDEO_CONFIG = {
-    "max_width": 1440,
+    "max_width": 1080,
     "codec": "libx264",
     "preset": "veryfast",
-    "crf": 21,
+    "crf": 22,
     "keyframe_interval_frames": 15,
     "pixel_format": "yuv420p",
     "audio": "copy",

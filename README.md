@@ -671,7 +671,7 @@ automatisch geöffnet werden soll, `--no-open-browser` verwenden und den ausgege
 Port; mit `--port 9000` kann ein Port erzwungen werden.
 
 Beim ersten Start erzeugt Stufe `90_player_video` aus dem großen 4K-Skelettvideo eine
-browserfreundliche 1440-Pixel-Version mit kurzen Schlüsselbildabständen. Das dauert nur die
+browserfreundliche 1080-Pixel-Version mit kurzen Schlüsselbildabständen. Das dauert nur die
 Video-Umwandlung, verändert weder Analyse noch Originaldateien und wird danach aus dem Cache
 wiederverwendet. Dadurch starten Wiedergabe und Frame-Sprünge insbesondere in Chrome deutlich
 schneller.
