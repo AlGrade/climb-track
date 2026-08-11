@@ -417,6 +417,7 @@ cache/
 │   └── summary.json
 ├── 80_move_metrics/<key>/
 │   ├── move_metrics.parquet
+│   ├── move_speed_timeline.parquet
 │   ├── move_metrics.json
 │   └── summary.json
 ├── 50_render_tracks/<key>/tracking_overlay.mp4
@@ -734,8 +735,10 @@ Die erste Version gibt Geschwindigkeiten in zwei Einheiten aus:
 - `px/s` als direkte Bildmessung;
 - `body_lengths/s` als grob körpergrößennormierte Vergleichsgröße.
 
-Die Körperlänge wird robust aus den über das Video stabilen Rumpf- und Beinsegmenten geschätzt,
-nicht aus einem einzelnen möglicherweise fehlerhaften Frame.
+Die Körperlänge wird pro Frame als anatomische Bildkette aus Schultermitte, Hüftmitte, Knie und
+Knöchel geschätzt; verwendet wird der Median über das gesamte Video. Der Kletterer muss dafür nicht
+aufrecht stehen. `BL` ist damit eine stabile relative Vergleichslänge, aber keine gemessene reale
+Körpergröße.
 
 Echte `cm/s` oder `m/s` wären ohne Kalibrierung irreführend. Dafür brauchen wir später mindestens
 eine bekannte Strecke in der Wandebene und möglichst eine statische Kamera. Perspektivische Tiefe
@@ -750,8 +753,10 @@ Die Berechnung ist als reproduzierbare Cache-Stufe `80_move_metrics` implementie
 wird dafür nicht erneut ausgeführt. Neben Parquet wird zur einfachen Einsicht dasselbe Ergebnis als
 JSON gespeichert.
 
-Der Player zeigt für den ausgewählten Zug bereits mittlere und maximale Hand- und
-Körpergeschwindigkeit sowie die geschätzten Wege. Am Referenzvideo ergeben sich:
+Der Player zeigt für den ausgewählten Zug mittlere und maximale Hand- und Körpergeschwindigkeit,
+die geschätzten Wege und eine Kurve mit beiden Geschwindigkeiten pro Frame. Ein Cursor folgt beim
+Abspielen der aktuellen Position. Die zugweisen Zusammenfassungen stehen in `move_metrics.parquet`,
+die vollständigen Kurvenwerte in `move_speed_timeline.parquet`. Am Referenzvideo ergeben sich:
 
 | Zug | Ergebnis | Hand max. | Hand Ø | Körper max. | Körper Ø |
 |---:|---|---:|---:|---:|---:|

@@ -56,6 +56,7 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
         frames,
         MovePlayerConfig(),
         move_metrics=[{"move_id": 1, "hand_max_speed_px_s": 42.0}],
+        speed_timeline=[{"move_id": 1, "frame_idx": 0, "hand_speed_px_s": 20.0}],
         port=0,
     )
     thread = threading.Thread(target=player.httpd.serve_forever, daemon=True)
@@ -68,6 +69,7 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
         assert payload["session"]["moves"] == []
         assert payload["timeline"][2]["media_time"] == pytest.approx(0.2)
         assert payload["metrics"][0]["hand_max_speed_px_s"] == 42.0
+        assert payload["speed_timeline"][0]["frame_idx"] == 0
 
         range_request = Request(
             f"{origin}/video",
@@ -105,6 +107,7 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
         with urlopen(f"{origin}/api/session") as response:
             refreshed = json.load(response)
         assert refreshed["metrics"] == []
+        assert refreshed["speed_timeline"] == []
     finally:
         player.httpd.shutdown()
         player.httpd.server_close()

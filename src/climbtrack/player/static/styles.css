@@ -231,6 +231,78 @@ video {
   font-size: 0.7rem;
 }
 
+.speed-chart {
+  margin-top: 10px;
+  border-radius: 9px;
+  padding: 9px 10px 7px;
+  background: var(--raised);
+}
+
+.chart-legend,
+.chart-axis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.chart-legend {
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.chart-legend i {
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.hand-line {
+  background: var(--accent);
+}
+
+.body-line {
+  background: #7dc8ff;
+}
+
+.speed-chart svg {
+  display: block;
+  width: 100%;
+  margin: 4px 0 1px;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.hand-path {
+  stroke: var(--accent);
+}
+
+.body-path {
+  stroke: #7dc8ff;
+}
+
+.chart-cursor {
+  filter: drop-shadow(0 0 2px #000);
+  stroke: #fff;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
 .empty-state {
   border: 1px dashed var(--line);
   border-radius: 9px;

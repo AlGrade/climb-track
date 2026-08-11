@@ -7,7 +7,8 @@ const elements = Object.fromEntries(
     "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
     "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
     "handMaxSpeed", "handMaxSpeedPx", "bodyMaxSpeed", "bodyMaxSpeedPx",
-    "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath",
+    "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath", "speedChartWrap",
+    "handSpeedPath", "bodySpeedPath", "chartCursor", "chartScale", "chartDuration",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
@@ -16,6 +17,8 @@ const state = {
   timeline: [],
   settings: null,
   metrics: [],
+  speedTimeline: [],
+  chartSamples: [],
   selectedIndex: -1,
   draft: { start_frame: null, end_frame: null, moving_hand: null, outcome: "completed" },
   playbackEnd: null,
@@ -34,6 +37,7 @@ async function initialize() {
     state.timeline = payload.timeline;
     state.settings = payload.settings;
     state.metrics = payload.metrics || [];
+    state.speedTimeline = payload.speed_timeline || [];
     elements.video.src = payload.video.url;
     renderAll();
     setSaveState("Saved locally", "saved");
@@ -52,6 +56,7 @@ function renderAll() {
 
 function renderMetrics() {
   if (state.selectedIndex < 0 || !state.session.moves.length) {
+    state.chartSamples = [];
     elements.metricsCard.hidden = true;
     return;
   }
@@ -59,11 +64,14 @@ function renderMetrics() {
   const metrics = state.metrics.find((row) => row.move_id === move.move_id);
   elements.metricsCard.hidden = false;
   if (!metrics) {
+    state.chartSamples = [];
     elements.metricsGrid.hidden = true;
+    elements.speedChartWrap.hidden = true;
     elements.metricsNote.textContent = "Restart the player to recalculate.";
     return;
   }
   elements.metricsGrid.hidden = false;
+  elements.speedChartWrap.hidden = false;
   elements.handMaxSpeed.textContent = formatRelativeSpeed(metrics.hand_max_speed_body_lengths_s);
   elements.handMaxSpeedPx.textContent = `${metrics.hand_max_speed_px_s.toFixed(0)} px/s`;
   elements.bodyMaxSpeed.textContent = formatRelativeSpeed(metrics.body_max_speed_body_lengths_s);
@@ -73,6 +81,51 @@ function renderMetrics() {
   elements.bodyMeanSpeed.textContent = formatRelativeSpeed(metrics.body_mean_speed_body_lengths_s);
   elements.bodyPath.textContent = `Path ${metrics.body_path_length_px.toFixed(0)} px`;
   elements.metricsNote.textContent = "BL/s = body lengths per second";
+  renderSpeedChart(move);
+}
+
+function renderSpeedChart(move) {
+  const samples = state.speedTimeline.filter((sample) => sample.move_id === move.move_id);
+  state.chartSamples = samples;
+  if (samples.length < 2) {
+    elements.speedChartWrap.hidden = true;
+    return;
+  }
+  const width = 600;
+  const top = 8;
+  const bottom = 150;
+  const duration = samples[samples.length - 1].offset_seconds || 1;
+  const maximum = Math.max(
+    ...samples.map((sample) => sample.hand_speed_body_lengths_s),
+    ...samples.map((sample) => sample.body_speed_body_lengths_s),
+    0.01,
+  );
+  const scaleMaximum = maximum * 1.08;
+  const pathFor = (key) => samples.map((sample, index) => {
+    const x = (sample.offset_seconds / duration) * width;
+    const y = bottom - (sample[key] / scaleMaximum) * (bottom - top);
+    return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(" ");
+  elements.handSpeedPath.setAttribute("d", pathFor("hand_speed_body_lengths_s"));
+  elements.bodySpeedPath.setAttribute("d", pathFor("body_speed_body_lengths_s"));
+  elements.chartScale.textContent = `0–${scaleMaximum.toFixed(1)} BL/s`;
+  elements.chartDuration.textContent = `${duration.toFixed(2)} s`;
+  updateChartCursor();
+}
+
+function updateChartCursor() {
+  if (state.selectedIndex < 0 || state.chartSamples.length < 2) {
+    elements.chartCursor.setAttribute("visibility", "hidden");
+    return;
+  }
+  const move = state.session.moves[state.selectedIndex];
+  const offset = elements.video.currentTime - mediaTime(move.start_frame);
+  const duration = state.chartSamples[state.chartSamples.length - 1].offset_seconds;
+  const clampedOffset = Math.max(0, Math.min(offset, duration));
+  const x = (clampedOffset / duration) * 600;
+  elements.chartCursor.setAttribute("visibility", "visible");
+  elements.chartCursor.setAttribute("x1", x.toFixed(2));
+  elements.chartCursor.setAttribute("x2", x.toFixed(2));
 }
 
 function formatRelativeSpeed(value) {
@@ -302,6 +355,7 @@ async function persistMoves(edits, selectedEdit) {
     if (!response.ok) throw new Error(payload.error || `Save failed (${response.status})`);
     state.session = payload.session;
     state.metrics = [];
+    state.speedTimeline = [];
     if (selectedEdit) {
       state.selectedIndex = state.session.moves.findIndex((move) =>
         move.start_frame === selectedEdit.start_frame
@@ -335,6 +389,7 @@ function updateReadout() {
   const frame = nearestFrame();
   elements.currentTime.textContent = formatTime(elements.video.currentTime);
   elements.currentFrame.textContent = frame ? String(frame.frame_idx) : "–";
+  updateChartCursor();
 }
 
 function formatTime(seconds) {

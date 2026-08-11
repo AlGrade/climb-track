@@ -51,6 +51,21 @@ MOVE_METRICS_SCHEMA = pa.schema(
     metadata={b"climbtrack.schema": MOVE_METRICS_SCHEMA_VERSION.encode()},
 )
 
+MOVE_SPEED_TIMELINE_SCHEMA_VERSION = "1.0.0"
+MOVE_SPEED_TIMELINE_SCHEMA = pa.schema(
+    [
+        pa.field("move_id", pa.int64(), nullable=False),
+        pa.field("frame_idx", pa.int64(), nullable=False),
+        pa.field("timestamp", pa.float64(), nullable=False),
+        pa.field("offset_seconds", pa.float64(), nullable=False),
+        pa.field("hand_speed_px_s", pa.float64(), nullable=False),
+        pa.field("hand_speed_body_lengths_s", pa.float64(), nullable=False),
+        pa.field("body_speed_px_s", pa.float64(), nullable=False),
+        pa.field("body_speed_body_lengths_s", pa.float64(), nullable=False),
+    ],
+    metadata={b"climbtrack.schema": MOVE_SPEED_TIMELINE_SCHEMA_VERSION.encode()},
+)
+
 
 def write_move_metrics_parquet(metrics: Iterable[Mapping[str, Any]], path: Path) -> None:
     """Atomically write per-move kinematics."""
@@ -65,4 +80,22 @@ def read_move_metrics_parquet(path: Path) -> list[dict[str, Any]]:
     table = pq.read_table(path)
     if not table.schema.equals(MOVE_METRICS_SCHEMA, check_metadata=True):
         raise SchemaValidationError(f"Unexpected move metrics schema: {path}")
+    return table.to_pylist()
+
+
+def write_move_speed_timeline_parquet(samples: Iterable[Mapping[str, Any]], path: Path) -> None:
+    """Atomically write per-frame hand and body speed samples."""
+    table = pa.Table.from_pylist(
+        [dict(sample) for sample in samples], schema=MOVE_SPEED_TIMELINE_SCHEMA
+    )
+    temporary = path.with_name(f".{path.name}.part")
+    pq.write_table(table, temporary, compression="zstd", version="2.6")
+    temporary.replace(path)
+
+
+def read_move_speed_timeline_parquet(path: Path) -> list[dict[str, Any]]:
+    """Read per-frame speeds and reject schema drift."""
+    table = pq.read_table(path)
+    if not table.schema.equals(MOVE_SPEED_TIMELINE_SCHEMA, check_metadata=True):
+        raise SchemaValidationError(f"Unexpected move speed timeline schema: {path}")
     return table.to_pylist()

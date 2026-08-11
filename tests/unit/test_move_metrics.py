@@ -6,7 +6,9 @@ from climbtrack.config import MoveMetricsConfig
 from climbtrack.moves import calculate_move_metrics
 from climbtrack.schema.move_metrics import (
     read_move_metrics_parquet,
+    read_move_speed_timeline_parquet,
     write_move_metrics_parquet,
+    write_move_speed_timeline_parquet,
 )
 
 
@@ -79,9 +81,20 @@ def test_calculates_vfr_ready_hand_and_body_speeds(tmp_path: Path) -> None:
     assert metric["body_path_length_px"] == pytest.approx(12.0)
     assert metric["body_mean_speed_px_s"] == pytest.approx(20.0)
     assert metric["support_hand_relative_path_length_px"] == pytest.approx(12.0)
+    assert len(result.speed_timeline) == 7
+    assert result.diagnostics["speed_samples"] == 7
+    assert result.speed_timeline[0]["frame_idx"] == 2
+    assert result.speed_timeline[-1]["frame_idx"] == 8
+    assert result.speed_timeline[3]["hand_speed_px_s"] == pytest.approx(100.0)
 
     path = tmp_path / "move_metrics.parquet"
     write_move_metrics_parquet(result.metrics, path)
     restored = read_move_metrics_parquet(path)
     assert restored[0]["move_id"] == 1
     assert restored[0]["hand_max_speed_px_s"] == pytest.approx(100.0)
+
+    timeline_path = tmp_path / "move_speed_timeline.parquet"
+    write_move_speed_timeline_parquet(result.speed_timeline, timeline_path)
+    timeline = read_move_speed_timeline_parquet(timeline_path)
+    assert timeline[0]["frame_idx"] == 2
+    assert timeline[-1]["body_speed_px_s"] == pytest.approx(20.0)

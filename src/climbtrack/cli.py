@@ -35,7 +35,10 @@ from climbtrack.player import create_player_server, run_player_server
 from climbtrack.provenance import executable_version
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.keypoints import read_registry
-from climbtrack.schema.move_metrics import read_move_metrics_parquet
+from climbtrack.schema.move_metrics import (
+    read_move_metrics_parquet,
+    read_move_speed_timeline_parquet,
+)
 from climbtrack.schema.moves import read_moves_parquet
 from climbtrack.schema.tracks import read_tracks
 from climbtrack.selection.click import choose_track_by_click
@@ -539,6 +542,9 @@ def player(
             False,
         )
         move_metrics = read_move_metrics_parquet(metrics_result.path / "move_metrics.parquet")
+        speed_timeline = read_move_speed_timeline_parquet(
+            metrics_result.path / "move_speed_timeline.parquet"
+        )
         frames = read_frame_index(ingest_result.path / "frames.parquet")
         server = create_player_server(
             skeleton.path / "skeleton_raw_overlay.mp4",
@@ -546,6 +552,7 @@ def player(
             frames,
             context.config.move_player,
             move_metrics=move_metrics,
+            speed_timeline=speed_timeline,
             port=port,
         )
         state = "created" if created else "resumed"
@@ -893,10 +900,10 @@ def _move_metrics_table(metrics: list[dict[str, object]]) -> Table:
         table.add_row(
             str(row["move_id"]),
             str(row["outcome"]),
-            f"{float(row['hand_max_speed_body_lengths_s']):.2f} KL/s",
-            f"{float(row['hand_mean_speed_body_lengths_s']):.2f} KL/s",
-            f"{float(row['body_max_speed_body_lengths_s']):.2f} KL/s",
-            f"{float(row['body_mean_speed_body_lengths_s']):.2f} KL/s",
+            f"{float(row['hand_max_speed_body_lengths_s']):.2f} BL/s",
+            f"{float(row['hand_mean_speed_body_lengths_s']):.2f} BL/s",
+            f"{float(row['body_max_speed_body_lengths_s']):.2f} BL/s",
+            f"{float(row['body_mean_speed_body_lengths_s']):.2f} BL/s",
         )
     return table
 

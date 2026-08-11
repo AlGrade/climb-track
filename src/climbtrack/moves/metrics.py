@@ -34,9 +34,10 @@ BODY_POINTS = (
 
 @dataclass(frozen=True)
 class MoveMetricsResult:
-    """Canonical metric rows and calculation diagnostics."""
+    """Canonical summary rows, per-frame speeds, and calculation diagnostics."""
 
     metrics: list[dict[str, Any]]
+    speed_timeline: list[dict[str, Any]]
     diagnostics: dict[str, Any]
 
 
@@ -72,6 +73,7 @@ def calculate_move_metrics(
     torso_speed = _speed(torso, timestamps, config.speed_window_radius)
 
     rows = []
+    speed_timeline = []
     for move in moves:
         start = int(move["start_frame"])
         end = int(move["end_frame"])
@@ -125,11 +127,26 @@ def calculate_move_metrics(
             "support_hand_relative_path_length_px": support_path,
         }
         rows.append(row)
+        speed_timeline.extend(
+            {
+                "move_id": int(move["move_id"]),
+                "frame_idx": frame,
+                "timestamp": float(timestamps[frame]),
+                "offset_seconds": float(timestamps[frame] - timestamps[start]),
+                "hand_speed_px_s": float(hand_speed[frame]),
+                "hand_speed_body_lengths_s": float(hand_speed[frame] / body_length),
+                "body_speed_px_s": float(torso_speed[frame]),
+                "body_speed_body_lengths_s": float(torso_speed[frame] / body_length),
+            }
+            for frame in range(start, end + 1)
+        )
 
     return MoveMetricsResult(
         metrics=rows,
+        speed_timeline=speed_timeline,
         diagnostics={
             "moves": len(rows),
+            "speed_samples": len(speed_timeline),
             "frames": len(timestamps),
             "body_length_px": body_length,
             "position_smoothing_radius": config.position_smoothing_radius,

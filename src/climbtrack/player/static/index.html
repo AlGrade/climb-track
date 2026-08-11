@@ -53,6 +53,24 @@
               <small id="bodyPath">–</small>
             </div>
           </div>
+          <div id="speedChartWrap" class="speed-chart">
+            <div class="chart-legend">
+              <span><i class="hand-line"></i>Hand</span>
+              <span><i class="body-line"></i>Body</span>
+            </div>
+            <svg id="speedChart" viewBox="0 0 600 170" role="img" aria-label="Speed per frame">
+              <line class="chart-grid" x1="0" y1="150" x2="600" y2="150"></line>
+              <line class="chart-grid" x1="0" y1="80" x2="600" y2="80"></line>
+              <path id="bodySpeedPath" class="chart-path body-path"></path>
+              <path id="handSpeedPath" class="chart-path hand-path"></path>
+              <line id="chartCursor" class="chart-cursor" x1="0" y1="8" x2="0" y2="150" visibility="hidden"></line>
+            </svg>
+            <div class="chart-axis">
+              <span>0 s</span>
+              <span id="chartScale">–</span>
+              <span id="chartDuration">–</span>
+            </div>
+          </div>
           <p id="metricsNote" class="metrics-note"></p>
         </section>
 

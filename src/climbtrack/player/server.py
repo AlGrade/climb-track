@@ -42,6 +42,7 @@ class _PlayerState:
     frames: list[dict[str, Any]]
     config: MovePlayerConfig
     move_metrics: tuple[dict[str, Any], ...]
+    speed_timeline: tuple[dict[str, Any], ...]
     metrics_revision: int
     lock: threading.Lock
 
@@ -53,6 +54,7 @@ def create_player_server(
     config: MovePlayerConfig,
     *,
     move_metrics: list[dict[str, Any]] | None = None,
+    speed_timeline: list[dict[str, Any]] | None = None,
     port: int | None = None,
 ) -> PlayerServer:
     """Bind a local player server without starting its request loop."""
@@ -67,6 +69,7 @@ def create_player_server(
         frames=frames,
         config=config,
         move_metrics=tuple(move_metrics or []),
+        speed_timeline=tuple(speed_timeline or []),
         metrics_revision=load_move_session(session_path).revision,
         lock=threading.Lock(),
     )
@@ -190,6 +193,11 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
                     "session": session.model_dump(mode="json"),
                     "metrics": (
                         list(state.move_metrics)
+                        if session.revision == state.metrics_revision
+                        else []
+                    ),
+                    "speed_timeline": (
+                        list(state.speed_timeline)
                         if session.revision == state.metrics_revision
                         else []
                     ),

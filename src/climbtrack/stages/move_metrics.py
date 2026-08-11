@@ -9,12 +9,15 @@ from climbtrack.config import AppConfig
 from climbtrack.hashing import fingerprint_file, hash_json
 from climbtrack.moves.metrics import calculate_move_metrics
 from climbtrack.provenance import git_state, runtime_state
-from climbtrack.schema.move_metrics import write_move_metrics_parquet
+from climbtrack.schema.move_metrics import (
+    write_move_metrics_parquet,
+    write_move_speed_timeline_parquet,
+)
 from climbtrack.schema.moves import read_moves_parquet
 from climbtrack.schema.pose import read_pose_parquet
 
 STAGE_NAME = "80_move_metrics"
-STAGE_VERSION = "1.0.0"
+STAGE_VERSION = "1.1.0"
 
 
 def measure_moves(
@@ -46,6 +49,10 @@ def measure_moves(
         moves = read_moves_parquet(moves_path)
         result = calculate_move_metrics(pose_records, moves, config.move_metrics)
         write_move_metrics_parquet(result.metrics, output / "move_metrics.parquet")
+        write_move_speed_timeline_parquet(
+            result.speed_timeline,
+            output / "move_speed_timeline.parquet",
+        )
         (output / "move_metrics.json").write_text(
             json.dumps(result.metrics, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
