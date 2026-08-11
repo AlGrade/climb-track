@@ -44,6 +44,11 @@ Die Milestones 1 bis 5 sind implementiert, am Video `best go.mp4` ausgeführt un
 | 5 – Verbessern | Confidence-Gating, Ausreißer-/Swap-Erkennung, Interpolation und One-Euro-Filter | Kurze Fehler werden repariert, ohne schnelle echte Kletterbewegungen glattzubügeln. |
 | 6 – übersprungen | ViTPose-Vergleichsbackend | Wird vorerst nicht gebaut; Phase 2 verwendet die vorhandenen refined Sapiens-Daten. |
 
+Phase 2 hat begonnen. **P2.1 – Zugdefinition, Datenformat und lokaler Zug-Player** ist
+implementiert; die Grenzen wurden in **P2.2** am Referenzvideo kontrolliert und nachgeschärft. Der
+Player wird aus dem refined Skelett automatisch mit Zugkandidaten befüllt; manuelle Bearbeitung ist
+nur noch eine optionale Kontrolle.
+
 ### Resultat am Referenzvideo
 
 Das Referenzvideo hat 1.648 Frames, variable Framerate und eine Dauer von rund 27,5 Sekunden.
@@ -219,6 +224,12 @@ uv run climbtrack render-comparison "/path/to/video.mp4" --config configs/defaul
 
 # Vorhandene vollständige Cache-Einträge anzeigen
 uv run climbtrack cache-list --config configs/default.yaml
+
+# Lokalen Phase-2-Zug-Player öffnen
+uv run climbtrack player "/path/to/video.mp4" --config configs/default.yaml
+
+# Nur die automatische Zugerkennung ausführen
+uv run climbtrack detect-moves "/path/to/video.mp4" --config configs/default.yaml
 ```
 
 ## Falls die falsche Person ausgewählt wird
@@ -397,6 +408,9 @@ cache/
 ├── 40_refine/<key>/
 │   ├── pose_refined.parquet
 │   └── summary.json
+├── 70_moves/<key>/
+│   ├── moves_auto.parquet
+│   └── summary.json
 ├── 50_render_tracks/<key>/tracking_overlay.mp4
 ├── 50_render_pose/<key>/skeleton_raw_overlay.mp4
 └── 50_render_compare/<key>/raw_vs_refined.mp4
@@ -404,7 +418,9 @@ cache/
 annotations/<video-session>/
 ├── ground_truth.json
 ├── evaluation.json
-└── evaluation_refined.json
+├── evaluation_refined.json
+├── moves_ground_truth.json
+└── moves.parquet
 ```
 
 Die großen PNG-Frames befinden sich also unter `cache/00_ingest/<key>/frames/`. Beim Referenzlauf
@@ -484,6 +500,8 @@ src/climbtrack/
 ├── backends/               YOLO11x, ByteTrack und Sapiens2
 ├── cache/                  Cache-Manifeste, atomare Speicherung und Abhängigkeiten
 ├── model_downloads/        explizite, geprüfte Modelldownloads
+├── moves/                  automatische Zugerkennung und korrigierbare Ground Truth
+├── player/                 lokaler Browser-Player, API und statische Oberfläche
 ├── refinement/             One-Euro-Filter und zeitliche Reparaturlogik
 ├── rendering/              gemeinsame Pose- und VFR-Videodarstellung
 ├── schema/                 kanonische Parquet- und Keypoint-Schemas
@@ -525,10 +543,11 @@ uv run ruff format --check .
 uv run pytest
 ```
 
-Aktueller Stand: 51 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
+Aktueller Stand: 65 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
 Zeitstempel, Schemas, Scoring, ByteTrack, Pose-Crops, Pose-Resume, Keypoint-Registry, VFR-Rendering,
-Annotation/Evaluation, Confidence-Gating, Interpolation, Swap-/Ausreißerlogik und One-Euro-Filter.
-Neuronale Vollinferenz wird wegen Laufzeit und Modellgröße nicht im automatischen Test ausgeführt.
+Annotation/Evaluation, Move-Schema, Video-Range-Streaming, revisionssicheres Speichern,
+Confidence-Gating, Interpolation, Swap-/Ausreißerlogik und One-Euro-Filter. Neuronale Vollinferenz
+wird wegen Laufzeit und Modellgröße nicht im automatischen Test ausgeführt.
 
 ## Bekannte Grenzen
 
@@ -596,9 +615,10 @@ angenommenen konstanten FPS berechnet.
 
 ### Phase-2-Milestones
 
-#### P2.1 – Zugdefinition, Datenformat und Zug-Player
+#### P2.1 – Zugdefinition, Datenformat und Zug-Player (implementiert)
 
-Erstes sichtbares Ergebnis ist ein lokaler Player mit zwei Betriebsarten:
+Erstes sichtbares Ergebnis ist ein lokaler Player, der das Video mit eingezeichnetem Skelett zeigt
+und zwei Betriebsarten anbietet:
 
 - **Zugmodus:** genau einen Zug abspielen und am Ende automatisch pausieren;
 - **Gesamtvideo:** das komplette Video normal abspielen.
@@ -607,35 +627,83 @@ Im Zugmodus gibt es **Zurück**, **Wiederholen** und **Weiter**. Zusätzlich sin
 Frame-Schritte und die Anzeige von Zugnummer, Hand, Start- und Endzeit vorgesehen. Start, Ende und
 Handzuordnung können korrigiert werden; die Änderungen werden separat als Ground Truth gespeichert.
 
-Vor dem automatischen Erkennen werden die Züge des Referenzvideos einmal mit diesem Player markiert.
-Dadurch entsteht eine kleine Wahrheitstabelle, gegen die wir die Automatik später messen können.
+Beim Start lädt der Player `pose_refined.parquet`, bildet pro Hand einen robusten Handflächenpunkt
+und erkennt Übergänge zwischen stabilen Positionen automatisch. Bereits fertige Pose- und
+Refinement-Caches werden wiederverwendet; Sapiens läuft nicht erneut. Auf dem Referenzvideo erkennt
+die aktuelle Konfiguration zwei abgeschlossene Handzüge und einen gescheiterten letzten Zug. Ein
+erfolgreicher Zug endet nicht schon beim neuen Handkontakt, sondern erst, wenn sich auch Körper und
+Beine beruhigt haben oder der nächste Zug beginnt. Bei einem Fehlversuch ersetzt der Sturz die sonst
+erforderliche stabile Endposition: Der Abschnitt reicht von der Vorbereitung bis zum tiefsten Punkt
+des Falls.
 
-Vorgesehenes Zug-Schema:
+Für die sichtbare Wiedergabe verwendet der Player das bereits gecachte
+`skeleton_raw_overlay.mp4`. Die Zuggrenzen selbst werden weiterhin aus den zeitlich geglätteten
+Skelettdaten in `pose_refined.parquet` berechnet. Dadurch ist das Skelett im Player sichtbar, ohne
+das Modell oder das Video erneut zu berechnen.
+
+Die automatisch erkannten Abschnitte im Referenzvideo sind aktuell:
+
+1. rechte Hand, `3,67–7,13 s`, abgeschlossen;
+2. linke Hand, `7,13–12,09 s`, abgeschlossen;
+3. linke Hand, `23,95–26,64 s`, Sturz.
+
+Player starten:
+
+```bash
+uv run climbtrack player "/path/to/video.mp4" --config configs/default.yaml
+```
+
+Der Befehl öffnet eine ausschließlich an `127.0.0.1` gebundene Browser-Oberfläche. Der Terminal
+muss währenddessen geöffnet bleiben; `Ctrl+C` beendet den lokalen Player. Falls kein Browser
+automatisch geöffnet werden soll, `--no-open-browser` verwenden und den ausgegebenen Link manuell
+öffnen. Der Link enthält ein zufälliges Sitzungstoken. Ist der konfigurierte Port belegt, probiert
+der Player automatisch den nächsten lokalen Port; mit `--port 9000` kann ein Port erzwungen werden.
+
+Der Player speichert jede Änderung sofort und atomar in:
+
+```text
+annotations/<video-session>/moves_ground_truth.json
+annotations/<video-session>/moves.parquet
+```
+
+`cache/70_moves/<key>/moves_auto.parquet` enthält die unveränderten automatischen Kandidaten. JSON
+im Annotation-Ordner ist die korrigierbare Sitzung; das dortige Parquet enthält denselben aktuellen
+Stand für die spätere Metrikpipeline. Eine Revisionsnummer verhindert, dass zwei gleichzeitig
+offene Browser-Tabs unbemerkt Änderungen überschreiben.
+
+Kanonisches Zug-Schema:
 
 ```text
 move_id, start_frame, end_frame, start_timestamp, end_timestamp,
-moving_hand, confidence, source, is_reviewed
+moving_hand, confidence, source, is_reviewed, outcome
 ```
 
-#### P2.2 – Automatische Zugerkennung
+`outcome` unterscheidet `completed` (abgeschlossener Zug) von `fall` (gescheiterter Zug mit Sturz).
 
-Die Erkennung kombiniert mehrere zeitliche Signale statt eines einzelnen Geschwindigkeitswerts:
+#### P2.2 – Automatische Zugerkennung evaluieren und tunen (Referenzvideo abgeschlossen)
 
-- Handgeschwindigkeit und Handbeschleunigung;
+Eine konservative erste automatische Erkennung ist bereits Teil von P2.1. Sie kombiniert:
+
+- Handgeschwindigkeit aus den echten Quellzeitstempeln;
 - stabile Phasen vor und nach der Bewegung;
+- das Nachschwingen von Körper und Beinen nach dem Handkontakt;
 - Mindestweg und Mindestdauer;
-- zeitliche Überlappung der linken und rechten Hand;
-- Confidence und Missing-Status der Posepunkte;
-- Bewegung der Hand relativ zum Rumpf, damit reine Ganzkörperbewegung nicht automatisch als neuer
-  Handzug zählt.
+- eine robuste, aus mehreren Punkten gebildete Handflächenposition;
+- körpergrößennormierte Schwellenwerte.
+
+Ein terminaler Fehlversuch wird gesondert erkannt, weil nach ihm naturgemäß keine neue stabile
+Handposition mehr existiert. Dazu kombiniert die Erkennung das Lösen der Hand mit der deutlichen
+Abwärtsbewegung des Rumpfs und markiert den Zug als `fall`.
 
 Als Handposition dient nicht eine einzelne Fingerspitze. Dafür wird ein robuster Handflächenpunkt
 aus Handgelenk und mehreren verfügbaren Handpunkten gebildet. So erzeugt das natürliche Zittern
 einzelner Finger nicht fälschlich einen neuen Zug.
 
-Automatisch erkannte Züge werden gegen die manuell markierten Grenzen geprüft. Ziel für das erste
-Referenzvideo sind die korrekte Anzahl und Handseite sowie ein medianer Grenzfehler von höchstens
-0,15 Sekunden. Unsichere Fälle werden markiert und nicht als sicher verkauft.
+Am Referenzvideo wurden Anzahl, Handseite und Zuggrenzen im Player kontrolliert. Dieses Feedback hat
+die Startschwelle, das Ende nach der Körperberuhigung und die Sonderbehandlung eines terminalen
+Sturzes festgelegt. Ergebnis sind zwei abgeschlossene Züge und ein als `fall` markierter Fehlzug.
+Für weitere Videos bleibt die manuelle Kontrolle als Sicherheitsnetz bestehen; beidhändige
+Überlappung und explizite Unsicherheitswarnungen sind mögliche spätere Erweiterungen.
 
 #### P2.3 – Geschwindigkeiten pro Zug
 
@@ -699,10 +767,10 @@ werden, damit einzelne Züge später einfach verglichen werden können.
 
 ### Empfohlene Reihenfolge
 
-Wir beginnen mit **P2.1**: einem einfachen lokalen Zug-Player, in dem die Zuggrenzen des
-Referenzvideos manuell markiert und bequem vor/zurück abgespielt werden können. Erst danach bauen
-wir P2.2, die automatische Erkennung. Geschwindigkeit und Winkel folgen erst, wenn die Segmente
-verlässlich sind; sonst würden präzise aussehende Zahlen dem falschen Zug zugeordnet.
+**P2.1** schlägt die Züge automatisch vor und spielt sie bequem vor/zurück ab. In **P2.2** werden
+nur noch offensichtliche Fehler korrigiert und die Erkennung dagegen gemessen. Geschwindigkeit und
+Winkel folgen erst, wenn die Segmente verlässlich sind; sonst würden präzise aussehende Zahlen dem
+falschen Zug zugeordnet.
 
 ### Vorläufige Annahmen für Phase 2
 

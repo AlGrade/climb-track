@@ -244,6 +244,34 @@ class RefineConfig(StrictModel):
         return self
 
 
+class MovePlayerConfig(StrictModel):
+    """Local-only Phase-2 move player settings."""
+
+    host: str = Field(default="127.0.0.1", pattern=r"^127\.0\.0\.1$")
+    port: int = Field(default=8765, ge=1024, le=65_535)
+    lead_in_seconds: float = Field(default=0.25, ge=0.0, le=2.0)
+    lead_out_seconds: float = Field(default=0.25, ge=0.0, le=2.0)
+
+
+class MoveDetectionConfig(StrictModel):
+    """Scale-normalized automatic hand-move segmentation settings."""
+
+    position_smoothing_radius: int = Field(default=4, ge=1, le=30)
+    speed_window_radius: int = Field(default=7, ge=1, le=60)
+    stable_speed_body_lengths_per_second: float = Field(default=0.18, gt=0.0, le=2.0)
+    start_speed_body_lengths_per_second: float = Field(default=0.45, gt=0.0, le=5.0)
+    minimum_stable_seconds: float = Field(default=0.50, ge=0.1, le=5.0)
+    maximum_stable_gap_seconds: float = Field(default=0.18, ge=0.0, le=1.0)
+    same_hold_radius_body_lengths: float = Field(default=0.12, gt=0.0, le=1.0)
+    minimum_displacement_body_lengths: float = Field(default=0.25, gt=0.0, le=2.0)
+    minimum_move_seconds: float = Field(default=0.10, gt=0.0, le=2.0)
+    maximum_move_seconds: float = Field(default=6.0, gt=0.1, le=30.0)
+    body_motion_quantile: float = Field(default=0.70, ge=0.5, le=1.0)
+    body_stable_speed_body_lengths_per_second: float = Field(default=0.40, gt=0.0, le=5.0)
+    minimum_body_stable_seconds: float = Field(default=0.50, ge=0.1, le=5.0)
+    fall_minimum_drop_body_lengths: float = Field(default=0.50, gt=0.0, le=5.0)
+
+
 class RenderConfig(StrictModel):
     """Tracking quality-control video settings."""
 
@@ -270,6 +298,8 @@ class AppConfig(StrictModel):
     pose_render: PoseRenderConfig = PoseRenderConfig()
     annotation: AnnotationConfig = AnnotationConfig()
     refine: RefineConfig = RefineConfig()
+    move_player: MovePlayerConfig = MovePlayerConfig()
+    move_detection: MoveDetectionConfig = MoveDetectionConfig()
     models: ModelsConfig
 
 

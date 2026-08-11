@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ClimbTrack Zug-Player</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">CLIMBTRACK · PHASE 2</span>
+        <h1>Zug-Player</h1>
+      </div>
+      <div class="save-state" id="saveState" data-state="loading">Wird geladen …</div>
+    </header>
+
+    <main class="workspace">
+      <section class="video-column" aria-label="Videoplayer">
+        <div class="video-shell">
+          <video id="video" preload="metadata" controls playsinline></video>
+          <div class="video-label">
+            <span id="videoName">Video</span>
+            <strong id="activeMove">Gesamtvideo</strong>
+          </div>
+        </div>
+
+        <div class="readout" aria-live="polite">
+          <div><span>Zeit</span><strong id="currentTime">00:00.000</strong></div>
+          <div><span>Frame</span><strong id="currentFrame">–</strong></div>
+          <div><span>Züge</span><strong id="moveCount">0</strong></div>
+        </div>
+
+        <div class="transport" aria-label="Zugnavigation">
+          <button id="previousMove" class="secondary">← Voriger Zug</button>
+          <button id="replayMove" class="primary">▶ Zug abspielen</button>
+          <button id="nextMove" class="secondary">Nächster Zug →</button>
+          <button id="playAll" class="ghost">Ganzes Video</button>
+        </div>
+
+        <div class="frame-controls" aria-label="Frame-Steuerung">
+          <button id="previousFrame" class="ghost">− 1 Frame</button>
+          <button id="togglePlayback" class="ghost">Play / Pause</button>
+          <button id="nextFrame" class="ghost">+ 1 Frame</button>
+          <label>
+            Tempo
+            <select id="playbackRate">
+              <option value="0.25">0,25×</option>
+              <option value="0.5">0,5×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.5">1,5×</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="editor-card">
+          <div class="section-heading">
+            <div>
+              <span class="step">ZUGGRENZEN</span>
+              <h2 id="editorTitle">Neuen Zug markieren</h2>
+            </div>
+            <button id="resetDraft" class="text-button">Leeren</button>
+          </div>
+
+          <p class="hint">
+            Automatisch erkannt. Falls nötig: Start am Bewegungsbeginn und Ende erst nach der
+            Körperbewegung korrigieren.
+          </p>
+
+          <div class="boundary-grid">
+            <button id="setStart" class="boundary-button">
+              <span>START SETZEN</span>
+              <strong id="startValue">Noch offen</strong>
+            </button>
+            <button id="setEnd" class="boundary-button">
+              <span>ENDE SETZEN</span>
+              <strong id="endValue">Noch offen</strong>
+            </button>
+          </div>
+
+          <fieldset class="hand-picker">
+            <legend>Welche Hand bewegt sich?</legend>
+            <div>
+              <button type="button" data-hand="left">Links</button>
+              <button type="button" data-hand="right">Rechts</button>
+              <button type="button" data-hand="both">Beide</button>
+            </div>
+          </fieldset>
+
+          <div class="editor-actions">
+            <button id="saveMove" class="primary wide" disabled>Zug speichern</button>
+            <button id="deleteMove" class="danger" hidden>Löschen</button>
+          </div>
+          <p class="validation" id="validationMessage" aria-live="polite"></p>
+        </section>
+
+        <section class="moves-card">
+          <div class="section-heading">
+            <div>
+              <span class="step">GROUND TRUTH</span>
+              <h2>Markierte Züge</h2>
+            </div>
+          </div>
+          <div id="emptyMoves" class="empty-state">
+            Noch kein Zug markiert. Setze links im Video Start und Ende des ersten Handzugs.
+          </div>
+          <ol id="moveList" class="move-list"></ol>
+        </section>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Alles bleibt lokal auf diesem Mac.</span>
+      <span>Tastatur: Leertaste = Play/Pause · ←/→ = Frame</span>
+    </footer>
+
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

@@ -99,6 +99,28 @@ refine:
   swap_cost_ratio: 0.35
   swap_minimum_jump_scale: 0.20
 
+move_player:
+  host: 127.0.0.1
+  port: 8765
+  lead_in_seconds: 0.25
+  lead_out_seconds: 0.25
+
+move_detection:
+  position_smoothing_radius: 4
+  speed_window_radius: 7
+  stable_speed_body_lengths_per_second: 0.18
+  start_speed_body_lengths_per_second: 0.45
+  minimum_stable_seconds: 0.50
+  maximum_stable_gap_seconds: 0.18
+  same_hold_radius_body_lengths: 0.12
+  minimum_displacement_body_lengths: 0.25
+  minimum_move_seconds: 0.10
+  maximum_move_seconds: 6.0
+  body_motion_quantile: 0.70
+  body_stable_speed_body_lengths_per_second: 0.40
+  minimum_body_stable_seconds: 0.50
+  fall_minimum_drop_body_lengths: 0.50
+
 models:
   primary_pose_backend: sapiens2
   yolo11:

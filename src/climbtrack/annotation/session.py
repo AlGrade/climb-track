@@ -1,7 +1,6 @@
 """Versioned, editable annotation sessions initialized from raw pose predictions."""
 
 import json
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -9,6 +8,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from climbtrack.annotation.keypoints import annotation_keypoints
+from climbtrack.annotation.paths import annotation_session_dir
 from climbtrack.annotation.selection import select_annotation_frames
 from climbtrack.cache import CacheResult
 from climbtrack.config import AppConfig
@@ -96,7 +96,11 @@ def prepare_session(
         minimum_spacing_seconds=config.annotation.minimum_spacing_seconds,
     )
     source_video = Path(str(ingest.manifest.input_fingerprint["path"]))
-    session_dir = annotation_root / (f"{_slug(source_video.stem)}-{ingest.manifest.cache_key[:12]}")
+    session_dir = annotation_session_dir(
+        annotation_root,
+        source_video,
+        ingest.manifest.cache_key,
+    )
     session_path = session_dir / "ground_truth.json"
     if session_path.is_file():
         existing = load_session(session_path)
@@ -214,8 +218,3 @@ def _validate_identity(
             "Existing annotations belong to different cached inputs; move the annotation "
             "directory aside before starting a new session."
         )
-
-
-def _slug(value: str) -> str:
-    slug = re.sub(r"[^a-zA-Z0-9._-]+", "-", value).strip("-.")
-    return slug or "video"

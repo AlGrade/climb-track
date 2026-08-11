@@ -1,0 +1,50 @@
+{
+  "automatic_moves_cache_key": "6aa4105f30f551cc6bf6a476dbab9099866c00bbbc253444330565393d9c2dbf",
+  "created_at": "2026-08-11T13:48:01.188449+00:00",
+  "first_timestamp": 0.0117,
+  "frame_count": 1648,
+  "ingest_cache_key": "c0ed8c9ed3ecd60618842b612490dba17d8d0077d9d61ea7e0eedadc95d4339f",
+  "last_timestamp": 27.526689,
+  "moves": [
+    {
+      "confidence": 0.8300000000000001,
+      "end_frame": 426,
+      "end_timestamp": 7.128478,
+      "is_reviewed": false,
+      "move_id": 1,
+      "moving_hand": "right",
+      "outcome": "completed",
+      "source": "automatic",
+      "start_frame": 219,
+      "start_timestamp": 3.670267
+    },
+    {
+      "confidence": 0.8300000000000001,
+      "end_frame": 723,
+      "end_timestamp": 12.090167,
+      "is_reviewed": false,
+      "move_id": 2,
+      "moving_hand": "left",
+      "outcome": "completed",
+      "source": "automatic",
+      "start_frame": 426,
+      "start_timestamp": 7.128478
+    },
+    {
+      "confidence": 0.75,
+      "end_frame": 1594,
+      "end_timestamp": 26.641178,
+      "is_reviewed": false,
+      "move_id": 3,
+      "moving_hand": "left",
+      "outcome": "fall",
+      "source": "automatic",
+      "start_frame": 1433,
+      "start_timestamp": 23.951578
+    }
+  ],
+  "revision": 0,
+  "schema_version": "1.1.0",
+  "source_video_name": "best go.mp4",
+  "updated_at": "2026-08-11T14:29:31.662565+00:00"
+}

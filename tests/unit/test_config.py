@@ -55,6 +55,9 @@ models:
     assert config.pose.multi_scale_tta == (1.0, 1.125)
     assert config.refine.smoothing_groups == ("left_hand", "right_hand")
     assert config.refine.confidence_threshold_overrides["feet"] == 0.05
+    assert config.move_player.host == "127.0.0.1"
+    assert config.move_player.port == 8765
+    assert config.move_detection.minimum_stable_seconds == 0.5
     assert resolve_cache_dir(config, config_path) == tmp_path / "cache"
 
 

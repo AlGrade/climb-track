@@ -30,13 +30,17 @@ from climbtrack.model_downloads import (
     verify_sapiens2_checkpoint,
     verify_yolo11_checkpoint,
 )
+from climbtrack.moves import prepare_move_session
+from climbtrack.player import create_player_server, run_player_server
 from climbtrack.provenance import executable_version
 from climbtrack.schema.frames import read_frame_index
 from climbtrack.schema.keypoints import read_registry
+from climbtrack.schema.moves import read_moves_parquet
 from climbtrack.schema.tracks import read_tracks
 from climbtrack.selection.click import choose_track_by_click
 from climbtrack.stages.detect import detect_people
 from climbtrack.stages.ingest import ingest_video
+from climbtrack.stages.moves import detect_moves
 from climbtrack.stages.pose import estimate_pose
 from climbtrack.stages.refine import refine_pose
 from climbtrack.stages.render_compare import render_pose_comparison
@@ -74,6 +78,17 @@ ReviewAllOption = Annotated[
         "--review-all",
         help="Render every track ID without selecting a climber (for ambiguity review).",
     ),
+]
+OpenBrowserOption = Annotated[
+    bool,
+    typer.Option(
+        "--open-browser/--no-open-browser",
+        help="Open the local move player in the default browser.",
+    ),
+]
+PortOption = Annotated[
+    int | None,
+    typer.Option("--port", min=1024, max=65_535, help="Override the local player port."),
 ]
 VideoArgument = Annotated[
     Path,
@@ -350,6 +365,30 @@ def render_pose(
         _abort(exc)
 
 
+@app.command("detect-moves")
+def detect_moves_command(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    force: ForceOption = False,
+) -> None:
+    """Automatically segment hand moves from cached refined poses."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        refined = _run_refine(selection, pose_result, context, False)
+        result = _run_moves(refined, context, force)
+        _report("70_moves", result)
+        console.print(f"[bold green]Moves:[/bold green] {result.path / 'moves_auto.parquet'}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except ClimbTrackError as exc:
+        _abort(exc)
+
+
 @app.command("render-comparison")
 def render_comparison(
     video: VideoArgument,
@@ -419,6 +458,63 @@ def annotate(
         console.print(f"[bold green]Reviewed:[/bold green] {reviewed}/{len(session.frames)} frames")
         if reviewed == len(session.frames):
             console.print(f"Next: climbtrack evaluate {session_path}")
+    except SelectionUncertainError as exc:
+        _abort_selection(exc)
+    except (ClimbTrackError, OSError) as exc:
+        _abort(exc)
+
+
+@app.command("player")
+def player(
+    video: VideoArgument,
+    config_path: ConfigOption = Path("configs/default.yaml"),
+    track_id: TrackIdOption = None,
+    click: ClickOption = False,
+    open_browser: OpenBrowserOption = True,
+    port: PortOption = None,
+) -> None:
+    """Open automatically detected moves in the local Phase-2 player."""
+    try:
+        context, ingest_result, selection = _pipeline_to_selection(
+            video, config_path, track_id=track_id, click=click
+        )
+        pose_result = _run_pose(ingest_result, selection, context, False)
+        refined = _run_refine(selection, pose_result, context, False)
+        automatic = _run_moves(refined, context, False)
+        skeleton = render_pose_overlay(
+            ingest_result,
+            selection,
+            pose_result,
+            config=context.config,
+            cache_root=context.cache_root,
+            project_root=context.project_root,
+            force=False,
+        )
+        automatic_moves = read_moves_parquet(automatic.path / "moves_auto.parquet")
+        session_path, session, created = prepare_move_session(
+            ingest_result,
+            annotation_root=resolve_annotation_dir(context.config, context.config_path),
+            automatic_moves=automatic_moves,
+            automatic_moves_cache_key=automatic.manifest.cache_key,
+        )
+        frames = read_frame_index(ingest_result.path / "frames.parquet")
+        server = create_player_server(
+            skeleton.path / "skeleton_raw_overlay.mp4",
+            session_path,
+            frames,
+            context.config.move_player,
+            port=port,
+        )
+        state = "created" if created else "resumed"
+        console.print(f"[green]Move session {state}:[/green] {session_path}")
+        console.print(
+            f"[bold green]Automatic moves:[/bold green] {len(session.moves)} "
+            "(manual correction is optional)"
+        )
+        console.print(f"[bold green]Player:[/bold green] {server.url}")
+        console.print("Press Ctrl+C in this terminal to stop the local player.")
+        run_player_server(server, open_browser=open_browser)
+        console.print("[green]Move player stopped.[/green]")
     except SelectionUncertainError as exc:
         _abort_selection(exc)
     except (ClimbTrackError, OSError) as exc:
@@ -708,6 +804,20 @@ def _run_refine(
     return refine_pose(
         selection,
         pose_result,
+        config=context.config,
+        cache_root=context.cache_root,
+        project_root=context.project_root,
+        force=force,
+    )
+
+
+def _run_moves(
+    refined: CacheResult,
+    context: PipelineContext,
+    force: bool,
+) -> CacheResult:
+    return detect_moves(
+        refined,
         config=context.config,
         cache_root=context.cache_root,
         project_root=context.project_root,
