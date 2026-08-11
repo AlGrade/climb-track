@@ -676,6 +676,13 @@ Video-Umwandlung, verändert weder Analyse noch Originaldateien und wird danach 
 wiederverwendet. Dadurch starten Wiedergabe und Frame-Sprünge insbesondere in Chrome deutlich
 schneller.
 
+Der Umschalter oben rechts im Video wechselt zwischen zwei lokal gespeicherten Desktop-Layouts.
+`Landscape layout` zeigt Video und Kurve kompakt untereinander. `Portrait layout` gibt dem
+9:16-Video ein passendes Fenster ohne breite schwarze Seitenflächen, setzt die Zugsteuerung unter
+das Video und nutzt die rechte Bildschirmhälfte für Zugliste, Kurve und Messwerte. Beide Varianten
+sind auf einen Desktop-Viewport ohne Seiten-Scrollbar ausgelegt; auf schmalen Geräten bleibt
+normales Scrollen als sichere responsive Darstellung erhalten.
+
 Der Player speichert jede Änderung sofort und atomar in:
 
 ```text
@@ -760,10 +767,10 @@ Die Berechnung ist als reproduzierbare Cache-Stufe `80_move_metrics` implementie
 wird dafür nicht erneut ausgeführt. Neben Parquet wird zur einfachen Einsicht dasselbe Ergebnis als
 JSON gespeichert.
 
-Der Player zeigt direkt unter dem Video eine vergrößerte Kurve mit Hand- und
+Der Player zeigt je nach Layout unter oder rechts neben dem Video eine Kurve mit Hand- und
 Körpergeschwindigkeit pro Frame, beschrifteten Zeit- und BL/s-Achsen sowie den exakten Werten am
-aktuellen Frame. Darunter stehen mittlere und maximale Geschwindigkeiten sowie die geschätzten
-Wege. Die eigene framebasierte Video-Zeitleiste aktualisiert Bild, Frameanzeige und weißen Cursor
+aktuellen Frame. Dazu stehen mittlere und maximale Geschwindigkeiten sowie die geschätzten Wege.
+Die eigene framebasierte Video-Zeitleiste aktualisiert Bild, Frameanzeige und weißen Cursor
 bereits während des Ziehens. Die Pfeiltasten und die beiden Frame-Buttons springen jeweils exakt
 einen Videoframe; gehaltene Pfeiltasten warten auf den tatsächlich dargestellten Frame, bevor sie
 zum nächsten springen. Die zugweisen

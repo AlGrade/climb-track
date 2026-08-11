@@ -3,7 +3,8 @@
 const elements = Object.fromEntries(
   [
     "video", "videoToggle", "videoScrubber", "videoTime", "videoMute", "activeMove",
-    "saveState", "currentTime", "currentFrame", "previousMove",
+    "layoutToggle", "layoutToggleIcon", "layoutToggleLabel", "saveState", "currentTime",
+    "currentFrame", "previousMove",
     "replayMove", "nextMove", "playAll", "previousFrame", "nextFrame", "editorTitle", "resetDraft", "setStart",
     "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
     "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
@@ -37,11 +38,13 @@ const state = {
   queuedFrameSteps: 0,
   heldFrameDirection: 0,
   frameHoldTimer: null,
+  layoutMode: "landscape",
 };
 
 const handLabels = { left: "Left hand", right: "Right hand", both: "Both hands" };
 const outcomeLabels = { completed: "Completed", fall: "Fall" };
 const chartLayout = Object.freeze({ width: 760, left: 58, right: 16, top: 18, bottom: 224 });
+const layoutStorageKey = "climbtrack-player-layout";
 
 async function initialize() {
   try {
@@ -744,6 +747,33 @@ function afterVideoFramePresented(callback) {
   }
 }
 
+function initializeLayout() {
+  let storedLayout = null;
+  try {
+    storedLayout = window.localStorage.getItem(layoutStorageKey);
+  } catch (error) {
+    console.warn("Could not read the saved player layout", error);
+  }
+  applyLayout(storedLayout === "portrait" ? "portrait" : "landscape", { persist: false });
+}
+
+function applyLayout(layout, options = {}) {
+  state.layoutMode = layout;
+  document.documentElement.dataset.layout = layout;
+  const portrait = layout === "portrait";
+  elements.layoutToggle.setAttribute("aria-pressed", String(portrait));
+  elements.layoutToggleIcon.textContent = portrait ? "▭" : "▯";
+  elements.layoutToggleLabel.textContent = portrait ? "Landscape layout" : "Portrait layout";
+  if (options.persist !== false) {
+    try {
+      window.localStorage.setItem(layoutStorageKey, layout);
+    } catch (error) {
+      console.warn("Could not save the player layout", error);
+    }
+  }
+  window.requestAnimationFrame(updateReadout);
+}
+
 elements.video.addEventListener("play", () => {
   updatePlaybackControls();
   watchPlayback();
@@ -765,6 +795,9 @@ elements.videoScrubber.addEventListener("input", previewScrub);
 elements.videoScrubber.addEventListener("pointerup", finishScrub);
 elements.videoScrubber.addEventListener("change", finishScrub);
 elements.videoScrubber.addEventListener("pointercancel", finishScrub);
+elements.layoutToggle.addEventListener("click", () => {
+  applyLayout(state.layoutMode === "portrait" ? "landscape" : "portrait");
+});
 elements.previousMove.addEventListener("click", () => playMove(state.selectedIndex <= 0 ? 0 : state.selectedIndex - 1));
 elements.replayMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : state.selectedIndex));
 elements.nextMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : Math.min(state.selectedIndex + 1, state.session.moves.length - 1)));
@@ -818,4 +851,5 @@ document.addEventListener("keyup", (event) => {
   }
 });
 
+initializeLayout();
 initialize();
