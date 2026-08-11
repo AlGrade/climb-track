@@ -7,7 +7,7 @@ kurze Modellfehler über die Zeit.
 
 Das Projekt ist derzeit ausschließlich für private Nutzung vorgesehen.
 
-## Projektziel und Grenzen
+## Phase 1: Projektziel und Grenzen
 
 Phase 1 beantwortet genau diese Frage:
 
@@ -16,13 +16,17 @@ Phase 1 beantwortet genau diese Frage:
 Die erzeugten Daten sind die Grundlage für spätere Geschwindigkeiten, Gelenkwinkel und
 Bewegungsmetriken. Solche Metriken sind aber bewusst noch nicht Teil dieses Projekts.
 
-Nicht enthalten sind:
+In Phase 1 waren bewusst nicht enthalten:
 
 - Geschwindigkeits-, Winkel- oder Bewegungsmetriken;
 - 3D-Rekonstruktion und Weltkoordinaten;
 - Griff- oder Hold-Erkennung;
 - Web-UI, Server oder Datenbank;
 - Echtzeit- oder Mobile-Betrieb.
+
+Phase 1 ist abgeschlossen. Phase 2 erweitert das Projekt jetzt um einen lokalen zugbasierten
+Videoplayer sowie Geschwindigkeits- und Winkelmessungen. 3D, Griff-Erkennung, Kraftmessung,
+Serverbetrieb und Echtzeit bleiben weiterhin außerhalb des Scopes.
 
 Qualität hat Vorrang vor Geschwindigkeit. Die komplette Pose-Berechnung eines kurzen Videos kann
 auf einem Mac mehrere Stunden dauern. Alle teuren Schritte sind deshalb gecacht und fortsetzbar.
@@ -38,7 +42,7 @@ Die Milestones 1 bis 5 sind implementiert, am Video `best go.mp4` ausgeführt un
 | 3 – Rohes Skeleton | Sapiens2-1B, 308 Keypoints, TTA, Resume und Roh-Overlay | Liefert unveränderte Modellmessungen als überprüfbare Ausgangsbasis. |
 | 4 – Messen | Lokales Annotationstool, zehn schwierige Frames, Ground Truth, PCK und OKS | Qualität wird gemessen, nicht nur nach Gefühl beurteilt. |
 | 5 – Verbessern | Confidence-Gating, Ausreißer-/Swap-Erkennung, Interpolation und One-Euro-Filter | Kurze Fehler werden repariert, ohne schnelle echte Kletterbewegungen glattzubügeln. |
-| 6 – geplant | ViTPose-Vergleichsbackend und Backend-Benchmark | Prüft objektiv, ob ein zweites Modell auf unseren Videos besser ist. |
+| 6 – übersprungen | ViTPose-Vergleichsbackend | Wird vorerst nicht gebaut; Phase 2 verwendet die vorhandenen refined Sapiens-Daten. |
 
 ### Resultat am Referenzvideo
 
@@ -499,7 +503,8 @@ models/                     große Modellgewichte; nicht in Git
 
 Die Struktur trennt Modelladapter, Pipeline-Steuerung, Datenschemas, Rendering und reine
 Refinement-Logik. Es gibt keine vorgezogenen Abstraktionsebenen für hypothetische Backends; die
-Schnittstellen sind aber so angelegt, dass ViTPose in Milestone 6 ergänzt werden kann.
+Schnittstellen bleiben trotzdem erweiterbar. Der ursprünglich geplante ViTPose-Vergleich wird
+bewusst übersprungen; für Phase 2 ist Sapiens2-1B die feste Datenquelle.
 
 ## Reproduzierbarkeit und Sicherheitsentscheidungen
 
@@ -533,12 +538,179 @@ Neuronale Vollinferenz wird wegen Laufzeit und Modellgröße nicht im automatisc
 - Gesichtspunkte werden gespeichert, aber standardmäßig nicht gerendert oder annotiert.
 - Das Ground-Truth-Set besteht bisher aus einem Video und zehn Stressframes.
 - Refinement verbessert die rechte Hand deutlich, die linke Hand im Mittel jedoch nicht.
-- Noch gibt es keinen objektiven Vergleich mit ViTPose.
+- Der ursprünglich geplante objektive Vergleich mit ViTPose wird vorerst bewusst übersprungen.
 - Perspektive, Weitwinkel und Kamerabewegung werden noch nicht in Weltkoordinaten umgerechnet.
 
-## Nächster Milestone
+## Phase 2: Züge und Bewegungsmetriken
 
-Milestone 6 ergänzt ViTPose-H beziehungsweise ViTPose++ als zweites Backend, mappt dessen Punkte in
-das bestehende kanonische Schema und führt beide Modelle auf demselben Ground-Truth-Set aus. Erst
-die Messergebnisse entscheiden, ob ViTPose einen praktischen Vorteil bringt. Bis dahin ist
-Sapiens2-1B das einzige produktiv verwendete Posemodell.
+Phase 2 baut direkt auf `pose_refined.parquet` auf. Sapiens muss für die Entwicklung der
+Zugerkennung, des Players und der Metriken nicht erneut über das Video laufen.
+
+### Was genau ist ein Zug?
+
+Für dieses Projekt gilt zunächst:
+
+> Ein Zug ist ein Handzug von einer stabilen Handposition zu einer neuen stabilen Handposition.
+
+Der Zug beginnt, wenn eine zuvor ruhige Hand ihre Position verlässt. Er endet, wenn dieselbe Hand
+an einer neuen Position wieder für eine Mindestdauer ruhig bleibt. Das System klassifiziert den
+Zug als `left`, `right` oder `both`. Bewegen sich beide Hände innerhalb eines kurzen gemeinsamen
+Zeitfensters, wird das als ein beidarmiger Zug behandelt, zum Beispiel bei einem Dyno.
+
+Diese Definition braucht einige Sicherheitsregeln:
+
+- Eine kurze Korrektur auf demselben Griff darf nicht automatisch als neuer Zug zählen.
+- Die Körperbewegung kann vor der Hand beginnen und nach dem Greifen weiterlaufen. Der Player zeigt
+  deshalb einen kleinen Vor- und Nachlauf um die eigentliche Zuggrenze.
+- Verdeckungen und falsche Handpunkte können automatische Grenzen verfälschen. Jede Erkennung erhält
+  eine Confidence und bleibt im Player manuell korrigierbar.
+- Ohne Griff-Erkennung kann das System nur aus der ruhigen Handposition auf einen Kontakt schließen.
+  Es behauptet nicht, den tatsächlichen Griff sicher erkannt zu haben.
+- „Bewegte Hand“ und „ziehende Hand“ sind nicht dasselbe. Die bewegte Hand greift zum nächsten
+  Punkt; eine ruhige Stützhand kann gleichzeitig den Körper ziehen. Kräfte sind aus einem einzelnen
+  2D-Video nicht messbar.
+
+### Geplanter Datenfluss
+
+```text
+pose_refined.parquet
+        │
+        ▼
+Hand- und Körper-Zeitreihen
+        │
+        ▼
+automatische Zugkandidaten ──► moves.parquet
+        │                           │
+        │                           ├──► lokaler Zug-Player + manuelle Korrektur
+        │                           │
+        │                           └──► Geschwindigkeit pro Zug
+        │
+        └──────────────────────────────► Gelenkwinkel pro Zug
+                                            │
+                                            ▼
+                                      move_metrics.parquet
+```
+
+Die originalen Videotimestamps bleiben die Zeitbasis. Geschwindigkeiten werden nicht aus einer
+angenommenen konstanten FPS berechnet.
+
+### Phase-2-Milestones
+
+#### P2.1 – Zugdefinition, Datenformat und Zug-Player
+
+Erstes sichtbares Ergebnis ist ein lokaler Player mit zwei Betriebsarten:
+
+- **Zugmodus:** genau einen Zug abspielen und am Ende automatisch pausieren;
+- **Gesamtvideo:** das komplette Video normal abspielen.
+
+Im Zugmodus gibt es **Zurück**, **Wiederholen** und **Weiter**. Zusätzlich sind langsame Wiedergabe,
+Frame-Schritte und die Anzeige von Zugnummer, Hand, Start- und Endzeit vorgesehen. Start, Ende und
+Handzuordnung können korrigiert werden; die Änderungen werden separat als Ground Truth gespeichert.
+
+Vor dem automatischen Erkennen werden die Züge des Referenzvideos einmal mit diesem Player markiert.
+Dadurch entsteht eine kleine Wahrheitstabelle, gegen die wir die Automatik später messen können.
+
+Vorgesehenes Zug-Schema:
+
+```text
+move_id, start_frame, end_frame, start_timestamp, end_timestamp,
+moving_hand, confidence, source, is_reviewed
+```
+
+#### P2.2 – Automatische Zugerkennung
+
+Die Erkennung kombiniert mehrere zeitliche Signale statt eines einzelnen Geschwindigkeitswerts:
+
+- Handgeschwindigkeit und Handbeschleunigung;
+- stabile Phasen vor und nach der Bewegung;
+- Mindestweg und Mindestdauer;
+- zeitliche Überlappung der linken und rechten Hand;
+- Confidence und Missing-Status der Posepunkte;
+- Bewegung der Hand relativ zum Rumpf, damit reine Ganzkörperbewegung nicht automatisch als neuer
+  Handzug zählt.
+
+Als Handposition dient nicht eine einzelne Fingerspitze. Dafür wird ein robuster Handflächenpunkt
+aus Handgelenk und mehreren verfügbaren Handpunkten gebildet. So erzeugt das natürliche Zittern
+einzelner Finger nicht fälschlich einen neuen Zug.
+
+Automatisch erkannte Züge werden gegen die manuell markierten Grenzen geprüft. Ziel für das erste
+Referenzvideo sind die korrekte Anzahl und Handseite sowie ein medianer Grenzfehler von höchstens
+0,15 Sekunden. Unsichere Fälle werden markiert und nicht als sicher verkauft.
+
+#### P2.3 – Geschwindigkeiten pro Zug
+
+Für die **bewegte Hand** werden pro Zug berechnet:
+
+- Dauer;
+- horizontaler, vertikaler und gesamter Weg;
+- direkte Verschiebung und tatsächliche Pfadlänge;
+- mittlere und maximale Geschwindigkeit;
+- Zeitpunkt der maximalen Geschwindigkeit.
+
+Für den **Körper** verwenden wir zunächst einen robusten Rumpfmittelpunkt aus Schultern und Hüften.
+Gemessen werden Körperweg, vertikale Verschiebung sowie mittlere und maximale Geschwindigkeit.
+Zusätzlich kann die Bewegung der ruhigen Hand relativ zum Körper beschrieben werden. Das ist ein
+Hinweis auf eine Stützphase, aber keine Kraft- oder Zugleistungsmessung.
+
+Die erste Version gibt Geschwindigkeiten in zwei Einheiten aus:
+
+- `px/s` als direkte Bildmessung;
+- `body_lengths/s` als grob körpergrößennormierte Vergleichsgröße.
+
+Die Körperlänge wird robust aus den über das Video stabilen Rumpf- und Beinsegmenten geschätzt,
+nicht aus einem einzelnen möglicherweise fehlerhaften Frame.
+
+Echte `cm/s` oder `m/s` wären ohne Kalibrierung irreführend. Dafür brauchen wir später mindestens
+eine bekannte Strecke in der Wandebene und möglichst eine statische Kamera. Perspektivische Tiefe
+bleibt selbst dann eine Einschränkung.
+
+Für Ableitungen wird eine eigene, vorsichtige Glättung verwendet. Geschwindigkeit verstärkt kleine
+Positionsfehler stark; einfach rohe Frame-Differenzen zu bilden wäre fachlich falsch.
+
+#### P2.4 – Gelenkwinkel pro Zug
+
+Als erste sinnvolle 2D-Winkel werden berechnet:
+
+- linker und rechter Ellbogen;
+- linke und rechte Schulter im Bild;
+- linkes und rechtes Knie;
+- linke und rechte Hüfte;
+- Rumpfneigung.
+
+Pro Zug speichern wir Winkel am Start und Ende sowie Minimum, Maximum und Bewegungsumfang. Frames
+mit fehlenden oder zu unsicheren Gelenkpunkten werden nicht erfunden, sondern als ungültig
+gekennzeichnet.
+
+Alle Werte sind **2D-Bildwinkel**. Dreht sich der Kletterer zur Wand oder aus der Bildebene, sind sie
+nicht identisch mit echten anatomischen 3D-Gelenkwinkeln.
+
+#### P2.5 – Ergebnisansicht und Export
+
+Der Player zeigt danach optional die wichtigsten Werte direkt beim Zug:
+
+- bewegte Hand und Zugdauer;
+- Hand- und Körpergeschwindigkeit;
+- Weg und Höhengewinn;
+- ausgewählte Winkel und Bewegungsumfang;
+- Warnungen bei fehlenden oder unsicheren Daten.
+
+Maschinenlesbare Ergebnisse bleiben in Parquet/JSON. Eine kompakte CSV kann zusätzlich exportiert
+werden, damit einzelne Züge später einfach verglichen werden können.
+
+### Empfohlene Reihenfolge
+
+Wir beginnen mit **P2.1**: einem einfachen lokalen Zug-Player, in dem die Zuggrenzen des
+Referenzvideos manuell markiert und bequem vor/zurück abgespielt werden können. Erst danach bauen
+wir P2.2, die automatische Erkennung. Geschwindigkeit und Winkel folgen erst, wenn die Segmente
+verlässlich sind; sonst würden präzise aussehende Zahlen dem falschen Zug zugeordnet.
+
+### Vorläufige Annahmen für Phase 2
+
+- Die Kamera des ersten Referenzvideos gilt als statisch.
+- Ein Zug wird primär durch Handbewegung definiert, unabhängig davon, ob er nach oben, seitlich oder
+  nach unten geht.
+- Dynos und zeitlich überlappende beidhändige Bewegungen können ein gemeinsamer Zug sein.
+- Der Player und alle Auswertungen laufen lokal; es werden keine Videos hochgeladen.
+- Automatische Zuggrenzen bleiben korrigierbar und erhalten eine Confidence.
+- Physische Geschwindigkeit in Metern pro Sekunde wird erst nach einer expliziten Kalibrierung
+  angeboten.
