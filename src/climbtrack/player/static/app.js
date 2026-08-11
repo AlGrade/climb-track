@@ -4,7 +4,9 @@ const elements = Object.fromEntries(
   [
     "videoShell", "movesCard", "transport", "editorCard",
     "video", "videoToggle", "videoScrubber", "videoTime", "videoMute", "activeMove",
-    "layoutToggle", "layoutToggleIcon", "layoutToggleLabel", "saveState", "currentTime",
+    "videoPreviousFrame", "videoNextFrame", "videoActions", "videoControls",
+    "layoutToggle", "layoutToggleIcon", "layoutToggleLabel",
+    "fullscreenToggle", "fullscreenToggleIcon", "fullscreenToggleLabel", "saveState", "currentTime",
     "currentFrame", "previousMove",
     "replayMove", "nextMove", "playAll", "previousFrame", "nextFrame", "editorTitle", "resetDraft", "setStart",
     "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
@@ -41,12 +43,14 @@ const state = {
   frameHoldTimer: null,
   layoutMode: "landscape",
   selectionFollowsTimeline: false,
+  chromeIdleTimer: null,
 };
 
 const handLabels = { left: "Left hand", right: "Right hand", both: "Both hands" };
 const outcomeLabels = { completed: "Completed", fall: "Fall" };
 const chartLayout = Object.freeze({ width: 760, left: 58, right: 16, top: 18, bottom: 224 });
 const layoutStorageKey = "climbtrack-player-layout";
+const chromeIdleDelay = 2200;
 
 async function initialize() {
   try {
@@ -311,6 +315,8 @@ function updateNavigation() {
   elements.videoToggle.disabled = !videoReady;
   elements.videoScrubber.disabled = !videoReady;
   elements.videoMute.disabled = !videoReady;
+  elements.videoPreviousFrame.disabled = !videoReady;
+  elements.videoNextFrame.disabled = !videoReady;
 }
 
 function selectMove(index, options = {}) {
@@ -834,12 +840,91 @@ function arrangeLayout(layout) {
   }
 }
 
+// Only the video shell goes fullscreen, so the chart, move list and editor
+// disappear on their own while the overlay controls stay clickable.
+function isFullscreen() {
+  const active = document.fullscreenElement || document.webkitFullscreenElement || null;
+  return active === elements.videoShell;
+}
+
+function toggleFullscreen() {
+  try {
+    if (isFullscreen()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      Promise.resolve(exit.call(document)).catch(reportFullscreenError);
+      return;
+    }
+    const request = elements.videoShell.requestFullscreen
+      || elements.videoShell.webkitRequestFullscreen;
+    if (!request) throw new Error("this browser offers no fullscreen mode");
+    Promise.resolve(request.call(elements.videoShell)).catch(reportFullscreenError);
+  } catch (error) {
+    reportFullscreenError(error);
+  }
+}
+
+function reportFullscreenError(error) {
+  elements.activeMove.textContent = `Fullscreen failed: ${error.message}`;
+  console.error("Fullscreen request failed", error);
+}
+
+function syncFullscreenControls() {
+  const active = isFullscreen();
+  // The stylesheet reads this attribute instead of `:fullscreen`, so the
+  // -webkit- prefixed fallback above styles the shell just like the standard API.
+  document.documentElement.dataset.fullscreen = String(active);
+  elements.fullscreenToggle.setAttribute("aria-pressed", String(active));
+  elements.fullscreenToggle.setAttribute(
+    "aria-label",
+    active ? "Exit fullscreen" : "Enter fullscreen",
+  );
+  elements.fullscreenToggleIcon.textContent = active ? "⤡" : "⛶";
+  elements.fullscreenToggleLabel.textContent = active ? "Exit fullscreen" : "Fullscreen";
+  revealChrome();
+  window.requestAnimationFrame(updateReadout);
+}
+
+// The overlay chrome only ever hides during fullscreen playback. A paused video
+// keeps it, because that is exactly when frames are stepped and read.
+function revealChrome() {
+  // Guarded because every pointermove calls this; a redundant attribute write
+  // would invalidate styles while a 1080p video is decoding.
+  if (document.documentElement.dataset.chrome !== "visible") {
+    document.documentElement.dataset.chrome = "visible";
+  }
+  window.clearTimeout(state.chromeIdleTimer);
+  state.chromeIdleTimer = null;
+  if (!isFullscreen() || elements.video.paused) return;
+  state.chromeIdleTimer = window.setTimeout(hideChromeIfIdle, chromeIdleDelay);
+}
+
+function hideChromeIfIdle() {
+  state.chromeIdleTimer = null;
+  if (!isFullscreen() || elements.video.paused) return;
+  const busy = elements.videoControls.matches(":hover")
+    || elements.videoActions.matches(":hover")
+    || (document.activeElement !== elements.video
+      && elements.videoShell.contains(document.activeElement));
+  if (busy) {
+    state.chromeIdleTimer = window.setTimeout(hideChromeIfIdle, chromeIdleDelay);
+    return;
+  }
+  document.documentElement.dataset.chrome = "hidden";
+}
+
 elements.video.addEventListener("play", () => {
   updatePlaybackControls();
   watchPlayback();
+  revealChrome();
 });
-elements.video.addEventListener("pause", updatePlaybackControls);
-elements.video.addEventListener("ended", updatePlaybackControls);
+elements.video.addEventListener("pause", () => {
+  updatePlaybackControls();
+  revealChrome();
+});
+elements.video.addEventListener("ended", () => {
+  updatePlaybackControls();
+  revealChrome();
+});
 elements.video.addEventListener("volumechange", updatePlaybackControls);
 elements.video.addEventListener("timeupdate", updateReadout);
 elements.video.addEventListener("seeking", updateReadout);
@@ -858,6 +943,13 @@ elements.videoScrubber.addEventListener("pointercancel", finishScrub);
 elements.layoutToggle.addEventListener("click", () => {
   applyLayout(state.layoutMode === "portrait" ? "landscape" : "portrait");
 });
+elements.fullscreenToggle.addEventListener("click", toggleFullscreen);
+elements.videoShell.addEventListener("pointermove", revealChrome);
+elements.videoShell.addEventListener("pointerdown", revealChrome);
+elements.videoPreviousFrame.addEventListener("click", () => stepFrame(-1));
+elements.videoNextFrame.addEventListener("click", () => stepFrame(1));
+document.addEventListener("fullscreenchange", syncFullscreenControls);
+document.addEventListener("webkitfullscreenchange", syncFullscreenControls);
 elements.previousMove.addEventListener("click", () => playMove(state.selectedIndex <= 0 ? 0 : state.selectedIndex - 1));
 elements.replayMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : state.selectedIndex));
 elements.nextMove.addEventListener("click", () => playMove(state.selectedIndex < 0 ? 0 : Math.min(state.selectedIndex + 1, state.session.moves.length - 1)));
@@ -884,6 +976,7 @@ document.querySelectorAll("[data-hand]").forEach((button) => {
 
 document.addEventListener("keydown", (event) => {
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
+  revealChrome();
   if (event.code === "Space") {
     event.preventDefault();
     if (!event.repeat) toggleVideoPlayback();
@@ -899,6 +992,9 @@ document.addEventListener("keydown", (event) => {
       state.heldFrameDirection = 1;
       stepFrame(1);
     }
+  } else if (event.key === "f" || event.key === "F") {
+    event.preventDefault();
+    if (!event.repeat) toggleFullscreen();
   }
 });
 
@@ -913,4 +1009,5 @@ document.addEventListener("keyup", (event) => {
 });
 
 initializeLayout();
+syncFullscreenControls();
 initialize();

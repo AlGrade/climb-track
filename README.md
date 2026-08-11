@@ -553,7 +553,7 @@ uv run ruff format --check .
 uv run pytest
 ```
 
-Aktueller Stand: 66 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
+Aktueller Stand: 67 Tests bestehen. Getestet werden unter anderem Hashing, Cache-Verhalten,
 Zeitstempel, Schemas, Scoring, ByteTrack, Pose-Crops, Pose-Resume, Keypoint-Registry, VFR-Rendering,
 Annotation/Evaluation, Move-Schema, Video-Range-Streaming, revisionssicheres Speichern,
 Confidence-Gating, Interpolation, Swap-/Ausreißerlogik und One-Euro-Filter. Neuronale Vollinferenz
@@ -677,14 +677,28 @@ Video-Umwandlung, verändert weder Analyse noch Originaldateien und wird danach 
 wiederverwendet. Dadurch starten Wiedergabe und Frame-Sprünge insbesondere in Chrome deutlich
 schneller.
 
-Der Umschalter oben rechts im Video zeigt das aktuelle Layout und wechselt zwischen zwei lokal
-gespeicherten Desktop-Ansichten. `Landscape layout` zeigt Video und Kurve kompakt untereinander.
+Der linke Umschalter oben rechts im Video zeigt das aktuelle Layout und wechselt zwischen zwei
+lokal gespeicherten Desktop-Ansichten. `Landscape layout` zeigt Video und Kurve kompakt untereinander.
 `Portrait layout` gibt dem 9:16-Video ein passendes Fenster ohne breite schwarze Seitenflächen und
 setzt die Zugsteuerung direkt darunter. Rechts stehen Zugliste und **Edit boundaries** nebeneinander;
 Kurve und Messwerte folgen darunter über die volle Breite. Ein geöffneter Editor vergrößert diese
 Zeile oder lässt die rechte Spalte intern scrollen, überlagert aber keine Kurve. Beide Varianten sind
 auf einen Desktop-Viewport ohne Seiten-Scrollbar ausgelegt; auf schmalen Geräten bleibt normales
 Scrollen als sichere responsive Darstellung erhalten.
+
+Daneben liegt `Fullscreen`. Der Knopf schaltet gezielt nur das Videofenster in den Vollbildmodus
+des Browsers. Kurve, Zugliste und Editor treten dabei bewusst zurück, weil im Vollbild ausschließlich
+das Skelettvideo beurteilt werden soll. Die Bedienleiste zeigt dort zusätzlich die beiden
+Frame-Knöpfe `−1` und `+1`. Damit funktioniert die framegenaue Navigation auch im Vollbild
+vollständig per Mausklick; Zeitleiste, Wiedergabe und Ton bleiben ebenfalls bedienbar.
+`f` schaltet den Vollbildmodus um, `Esc` verlässt ihn, und die Pfeiltasten springen weiterhin
+einzelne Frames. Der Modus ist reine Darstellung: Er verändert weder Zuggrenzen noch Messwerte.
+
+Während der Wiedergabe im Vollbild blenden sich Bedienleiste, Umschalter und Zugbeschriftung nach
+gut zwei Sekunden Ruhe aus, damit nichts den Kletterer verdeckt; jede Maus- oder Tastenbewegung holt
+sie sofort zurück. Bei **pausiertem** Video bleiben sie dauerhaft stehen, denn genau dann wird Frame
+für Frame geprüft. Solange der Zeiger über der Leiste liegt oder ein Bedienelement den Fokus hat,
+wird ebenfalls nicht ausgeblendet.
 
 Der Player speichert jede Änderung sofort und atomar in:
 

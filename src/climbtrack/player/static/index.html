@@ -14,19 +14,33 @@
           <div class="video-label">
             <strong id="activeMove">Full video</strong>
           </div>
-          <button
-            id="layoutToggle"
-            class="layout-toggle"
-            type="button"
-            aria-pressed="false"
-            aria-label="Switch to portrait layout"
-          >
-            <span id="layoutToggleIcon" aria-hidden="true">▭</span>
-            <span id="layoutToggleLabel">Landscape layout</span>
-          </button>
-          <div class="video-controls" aria-label="Video controls">
+          <div id="videoActions" class="video-actions">
+            <button
+              id="layoutToggle"
+              class="video-action-button"
+              type="button"
+              aria-pressed="false"
+              aria-label="Switch to portrait layout"
+            >
+              <span id="layoutToggleIcon" aria-hidden="true">▭</span>
+              <span id="layoutToggleLabel">Landscape layout</span>
+            </button>
+            <button
+              id="fullscreenToggle"
+              class="video-action-button"
+              type="button"
+              aria-pressed="false"
+              aria-label="Enter fullscreen"
+            >
+              <span id="fullscreenToggleIcon" aria-hidden="true">⛶</span>
+              <span id="fullscreenToggleLabel">Fullscreen</span>
+            </button>
+          </div>
+          <div id="videoControls" class="video-controls" aria-label="Video controls">
             <button id="videoToggle" class="video-control-button" aria-label="Play video" disabled>▶</button>
+            <button id="videoPreviousFrame" class="video-control-button frame-step" aria-label="Previous frame" title="Previous frame" disabled>−1</button>
             <input id="videoScrubber" class="video-scrubber" type="range" min="0" max="0" value="0" step="1" aria-label="Video frame" disabled>
+            <button id="videoNextFrame" class="video-control-button frame-step" aria-label="Next frame" title="Next frame" disabled>+1</button>
             <span id="videoTime" class="video-time">00:00 / 00:00</span>
             <button id="videoMute" class="video-control-button" aria-label="Mute video" disabled>🔊</button>
           </div>

@@ -120,10 +120,15 @@ video {
   font-size: 0.76rem;
 }
 
-.layout-toggle {
+.video-actions {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;
+  gap: 7px;
+}
+
+.video-action-button {
   display: flex;
   min-height: 34px;
   gap: 7px;
@@ -136,11 +141,12 @@ video {
   font-size: 0.72rem;
 }
 
-.layout-toggle:hover:not(:disabled) {
+.video-action-button:hover:not(:disabled) {
   border-color: var(--accent);
 }
 
-#layoutToggleIcon {
+#layoutToggleIcon,
+#fullscreenToggleIcon {
   color: var(--accent);
   font-size: 1rem;
   line-height: 1;
@@ -165,6 +171,12 @@ video {
   padding: 0;
   background: rgba(7, 10, 8, 0.78);
   font-size: 0.8rem;
+}
+
+/* Frame stepping lives in the editor panel; fullscreen re-exposes it here. */
+.frame-step {
+  display: none;
+  font-variant-numeric: tabular-nums;
 }
 
 .video-time {
@@ -838,5 +850,82 @@ html[data-layout="landscape"] .video-shell {
   .chart-readout span:last-child {
     width: 100%;
     margin-left: 0;
+  }
+}
+
+/*
+ * Fullscreen shows the video alone: no chart, no move list, no editor.
+ * The state comes from a data attribute rather than `:fullscreen`, because the
+ * script still falls back to the -webkit- prefixed API. A prefixed pseudo-class
+ * cannot be added to the same selector list: one unknown selector drops the
+ * whole rule, so the attribute keeps a single source of truth for every engine.
+ * These rules stay last and repeat the layout attribute so they win over the
+ * layout-specific height and aspect-ratio rules above.
+ */
+html[data-layout][data-fullscreen="true"] .video-shell {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+.video-shell:fullscreen::backdrop {
+  background: #050606;
+}
+
+html[data-fullscreen="true"] #layoutToggle {
+  display: none;
+}
+
+html[data-fullscreen="true"] .frame-step {
+  display: block;
+}
+
+html[data-fullscreen="true"] .video-controls {
+  grid-template-columns: 42px 42px minmax(120px, 1fr) 42px auto 42px;
+  gap: 12px;
+  padding: 44px 20px 18px;
+}
+
+html[data-fullscreen="true"] .video-control-button {
+  min-height: 42px;
+  font-size: 0.9rem;
+}
+
+html[data-fullscreen="true"] .video-time {
+  display: block;
+  font-size: 0.82rem;
+}
+
+/*
+ * During fullscreen playback the overlay chrome fades out so it never covers
+ * the climber. It stays visible whenever the video is paused, because frame
+ * stepping needs the frame buttons, the timeline and the frame readout.
+ */
+.video-label,
+.video-actions,
+.video-controls {
+  transition: opacity 200ms ease;
+}
+
+html[data-fullscreen="true"][data-chrome="hidden"] .video-label,
+html[data-fullscreen="true"][data-chrome="hidden"] .video-actions,
+html[data-fullscreen="true"][data-chrome="hidden"] .video-controls {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-fullscreen="true"][data-chrome="hidden"] .video-shell,
+html[data-fullscreen="true"][data-chrome="hidden"] video {
+  cursor: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-label,
+  .video-actions,
+  .video-controls {
+    transition: none;
   }
 }
