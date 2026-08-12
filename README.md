@@ -665,6 +665,15 @@ Player starten:
 uv run climbtrack player "/path/to/video.mp4" --config configs/default.yaml
 ```
 
+Der Player öffnet auch dann, wenn die automatische Erkennung oder die Metrikstufe dieses Video
+ablehnen. Beide Schritte sind für den Player nur Vorschläge; er ist zugleich der einzige Ort, an dem
+Zuggrenzen korrigiert werden können. Ein harter Abbruch würde also genau das Werkzeug sperren, mit
+dem der Fehler zu beheben wäre — etwa nachdem alle Züge gelöscht wurden oder wenn ein neues Video
+keinen einzigen Zugkandidaten liefert. Das Terminal nennt den Grund deutlich, die Zugliste bleibt
+leer und die Geschwindigkeitskurve blendet sich aus, bis die Grenzen von Hand gesetzt und der Player
+neu gestartet wurde. Die eigenständigen Befehle `detect-moves` und `measure-moves` scheitern
+weiterhin laut, weil dort das Ergebnis selbst das Ziel ist.
+
 Der Befehl öffnet eine ausschließlich an `127.0.0.1` gebundene Browser-Oberfläche. Der Terminal
 muss währenddessen geöffnet bleiben; `Ctrl+C` beendet den lokalen Player. Falls kein Browser
 automatisch geöffnet werden soll, `--no-open-browser` verwenden und den ausgegebenen Link manuell

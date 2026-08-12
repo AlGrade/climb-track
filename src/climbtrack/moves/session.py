@@ -211,17 +211,26 @@ def apply_move_edits(
 
 
 def save_move_session(session: MoveSession, path: Path) -> None:
-    """Atomically save JSON ground truth and its canonical Parquet projection."""
-    temporary = path.with_name(f".{path.name}.part")
-    temporary.write_text(
+    """Save JSON ground truth and its canonical Parquet projection together.
+
+    Both files describe the same revision, so both are staged first and only then
+    renamed back to back. The Parquet goes last-but-one and the revision-carrying
+    JSON last, so an interrupted save can never publish a revision whose metrics
+    input still holds the previous boundaries.
+    """
+    json_staging = path.with_name(f".{path.name}.part")
+    parquet_path = path.with_name("moves.parquet")
+    parquet_staging = path.with_name(".moves.parquet.staging")
+    json_staging.write_text(
         json.dumps(session.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    temporary.replace(path)
     write_moves_parquet(
         (move.model_dump(mode="json") for move in session.moves),
-        path.with_name("moves.parquet"),
+        parquet_staging,
     )
+    parquet_staging.replace(parquet_path)
+    json_staging.replace(path)
 
 
 def load_move_session(path: Path) -> MoveSession:

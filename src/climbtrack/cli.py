@@ -4,7 +4,7 @@ import json
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import numpy as np
 import typer
@@ -520,7 +520,7 @@ def player(
         )
         pose_result = _run_pose(ingest_result, selection, context, False)
         refined = _run_refine(selection, pose_result, context, False)
-        automatic = _run_moves(refined, context, False)
+        automatic, automatic_moves = _detect_moves_for_player(refined, context)
         skeleton = render_pose_overlay(
             ingest_result,
             selection,
@@ -541,22 +541,16 @@ def player(
         console.print(
             f"Browser video {player_video_state}: {player_video.path / PLAYER_VIDEO_NAME}"
         )
-        automatic_moves = read_moves_parquet(automatic.path / "moves_auto.parquet")
         session_path, session, created = prepare_move_session(
             ingest_result,
             annotation_root=resolve_annotation_dir(context.config, context.config_path),
             automatic_moves=automatic_moves,
-            automatic_moves_cache_key=automatic.manifest.cache_key,
+            automatic_moves_cache_key=None if automatic is None else automatic.manifest.cache_key,
         )
-        metrics_result = _run_move_metrics(
+        move_metrics, speed_timeline = _measure_moves_for_player(
             refined,
             session_path.with_name("moves.parquet"),
             context,
-            False,
-        )
-        move_metrics = read_move_metrics_parquet(metrics_result.path / "move_metrics.parquet")
-        speed_timeline = read_move_speed_timeline_parquet(
-            metrics_result.path / "move_speed_timeline.parquet"
         )
         frames = read_frame_index(ingest_result.path / "frames.parquet")
         server = create_player_server(
@@ -572,7 +566,7 @@ def player(
         console.print(f"[green]Move session {state}:[/green] {session_path}")
         console.print(
             f"[bold green]Automatic moves:[/bold green] {len(session.moves)} "
-            "(manual correction is optional)"
+            + ("(manual correction is optional)" if session.moves else "(add moves manually)")
         )
         console.print(f"[bold green]Move metrics:[/bold green] {len(move_metrics)}")
         console.print(f"[bold green]Player:[/bold green] {server.url}")
@@ -902,6 +896,51 @@ def _run_move_metrics(
         cache_root=context.cache_root,
         project_root=context.project_root,
         force=force,
+    )
+
+
+def _detect_moves_for_player(
+    refined: CacheResult,
+    context: PipelineContext,
+) -> tuple[CacheResult | None, list[dict[str, Any]]]:
+    """Propose moves for the player, falling back to manual annotation.
+
+    The player is the only place where boundaries can be corrected, so a video
+    the detector refuses must not also lock the reviewer out of the correction
+    tool. The dedicated 'detect-moves' command still fails loudly.
+    """
+    try:
+        result = _run_moves(refined, context, False)
+    except ClimbTrackError as exc:
+        console.print(f"[bold yellow]Automatic move detection unavailable:[/bold yellow] {exc}")
+        console.print("The player opens empty; add moves manually under 'Edit boundaries'.")
+        return None, []
+    return result, read_moves_parquet(result.path / "moves_auto.parquet")
+
+
+def _measure_moves_for_player(
+    refined: CacheResult,
+    moves_path: Path,
+    context: PipelineContext,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Measure the current move set, falling back to an empty speed view.
+
+    Metrics only describe boundaries that the player exists to fix. An empty move
+    set or a single segment with too few valid observations must therefore not
+    stop the player from opening, or those boundaries could never be corrected.
+    The dedicated 'measure-moves' command still fails loudly.
+    """
+    try:
+        result = _run_move_metrics(refined, moves_path, context, False)
+    except ClimbTrackError as exc:
+        console.print(f"[bold yellow]Move metrics unavailable:[/bold yellow] {exc}")
+        console.print(
+            "Speeds stay empty until the boundaries are corrected and the player restarts."
+        )
+        return [], []
+    return (
+        read_move_metrics_parquet(result.path / "move_metrics.parquet"),
+        read_move_speed_timeline_parquet(result.path / "move_speed_timeline.parquet"),
     )
 
 
