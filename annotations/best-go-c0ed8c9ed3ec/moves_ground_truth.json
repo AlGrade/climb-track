@@ -31,20 +31,20 @@
       "start_timestamp": 7.128478
     },
     {
-      "confidence": 0.75,
-      "end_frame": 1594,
-      "end_timestamp": 26.641178,
-      "is_reviewed": false,
+      "confidence": 1.0,
+      "end_frame": 1561,
+      "end_timestamp": 26.089967,
+      "is_reviewed": true,
       "move_id": 3,
       "moving_hand": "left",
       "outcome": "fall",
-      "source": "automatic",
+      "source": "corrected",
       "start_frame": 1433,
       "start_timestamp": 23.951578
     }
   ],
-  "revision": 0,
+  "revision": 1,
   "schema_version": "1.1.0",
   "source_video_name": "best go.mp4",
-  "updated_at": "2026-08-11T14:29:31.662565+00:00"
+  "updated_at": "2026-08-12T12:44:21.198994+00:00"
 }

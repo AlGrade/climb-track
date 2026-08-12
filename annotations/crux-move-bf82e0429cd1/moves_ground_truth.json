@@ -1,0 +1,26 @@
+{
+  "automatic_moves_cache_key": "189230bdb55aa74e70e4be1eb554d9e936d8ef033dc48e08d5ddeb8b69f2ded7",
+  "created_at": "2026-08-12T11:53:37.584188+00:00",
+  "first_timestamp": 0.0047,
+  "frame_count": 508,
+  "ingest_cache_key": "bf82e0429cd1304777ef7f3fa3b2dabfb98ecb81f0a278a21f68bd921b77f94e",
+  "last_timestamp": 8.4747,
+  "moves": [
+    {
+      "confidence": 1.0,
+      "end_frame": 410,
+      "end_timestamp": 6.854133,
+      "is_reviewed": true,
+      "move_id": 1,
+      "moving_hand": "left",
+      "outcome": "completed",
+      "source": "corrected",
+      "start_frame": 220,
+      "start_timestamp": 3.680089
+    }
+  ],
+  "revision": 20,
+  "schema_version": "1.1.0",
+  "source_video_name": "crux move.mp4",
+  "updated_at": "2026-08-12T12:26:33.314823+00:00"
+}
