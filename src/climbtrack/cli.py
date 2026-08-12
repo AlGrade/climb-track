@@ -422,6 +422,7 @@ def measure_moves_command(
         metrics = read_move_metrics_parquet(result.path / "move_metrics.parquet")
         _report("80_move_metrics", result)
         console.print(_move_metrics_table(metrics))
+        console.print(_move_posture_table(metrics))
         console.print(f"[bold green]Metrics:[/bold green] {result.path / 'move_metrics.parquet'}")
     except SelectionUncertainError as exc:
         _abort_selection(exc)
@@ -956,6 +957,29 @@ def _move_metrics_table(metrics: list[dict[str, object]]) -> Table:
             f"{float(row['hand_mean_speed_body_lengths_s']):.2f} BL/s",
             f"{float(row['body_max_speed_body_lengths_s']):.2f} BL/s",
             f"{float(row['body_mean_speed_body_lengths_s']):.2f} BL/s",
+        )
+    return table
+
+
+def _move_posture_table(metrics: list[dict[str, object]]) -> Table:
+    table = Table(title="Per-move posture and coordination")
+    for column in ("Move", "Result", "Hand settles", "Hip rise", "Hip below hand", "Torso lead"):
+        table.add_column(column)
+    for row in metrics:
+        lag = row["coordination_lag_seconds"]
+        correlation = row["coordination_correlation"]
+        lead = (
+            "undefined"
+            if lag is None or correlation is None
+            else f"{float(lag) * 1000:+.0f} ms (r={float(correlation):.2f})"
+        )
+        table.add_row(
+            str(row["move_id"]),
+            str(row["outcome"]),
+            f"{float(row['hand_settle_offset_seconds']):.2f} s",
+            f"{float(row['hip_rise_body_lengths']):+.2f} BL",
+            f"{float(row['hip_below_hand_body_lengths']):.2f} BL",
+            lead,
         )
     return table
 

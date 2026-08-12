@@ -13,6 +13,8 @@ const elements = Object.fromEntries(
     "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
     "handMaxSpeed", "handMaxSpeedPx", "bodyMaxSpeed", "bodyMaxSpeedPx",
     "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath", "speedChartWrap",
+    "hipRise", "hipRiseNote", "hipBelowHand", "hipBelowHandNote",
+    "torsoLead", "torsoLeadNote", "handSettle", "handSettleNote",
     "handSpeedPath", "bodySpeedPath", "chartCursor", "chartGrid", "chartHandValue",
     "chartBodyValue", "chartFrameLabel",
   ].map((id) => [id, document.getElementById(id)]),
@@ -107,8 +109,39 @@ function renderMetrics() {
   elements.handPath.textContent = `Path ${metrics.hand_path_length_px.toFixed(0)} px`;
   elements.bodyMeanSpeed.textContent = formatRelativeSpeed(metrics.body_mean_speed_body_lengths_s);
   elements.bodyPath.textContent = `Path ${metrics.body_path_length_px.toFixed(0)} px`;
+  renderPostureMetrics(metrics);
   elements.metricsNote.textContent = "BL/s = body lengths per second";
   renderSpeedChart(move);
+}
+
+// Posture is read where the moving hand comes to rest, which is the grasp on a
+// completed move and the bottom of the fall on a failed one. That frame is
+// deliberately earlier than the move end, because a move only closes once the
+// body and legs settle as well.
+function renderPostureMetrics(metrics) {
+  elements.hipRise.textContent = formatSignedBodyLengths(metrics.hip_rise_body_lengths);
+  elements.hipRiseNote.textContent = "until the hand rests";
+  elements.hipBelowHand.textContent = `${metrics.hip_below_hand_body_lengths.toFixed(2)} BL`;
+  elements.hipBelowHandNote.textContent = "when the hand rests";
+  elements.handSettle.textContent = `${metrics.hand_settle_offset_seconds.toFixed(2)} s`;
+  elements.handSettleNote.textContent = "after release";
+
+  const lag = metrics.coordination_lag_seconds;
+  const correlation = metrics.coordination_correlation;
+  if (lag === null || correlation === null) {
+    // The server sends null when the correlation peak sits on the edge of the
+    // searched range or one curve is flat. Showing a number would invent one.
+    elements.torsoLead.textContent = "–";
+    elements.torsoLeadNote.textContent = "undefined";
+    return;
+  }
+  const milliseconds = Math.abs(lag * 1000).toFixed(0);
+  elements.torsoLead.textContent = `${lag < 0 ? "−" : "+"}${milliseconds} ms`;
+  elements.torsoLeadNote.textContent = `r = ${correlation.toFixed(2)}`;
+}
+
+function formatSignedBodyLengths(value) {
+  return `${value < 0 ? "−" : "+"}${Math.abs(value).toFixed(2)} BL`;
 }
 
 function renderSpeedChart(move) {

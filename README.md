@@ -814,6 +814,10 @@ JSON gespeichert.
 Der Player zeigt je nach Layout unter oder rechts neben dem Video eine Kurve mit Hand- und
 Körpergeschwindigkeit pro Frame, beschrifteten Zeit- und BL/s-Achsen sowie den exakten Werten am
 aktuellen Frame. Dazu stehen mittlere und maximale Geschwindigkeiten sowie die geschätzten Wege.
+Eine zweite Kachelreihe zeigt `Hip rise`, `Hip below hand`, `Torso lead` und `Hand settles`, also
+die Körperposition am Zugriff und den Rumpfvorlauf. Beim Vorlauf steht die Korrelation als
+Kleintext darunter, damit ein schwach gestützter Wert erkennbar bleibt; ist er unbestimmt, zeigt
+die Kachel `undefined` statt einer Zahl.
 Die eigene framebasierte Video-Zeitleiste aktualisiert Bild, Frameanzeige und weißen Cursor
 bereits während des Ziehens. Die Pfeiltasten und die beiden Frame-Buttons springen jeweils exakt
 einen Videoframe; gehaltene Pfeiltasten warten auf den tatsächlich dargestellten Frame, bevor sie
@@ -831,6 +835,43 @@ Zusammenfassungen stehen in `move_metrics.parquet`, die vollständigen Kurvenwer
 höchste Körpergeschwindigkeit. Die absoluten `px/s` bleiben ebenfalls im Datensatz. Weil das eine
 2D-Messung mit Modellunsicherheit ist, sind kleine Unterschiede nicht automatisch sportlich
 bedeutsam; die Werte sind zunächst für den Vergleich von Zügen im selben Kamerabild gedacht.
+
+##### Körperposition und Koordination
+
+Zwei zusätzliche Gruppen zielen auf den Vergleich **zweier Versuche desselben Zugs**. Beide sind
+bewusst so gewählt, dass sie gegen die Kameraposition unempfindlich sind: die eine misst
+vertikale Verhältnisse in Körperlängen, die andere nur Zeiten.
+
+`hand_settle_*` markiert den Frame, an dem die bewegte Hand zur Ruhe kommt — bei einem
+abgeschlossenen Zug der Griff, bei einem Sturz der tiefste Punkt. Das ist absichtlich **nicht** das
+Zugende, denn ein Zug schließt erst, wenn sich auch Körper und Beine beruhigt haben; die Hüfte dort
+abzulesen würde die Haltung verfehlen, auf die es beim Zugriff ankam. Genommen wird der Beginn der
+letzten ruhigen Strecke, weil eine Hand auf dem Weg oft kurz zögert, bevor sie sich festlegt.
+
+Darauf setzen `hip_rise_body_lengths` (wie weit die Hüfte vom Zugbeginn bis zum Zugriff gestiegen
+ist) und `hip_below_hand_body_lengths` (wie weit die Hüfte im Moment des Zugriffs unter der
+Greifhand steht, also wie gestreckt der Körper war).
+
+`coordination_lag_seconds` beantwortet, ob der Rumpf vor der Hand losgeht. Bewusst **ohne**
+Schwellenwert: ein Kletterer ist vor einem Zug selten ruhig — am Referenzvideo bewegt sich der Rumpf
+in der Sekunde vor zwei von drei Zügen mit 0,2 bis 1,2 KL/s, weil Füße gesetzt und Gewicht verlagert
+wird. Ein Schwellenübertritt würde dort vor allem die Schwelle messen. Stattdessen werden die beiden
+Geschwindigkeitskurven gegeneinander korreliert; ein positiver Wert bedeutet, der Rumpf war zuerst
+dran. `coordination_correlation` steht daneben, damit ein schwach begründeter Versatz erkennbar
+bleibt. Liegt das Korrelationsmaximum am Rand des durchsuchten Bereichs oder ist eine der beiden
+Kurven flach, bleiben beide Felder `null` statt einen Randwert als Messung auszugeben.
+
+Am Referenzvideo:
+
+| Zug | Ergebnis | Hand ruht nach | Hüftanstieg | Hüfte unter Hand | Rumpfvorlauf |
+|---:|---|---:|---:|---:|---:|
+| 1 | abgeschlossen | 1,92 s | +0,32 KL | 1,10 KL | +17 ms (r=0,76) |
+| 2 | abgeschlossen | 4,49 s | +0,29 KL | 1,04 KL | +936 ms (r=0,53) |
+| 3 | Sturz | 2,69 s | **−0,64 KL** | 0,39 KL | −100 ms (r=0,78) |
+
+Der Sturz trennt sich beim Hüftanstieg von selbst ab: als einziger Abschnitt verliert die Hüfte an
+Höhe. Der Vorlauf von Zug 2 ist mit `r=0,53` allerdings schwach gestützt — dort bewegt sich die Hand
+über Sekunden kaum, sodass die Korrelation breit und ihr Maximum unscharf ist.
 
 #### P2.4 – Gelenkwinkel pro Zug
 

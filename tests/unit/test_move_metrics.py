@@ -166,6 +166,107 @@ def test_normalizes_speed_by_the_local_body_length() -> None:
     )
 
 
+def test_reports_hip_position_where_the_hand_settles() -> None:
+    """The hip columns must describe the frame the hand actually comes to rest on.
+
+    The move end is deliberately later than the grasp, because a move only closes
+    once body and legs settle too. Reading the hip there would miss the posture
+    that mattered while the climber was still reaching.
+    """
+    anchors = (
+        "wrist",
+        "thumb_third_joint",
+        "forefinger_third_joint",
+        "middle_finger_third_joint",
+        "ring_finger_third_joint",
+        "pinky_finger_third_joint",
+    )
+    records: list[dict[str, object]] = []
+    for frame in range(31):
+        # The hand rises for 10 frames, then holds still for the rest of the move.
+        hand_y = -float(frame * 20) if frame <= 10 else -200.0
+        # The hips keep creeping up for the whole move, well past the grasp.
+        hip_offset = -float(frame * 4)
+        for anchor in anchors:
+            records.append(_record(frame, f"left_{anchor}", 0.0, hand_y))
+            records.append(_record(frame, f"right_{anchor}", 0.0, 0.0))
+        for name, x, y in (
+            ("left_shoulder", -50.0, 0.0),
+            ("right_shoulder", 50.0, 0.0),
+            ("left_hip", -40.0, 100.0),
+            ("right_hip", 40.0, 100.0),
+            ("left_knee", -40.0, 160.0),
+            ("right_knee", 40.0, 160.0),
+            ("left_ankle", -40.0, 220.0),
+            ("right_ankle", 40.0, 220.0),
+        ):
+            records.append(_record(frame, name, x, y + hip_offset))
+
+    metric = calculate_move_metrics(
+        records,
+        [{"move_id": 1, "start_frame": 0, "end_frame": 30, "moving_hand": "left"}],
+        MoveMetricsConfig(position_smoothing_radius=1, speed_window_radius=1),
+    ).metrics[0]
+
+    # The hand stops around frame 10, far short of the frame-30 move end.
+    assert 8 <= metric["hand_settle_frame"] <= 13
+    assert metric["hand_settle_offset_seconds"] < metric["duration_seconds"]
+    # Hips rose 4 px per frame up to that point, against a 220 px body.
+    assert metric["hip_rise_body_lengths"] == pytest.approx(
+        metric["hand_settle_frame"] * 4.0 / 220.0, rel=0.1
+    )
+    # The hand is above the hips, so the hips sit below it by a positive amount.
+    assert metric["hip_below_hand_body_lengths"] > 0.0
+
+
+def test_reports_torso_lead_over_the_moving_hand() -> None:
+    """A torso that moves before the hand must show up as a positive lead.
+
+    No threshold decides this: a climber is rarely still before a move, so the
+    two speed curves are correlated against each other instead of hunting for an
+    onset that often does not exist.
+    """
+    anchors = (
+        "wrist",
+        "thumb_third_joint",
+        "forefinger_third_joint",
+        "middle_finger_third_joint",
+        "ring_finger_third_joint",
+        "pinky_finger_third_joint",
+    )
+    shift = 8
+    records: list[dict[str, object]] = []
+    for frame in range(71):
+        # One burst of motion for each, with the body starting `shift` frames first.
+        body_offset = -float(min(max(frame - 20, 0), 10) * 6)
+        hand_offset = -float(min(max(frame - 20 - shift, 0), 10) * 20)
+        for anchor in anchors:
+            records.append(_record(frame, f"left_{anchor}", 0.0, hand_offset))
+            records.append(_record(frame, f"right_{anchor}", 0.0, 0.0))
+        for name, x, y in (
+            ("left_shoulder", -50.0, 0.0),
+            ("right_shoulder", 50.0, 0.0),
+            ("left_hip", -40.0, 100.0),
+            ("right_hip", 40.0, 100.0),
+            ("left_knee", -40.0, 160.0),
+            ("right_knee", 40.0, 160.0),
+            ("left_ankle", -40.0, 220.0),
+            ("right_ankle", 40.0, 220.0),
+        ):
+            records.append(_record(frame, name, x, y + body_offset))
+
+    metric = calculate_move_metrics(
+        records,
+        [{"move_id": 1, "start_frame": 15, "end_frame": 50, "moving_hand": "left"}],
+        MoveMetricsConfig(position_smoothing_radius=1, speed_window_radius=1),
+    ).metrics[0]
+
+    assert metric["coordination_lag_seconds"] is not None
+    # Frames are 0.1 s apart in this fixture, so the lead is the shift in seconds.
+    assert metric["coordination_lag_seconds"] == pytest.approx(shift * 0.1, abs=0.15)
+    assert metric["coordination_correlation"] > 0.8
+
+
 def test_path_length_matches_the_travelled_steps() -> None:
     """The path column must count real travel, including motion that reverses.
 

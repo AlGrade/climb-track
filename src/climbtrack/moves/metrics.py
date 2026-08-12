@@ -65,7 +65,10 @@ def calculate_move_metrics(
         minimum_points=2,
     )
     torso = _smooth(_interpolate(torso), config.position_smoothing_radius)
+    hips, _ = _robust_center(coordinates, ("left_hip", "right_hip"), minimum_points=1)
+    hips = _smooth(_interpolate(hips), config.position_smoothing_radius)
     body_lengths = _body_length_series(coordinates, config.body_length_smoothing_radius)
+    maximum_lag_frames = round(config.coordination_maximum_lag_seconds / _median_step(timestamps))
     hand_speeds = {
         side: _speed(values, timestamps, config.speed_window_radius)
         for side, values in palms.items()
@@ -113,6 +116,24 @@ def calculate_move_metrics(
             support_displacement = support["direct_displacement_px"]
             support_path = support["path_length_px"]
 
+        settle = _settle_frame(
+            hand_speed / body_lengths,
+            start,
+            end,
+            config.settle_speed_body_lengths_per_second,
+        )
+        lag_seconds, lag_correlation = _coordination_lag(
+            torso_speed,
+            hand_speed,
+            timestamps,
+            start,
+            end,
+            maximum_lag_frames,
+        )
+        # Image y grows downward, so a climber gaining height loses y.
+        hip_rise = float((hips[start, 1] - hips[settle, 1]) / body_lengths[settle])
+        hip_below_hand = float((hips[settle, 1] - hand[settle, 1]) / body_lengths[settle])
+
         row = {
             "move_id": int(move["move_id"]),
             "moving_hand": hand_side,
@@ -127,6 +148,13 @@ def calculate_move_metrics(
             **_prefixed_metrics("body", body_metrics, float(timestamps[start])),
             "support_hand_relative_displacement_px": support_displacement,
             "support_hand_relative_path_length_px": support_path,
+            "hand_settle_frame": int(settle),
+            "hand_settle_timestamp": float(timestamps[settle]),
+            "hand_settle_offset_seconds": float(timestamps[settle] - timestamps[start]),
+            "hip_rise_body_lengths": hip_rise,
+            "hip_below_hand_body_lengths": hip_below_hand,
+            "coordination_lag_seconds": lag_seconds,
+            "coordination_correlation": lag_correlation,
         }
         rows.append(row)
         speed_timeline.extend(
@@ -234,6 +262,72 @@ def _speed(
         if seconds > 0:
             result[index] = float(np.linalg.norm(values[end] - values[start])) / seconds
     return result
+
+
+def _median_step(timestamps: np.ndarray) -> float:
+    """Return the typical frame period, used only to size windows given in seconds."""
+    if len(timestamps) < 2:
+        # Without a second frame the median difference is NaN, which would fail
+        # much later as an unreadable integer conversion error.
+        raise ClimbTrackError("Move metrics require at least two frames")
+    return float(np.median(np.diff(timestamps)))
+
+
+def _settle_frame(speed: np.ndarray, start: int, end: int, threshold: float) -> int:
+    """Find where the moving hand last comes to rest inside the move.
+
+    Taken as the beginning of the final quiet stretch rather than the first one,
+    because a hand often pauses mid-reach before committing to the hold. A move
+    whose hand never crosses the threshold settles at its own end.
+    """
+    moving = np.nonzero(speed[start : end + 1] > threshold)[0]
+    if not len(moving):
+        return end
+    return min(start + int(moving[-1]) + 1, end)
+
+
+def _coordination_lag(
+    body_speed: np.ndarray,
+    hand_speed: np.ndarray,
+    timestamps: np.ndarray,
+    start: int,
+    end: int,
+    maximum_lag_frames: int,
+) -> tuple[float | None, float | None]:
+    """Correlate the torso and hand speed curves to find which one leads.
+
+    A threshold on 'the body starts pulling' would mostly measure the threshold:
+    on the reference video the torso is still moving from footwork in the second
+    before two of three moves, so no clean onset exists. Correlating the whole
+    curve needs no event and no threshold. A positive lag means the torso pattern
+    arrives before the hand does.
+    """
+    span = end - start + 1
+    lag_limit = max(0, min(maximum_lag_frames, start, len(hand_speed) - 1 - end, span // 2))
+    if lag_limit == 0:
+        return None, None
+    reference = body_speed[start : end + 1]
+    if not np.isfinite(reference).all() or np.std(reference) <= 0.0:
+        return None, None
+    best_lag, best_correlation = 0, -2.0
+    for lag in range(-lag_limit, lag_limit + 1):
+        shifted = hand_speed[start + lag : end + lag + 1]
+        if np.std(shifted) <= 0.0:
+            continue
+        correlation = float(np.corrcoef(reference, shifted)[0, 1])
+        if correlation > best_correlation:
+            best_lag, best_correlation = lag, correlation
+    if best_correlation < -1.0:
+        return None, None
+    if abs(best_lag) == lag_limit:
+        # The peak sits on the edge of the searched range, so the real one may lie
+        # outside it. Reporting the boundary would look like a measurement.
+        return None, None
+    # The shift is measured on the hand, so a hand pattern that has to move later
+    # in time to match the torso means the torso arrived first.
+    center = (start + end) // 2
+    seconds = float(timestamps[center + best_lag] - timestamps[center])
+    return seconds, best_correlation
 
 
 def _body_length_series(coordinates: dict[str, np.ndarray], radius: int) -> np.ndarray:

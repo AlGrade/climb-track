@@ -9,7 +9,7 @@ import pyarrow.parquet as pq
 
 from climbtrack.errors import SchemaValidationError
 
-MOVE_METRICS_SCHEMA_VERSION = "1.0.0"
+MOVE_METRICS_SCHEMA_VERSION = "1.1.0"
 MOVE_METRICS_SCHEMA = pa.schema(
     [
         pa.field("move_id", pa.int64(), nullable=False),
@@ -47,6 +47,17 @@ MOVE_METRICS_SCHEMA = pa.schema(
         pa.field("body_peak_speed_offset_seconds", pa.float64(), nullable=False),
         pa.field("support_hand_relative_displacement_px", pa.float64(), nullable=True),
         pa.field("support_hand_relative_path_length_px", pa.float64(), nullable=True),
+        # Where the moving hand comes to rest: the grasp for a completed move,
+        # the bottom of the fall for a failed one.
+        pa.field("hand_settle_frame", pa.int64(), nullable=False),
+        pa.field("hand_settle_timestamp", pa.float64(), nullable=False),
+        pa.field("hand_settle_offset_seconds", pa.float64(), nullable=False),
+        pa.field("hip_rise_body_lengths", pa.float64(), nullable=False),
+        pa.field("hip_below_hand_body_lengths", pa.float64(), nullable=False),
+        # Lead of the torso over the moving hand. Null when one of the two speed
+        # curves is flat, which leaves the lag undefined rather than zero.
+        pa.field("coordination_lag_seconds", pa.float64(), nullable=True),
+        pa.field("coordination_correlation", pa.float64(), nullable=True),
     ],
     metadata={b"climbtrack.schema": MOVE_METRICS_SCHEMA_VERSION.encode()},
 )

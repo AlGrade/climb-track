@@ -126,6 +126,8 @@ move_metrics:
   speed_window_radius: 2
   body_length_smoothing_radius: 30
   minimum_valid_fraction: 0.80
+  settle_speed_body_lengths_per_second: 0.18
+  coordination_maximum_lag_seconds: 1.0
 
 models:
   primary_pose_backend: sapiens2

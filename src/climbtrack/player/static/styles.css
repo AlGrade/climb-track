@@ -757,6 +757,22 @@ html[data-layout="landscape"] .video-shell {
   .move-row {
     min-height: 48px;
   }
+
+  /* The tile row wraps to two lines on a short screen, so give the video back
+     the height the second row would otherwise take from it. */
+  .metrics-grid div {
+    padding: 5px 7px;
+  }
+
+  .metrics-grid strong {
+    margin: 2px 0 1px;
+    font-size: 0.86rem;
+  }
+
+  .metrics-grid span,
+  .metrics-grid small {
+    font-size: 0.66rem;
+  }
 }
 
 @media (max-width: 900px) {

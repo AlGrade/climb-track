@@ -279,6 +279,8 @@ class MoveMetricsConfig(StrictModel):
     speed_window_radius: int = Field(default=2, ge=1, le=60)
     body_length_smoothing_radius: int = Field(default=30, ge=1, le=600)
     minimum_valid_fraction: float = Field(default=0.80, ge=0.5, le=1.0)
+    settle_speed_body_lengths_per_second: float = Field(default=0.18, ge=0.01, le=5.0)
+    coordination_maximum_lag_seconds: float = Field(default=1.0, ge=0.05, le=5.0)
 
 
 class RenderConfig(StrictModel):
