@@ -123,7 +123,8 @@ move_detection:
 
 move_metrics:
   position_smoothing_radius: 4
-  speed_window_radius: 7
+  speed_window_radius: 2
+  body_length_smoothing_radius: 30
   minimum_valid_fraction: 0.80
 
 models:

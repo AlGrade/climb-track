@@ -17,7 +17,7 @@ from climbtrack.schema.moves import read_moves_parquet
 from climbtrack.schema.pose import read_pose_parquet
 
 STAGE_NAME = "80_move_metrics"
-STAGE_VERSION = "1.1.0"
+STAGE_VERSION = "2.0.0"
 
 
 def measure_moves(

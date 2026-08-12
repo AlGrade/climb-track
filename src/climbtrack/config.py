@@ -276,7 +276,8 @@ class MoveMetricsConfig(StrictModel):
     """Smoothing and quality thresholds for per-move kinematics."""
 
     position_smoothing_radius: int = Field(default=4, ge=1, le=30)
-    speed_window_radius: int = Field(default=7, ge=1, le=60)
+    speed_window_radius: int = Field(default=2, ge=1, le=60)
+    body_length_smoothing_radius: int = Field(default=30, ge=1, le=600)
     minimum_valid_fraction: float = Field(default=0.80, ge=0.5, le=1.0)
 
 

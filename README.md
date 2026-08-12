@@ -569,6 +569,12 @@ wird wegen Laufzeit und Modellgröße nicht im automatischen Test ausgeführt.
 - Refinement verbessert die rechte Hand deutlich, die linke Hand im Mittel jedoch nicht.
 - Der ursprünglich geplante objektive Vergleich mit ViTPose wird vorerst bewusst übersprungen.
 - Perspektive, Weitwinkel und Kamerabewegung werden noch nicht in Weltkoordinaten umgerechnet.
+- Der Handflächenpunkt springt, wenn sich die Zahl der sichtbaren Handanker ändert, weil der Median
+  dann über eine andere Punktmenge gebildet wird. Am Referenzvideo betrifft das 21 von 1.648 Frames;
+  dort liegt die Geschwindigkeit im Mittel etwa beim Ein- bis Zweieinhalbfachen der Umgebung. Das
+  frühere breite Ableitungsfenster hat das verdeckt statt behoben. Keiner der drei berichteten
+  Spitzenwerte liegt auf einem solchen Frame, aber ein Maximum in dieser Nähe ist mit Vorsicht zu
+  lesen. Eine Mindestankerzahl oder confidence-gewichtete Handfläche wäre die eigentliche Lösung.
 
 ## Phase 2: Züge und Bewegungsmetriken
 
@@ -776,16 +782,28 @@ Die erste Version gibt Geschwindigkeiten in zwei Einheiten aus:
 - `body_lengths/s` als grob körpergrößennormierte Vergleichsgröße.
 
 Die Körperlänge wird pro Frame als anatomische Bildkette aus Schultermitte, Hüftmitte, Knie und
-Knöchel geschätzt; verwendet wird der Median über das gesamte Video. Der Kletterer muss dafür nicht
-aufrecht stehen. `BL` ist damit eine stabile relative Vergleichslänge, aber keine gemessene reale
-Körpergröße.
+Knöchel geschätzt. Der Kletterer muss dafür nicht aufrecht stehen, weil die Kette segmentweise
+summiert wird und ein gebeugtes Knie sie in der Bildebene nicht verkürzt. Normiert wird mit dem
+Wert **pro Frame**, geglättet über etwa eine Sekunde: Tiefe ändert sich langsam, die
+Verkürzung einzelner Frames ist dagegen verrauscht. Ein einziger Median über das ganze Video wäre
+zu grob — am Referenzvideo schwankt die scheinbare Körperlänge zwischen 295 und 446 Pixeln, was
+einzelne Züge um über zehn Prozent falsch normiert hätte. `BL` bleibt eine relative
+Vergleichslänge, keine gemessene reale Körpergröße.
 
 Echte `cm/s` oder `m/s` wären ohne Kalibrierung irreführend. Dafür brauchen wir später mindestens
 eine bekannte Strecke in der Wandebene und möglichst eine statische Kamera. Perspektivische Tiefe
 bleibt selbst dann eine Einschränkung.
 
-Für Ableitungen wird eine eigene, vorsichtige Glättung verwendet. Geschwindigkeit verstärkt kleine
-Positionsfehler stark; einfach rohe Frame-Differenzen zu bilden wäre fachlich falsch.
+Für Ableitungen wird eine eigene Glättung verwendet. Geschwindigkeit verstärkt kleine
+Positionsfehler stark; einfach rohe Frame-Differenzen zu bilden wäre fachlich falsch. Die
+Entrauschung leistet dabei der Positionsfilter (9-Frame-Median), nicht das Ableitungsfenster. Ein
+Vergleich am Referenzvideo zeigt das deutlich: zwischen Radius 1 und Radius 10 bleibt der
+Rauschboden in Ruhephasen nahezu unverändert, während die erfasste Spitzengeschwindigkeit von
+100 auf 52 Prozent fällt. `speed_window_radius: 2` (rund 84 ms) hält deshalb die Spitzen fest,
+ohne Rauschen einzuhandeln — das frühere Fenster von 251 ms hat kurze Züge stark verwischt.
+
+Alle Wegspalten verwenden dieselbe Definition, nämlich die Summe der tatsächlichen Frameschritte.
+`mean_speed_px_s` ist exakt `path_length_px / duration_seconds`.
 
 Die Berechnung ist als reproduzierbare Cache-Stufe `80_move_metrics` implementiert. Eingaben sind
 `pose_refined.parquet` und der aktuelle korrigierbare Stand in `annotations/.../moves.parquet`.
@@ -805,9 +823,9 @@ Zusammenfassungen stehen in `move_metrics.parquet`, die vollständigen Kurvenwer
 
 | Zug | Ergebnis | Hand max. | Hand Ø | Körper max. | Körper Ø |
 |---:|---|---:|---:|---:|---:|
-| 1 | abgeschlossen | 4,32 KL/s | 0,85 KL/s | 1,44 KL/s | 0,45 KL/s |
-| 2 | abgeschlossen | 2,11 KL/s | 0,42 KL/s | 0,32 KL/s | 0,10 KL/s |
-| 3 | Sturz | 8,97 KL/s | 1,51 KL/s | 3,70 KL/s | 1,03 KL/s |
+| 1 | abgeschlossen | 5,50 KL/s | 0,97 KL/s | 2,14 KL/s | 0,51 KL/s |
+| 2 | abgeschlossen | 5,82 KL/s | 0,54 KL/s | 0,33 KL/s | 0,11 KL/s |
+| 3 | Sturz | 9,53 KL/s | 1,30 KL/s | 3,14 KL/s | 0,86 KL/s |
 
 `KL/s` bedeutet geschätzte Körperlängen pro Sekunde. Der Sturz zeigt erwartungsgemäß die
 höchste Körpergeschwindigkeit. Die absoluten `px/s` bleiben ebenfalls im Datensatz. Weil das eine

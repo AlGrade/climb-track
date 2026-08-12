@@ -65,7 +65,7 @@ def calculate_move_metrics(
         minimum_points=2,
     )
     torso = _smooth(_interpolate(torso), config.position_smoothing_radius)
-    body_length = _body_length(coordinates)
+    body_lengths = _body_length_series(coordinates, config.body_length_smoothing_radius)
     hand_speeds = {
         side: _speed(values, timestamps, config.speed_window_radius)
         for side, values in palms.items()
@@ -99,15 +99,17 @@ def calculate_move_metrics(
                 f"(hand={hand_fraction:.1%}, body={body_fraction:.1%})"
             )
 
-        hand_metrics = _trajectory_metrics(hand, hand_speed, timestamps, start, end)
-        body_metrics = _trajectory_metrics(torso, torso_speed, timestamps, start, end)
+        hand_metrics = _trajectory_metrics(hand, hand_speed, timestamps, body_lengths, start, end)
+        body_metrics = _trajectory_metrics(torso, torso_speed, timestamps, body_lengths, start, end)
         support_displacement: float | None = None
         support_path: float | None = None
         if hand_side in ("left", "right"):
             support_side = "right" if hand_side == "left" else "left"
             relative = palms[support_side] - torso
             relative_speed = _speed(relative, timestamps, config.speed_window_radius)
-            support = _trajectory_metrics(relative, relative_speed, timestamps, start, end)
+            support = _trajectory_metrics(
+                relative, relative_speed, timestamps, body_lengths, start, end
+            )
             support_displacement = support["direct_displacement_px"]
             support_path = support["path_length_px"]
 
@@ -118,11 +120,11 @@ def calculate_move_metrics(
             "start_timestamp": float(timestamps[start]),
             "end_timestamp": float(timestamps[end]),
             "duration_seconds": float(timestamps[end] - timestamps[start]),
-            "body_length_px": body_length,
+            "body_length_px": float(np.median(body_lengths[start : end + 1])),
             "hand_valid_fraction": hand_fraction,
-            **_prefixed_metrics("hand", hand_metrics, body_length, float(timestamps[start])),
+            **_prefixed_metrics("hand", hand_metrics, float(timestamps[start])),
             "body_valid_fraction": body_fraction,
-            **_prefixed_metrics("body", body_metrics, body_length, float(timestamps[start])),
+            **_prefixed_metrics("body", body_metrics, float(timestamps[start])),
             "support_hand_relative_displacement_px": support_displacement,
             "support_hand_relative_path_length_px": support_path,
         }
@@ -134,9 +136,9 @@ def calculate_move_metrics(
                 "timestamp": float(timestamps[frame]),
                 "offset_seconds": float(timestamps[frame] - timestamps[start]),
                 "hand_speed_px_s": float(hand_speed[frame]),
-                "hand_speed_body_lengths_s": float(hand_speed[frame] / body_length),
+                "hand_speed_body_lengths_s": float(hand_speed[frame] / body_lengths[frame]),
                 "body_speed_px_s": float(torso_speed[frame]),
-                "body_speed_body_lengths_s": float(torso_speed[frame] / body_length),
+                "body_speed_body_lengths_s": float(torso_speed[frame] / body_lengths[frame]),
             }
             for frame in range(start, end + 1)
         )
@@ -148,9 +150,12 @@ def calculate_move_metrics(
             "moves": len(rows),
             "speed_samples": len(speed_timeline),
             "frames": len(timestamps),
-            "body_length_px": body_length,
+            "body_length_px_median": float(np.median(body_lengths)),
+            "body_length_px_p10": float(np.quantile(body_lengths, 0.10)),
+            "body_length_px_p90": float(np.quantile(body_lengths, 0.90)),
             "position_smoothing_radius": config.position_smoothing_radius,
             "speed_window_radius": config.speed_window_radius,
+            "body_length_smoothing_radius": config.body_length_smoothing_radius,
             "timing": "source_frame_timestamps_vfr",
         },
     )
@@ -231,7 +236,16 @@ def _speed(
     return result
 
 
-def _body_length(coordinates: dict[str, np.ndarray]) -> float:
+def _body_length_series(coordinates: dict[str, np.ndarray], radius: int) -> np.ndarray:
+    """Estimate the apparent body length per frame in image pixels.
+
+    A single median over the whole video misnormalizes every move recorded at a
+    different distance from the camera: on the reference video the apparent body
+    length spans 293 to 445 px, so one global value biases individual moves by
+    well over ten percent. The chain is summed segment by segment, which keeps it
+    stable when a knee bends in the image plane, and is smoothed over a wide
+    window because depth changes slowly while single-frame foreshortening is noisy.
+    """
     points = {name: _interpolate(coordinates[name]) for name in BODY_POINTS}
     shoulders = (points["left_shoulder"] + points["right_shoulder"]) / 2.0
     hips = (points["left_hip"] + points["right_hip"]) / 2.0
@@ -241,27 +255,42 @@ def _body_length(coordinates: dict[str, np.ndarray]) -> float:
         thigh = np.linalg.norm(points[f"{side}_hip"] - points[f"{side}_knee"], axis=1)
         shin = np.linalg.norm(points[f"{side}_knee"] - points[f"{side}_ankle"], axis=1)
         legs.append(thigh + shin)
-    estimate = float(np.median(torso + np.mean(np.stack(legs, axis=1), axis=1)))
-    if not math.isfinite(estimate) or estimate < 1.0:
+    series = torso + np.mean(np.stack(legs, axis=1), axis=1)
+    smoothed = np.empty_like(series)
+    for index in range(len(series)):
+        start = max(0, index - radius)
+        end = min(len(series), index + radius + 1)
+        smoothed[index] = np.median(series[start:end])
+    if not np.isfinite(smoothed).all() or smoothed.min() < 1.0:
         raise ClimbTrackError("Could not estimate body length for normalized move metrics")
-    return estimate
+    return smoothed
 
 
 def _trajectory_metrics(
     values: np.ndarray,
     speed: np.ndarray,
     timestamps: np.ndarray,
+    body_lengths: np.ndarray,
     start: int,
     end: int,
 ) -> dict[str, float]:
     segment = values[start : end + 1]
     deltas = np.diff(segment, axis=0)
+    step_lengths = np.linalg.norm(deltas, axis=1)
     displacement = segment[-1] - segment[0]
     duration = float(timestamps[end] - timestamps[start])
     segment_speed = speed[start : end + 1]
-    segment_timestamps = timestamps[start : end + 1]
-    path_length = float(np.trapezoid(segment_speed, segment_timestamps))
-    peak_offset = int(np.argmax(segment_speed))
+    segment_body = body_lengths[start : end + 1]
+    # Every path column now uses the same definition, the summed frame-to-frame
+    # steps. Integrating the smoothed speed instead disagreed with the axis-wise
+    # path sums printed beside it by up to a quarter on the reference video.
+    path_length = float(np.sum(step_lengths))
+    normalized_speed = segment_speed / segment_body
+    normalized_path = float(np.sum(step_lengths / segment_body[1:]))
+    # Body length is smoothed over about a second, so both peaks fall on the same
+    # frame in practice; the normalized series decides because BL/s is the unit
+    # the results are read in.
+    peak_offset = int(np.argmax(normalized_speed))
     return {
         "horizontal_displacement_px": float(displacement[0]),
         "vertical_gain_px": float(-displacement[1]),
@@ -270,7 +299,9 @@ def _trajectory_metrics(
         "direct_displacement_px": float(np.linalg.norm(displacement)),
         "path_length_px": path_length,
         "mean_speed_px_s": path_length / duration,
-        "max_speed_px_s": float(segment_speed[peak_offset]),
+        "max_speed_px_s": float(np.max(segment_speed)),
+        "mean_speed_body_lengths_s": normalized_path / duration,
+        "max_speed_body_lengths_s": float(normalized_speed[peak_offset]),
         "peak_speed_timestamp": float(timestamps[start + peak_offset]),
     }
 
@@ -278,12 +309,9 @@ def _trajectory_metrics(
 def _prefixed_metrics(
     prefix: str,
     metrics: dict[str, float],
-    body_length: float,
     start_timestamp: float,
 ) -> dict[str, float]:
     result = {f"{prefix}_{name}": value for name, value in metrics.items()}
-    result[f"{prefix}_mean_speed_body_lengths_s"] = metrics["mean_speed_px_s"] / body_length
-    result[f"{prefix}_max_speed_body_lengths_s"] = metrics["max_speed_px_s"] / body_length
     result[f"{prefix}_peak_speed_offset_seconds"] = (
         metrics["peak_speed_timestamp"] - start_timestamp
     )
