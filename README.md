@@ -645,6 +645,17 @@ video**. Sie ist bewusst auf Video, Zugliste und Messwerte reduziert. Frame-Schr
 Korrektur von Start, Ende und Handzuordnung bleiben unter **Edit boundaries** eingeklappt erreichbar;
 Änderungen werden separat als Ground Truth gespeichert.
 
+Eine Grenze lässt sich auf zwei Wegen setzen: `Use current frame` übernimmt die aktuelle
+Videoposition, oder die Frame-Nummer wird direkt in das Zahlenfeld getippt. `Enter` springt dort
+zusätzlich auf den eingegebenen Frame, damit er vor dem Speichern sichtbar geprüft werden kann;
+Werte außerhalb des Videos werden abgelehnt statt still verworfen. Ist der Entwurf unvollständig,
+nennt die Meldung unter **Save** die fehlenden Angaben, statt den Knopf nur ausgegraut zu lassen.
+
+Solange **Edit boundaries** aufgeklappt ist, ändert die Videoposition die Auswahl nicht mehr. Das ist
+notwendig, weil das Suchen einer neuen Grenze zwangsläufig aus dem Zug herausführt: vorher hat die
+mitlaufende Auswahl dort den Entwurf geleert und die Korrektur ließ sich nicht mehr speichern.
+Zugeklappt folgt die Auswahl weiterhin dem aktuellen Frame.
+
 Beim Start lädt der Player `pose_refined.parquet`, bildet pro Hand einen robusten Handflächenpunkt
 und erkennt Übergänge zwischen stabilen Positionen automatisch. Bereits fertige Pose- und
 Refinement-Caches werden wiederverwendet; Sapiens läuft nicht erneut. Auf dem Referenzvideo erkennt

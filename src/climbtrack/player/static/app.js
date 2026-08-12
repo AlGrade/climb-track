@@ -9,7 +9,8 @@ const elements = Object.fromEntries(
     "fullscreenToggle", "fullscreenToggleIcon", "fullscreenToggleLabel", "saveState", "currentTime",
     "currentFrame", "previousMove",
     "replayMove", "nextMove", "playAll", "previousFrame", "nextFrame", "editorTitle", "resetDraft", "setStart",
-    "setEnd", "startValue", "endValue", "saveMove", "deleteMove", "validationMessage",
+    "setEnd", "startValue", "endValue", "startFrameInput", "endFrameInput",
+    "saveMove", "deleteMove", "validationMessage",
     "emptyMoves", "moveList", "metricsCard", "metricsGrid", "metricsNote",
     "handMaxSpeed", "handMaxSpeedPx", "bodyMaxSpeed", "bodyMaxSpeedPx",
     "handMeanSpeed", "handPath", "bodyMeanSpeed", "bodyPath", "speedChartWrap",
@@ -325,6 +326,8 @@ function renderDraft() {
     : "New move";
   elements.startValue.textContent = boundaryText(draft.start_frame);
   elements.endValue.textContent = boundaryText(draft.end_frame);
+  syncBoundaryInput(elements.startFrameInput, draft.start_frame);
+  syncBoundaryInput(elements.endFrameInput, draft.end_frame);
   document.querySelectorAll("[data-hand]").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.hand === draft.moving_hand));
   });
@@ -333,9 +336,49 @@ function renderDraft() {
   elements.saveMove.disabled = !forward;
   elements.saveMove.textContent = "Save";
   elements.deleteMove.hidden = state.selectedIndex < 0;
-  elements.validationMessage.textContent = complete && !forward
-    ? "The end must be after the start."
-    : "";
+  elements.validationMessage.textContent = draftBlockReason(draft, complete, forward);
+}
+
+function syncBoundaryInput(input, frameIdx) {
+  // Never overwrite the field the user is typing into.
+  if (document.activeElement === input) return;
+  input.value = frameIdx === null ? "" : String(frameIdx);
+}
+
+function draftBlockReason(draft, complete, forward) {
+  if (complete) return forward ? "" : "The end must be after the start.";
+  const missing = [];
+  if (draft.start_frame === null) missing.push("a start frame");
+  if (draft.end_frame === null) missing.push("an end frame");
+  if (draft.moving_hand === null) missing.push("the moving hand");
+  const last = missing.pop();
+  const listed = missing.length ? `${missing.join(", ")} and ${last}` : last;
+  return `Saving needs ${listed}.`;
+}
+
+function lastFrameIdx() {
+  if (!state.timeline.length) return 0;
+  return state.timeline[state.timeline.length - 1].frame_idx;
+}
+
+function applyBoundaryInput(name, input) {
+  state.selectionFollowsTimeline = false;
+  const raw = input.value.trim();
+  if (raw === "") {
+    state.draft[`${name}_frame`] = null;
+    renderDraft();
+    return;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  if (!state.timelineIndexByFrame.has(parsed)) {
+    state.draft[`${name}_frame`] = null;
+    renderDraft();
+    elements.validationMessage.textContent =
+      `Frame ${raw} is outside this video (0–${lastFrameIdx()}).`;
+    return;
+  }
+  state.draft[`${name}_frame`] = parsed;
+  renderDraft();
 }
 
 function updateNavigation() {
@@ -385,6 +428,9 @@ function setSelectedMove(index) {
 
 function syncMoveSelection(frameIdx) {
   if (!state.selectionFollowsTimeline) return;
+  // An open editor means edit intent: leaving the move while scrubbing to a new
+  // boundary must not silently discard the draft that is being corrected.
+  if (elements.editorCard.open) return;
   const matchingIndex = moveIndexForFrame(frameIdx);
   if (matchingIndex === state.selectedIndex) return;
   setSelectedMove(matchingIndex);
@@ -566,7 +612,7 @@ function setBoundary(name) {
 
 function boundaryText(frameIdx) {
   if (frameIdx === null) return "Unset";
-  return `${formatTime(mediaTime(frameIdx))} · Frame ${frameIdx}`;
+  return formatTime(mediaTime(frameIdx));
 }
 
 function resetDraft() {
@@ -690,6 +736,8 @@ function updateReadoutForTimelineIndex(timelineIndex) {
 
 function configureVideoControls() {
   elements.videoScrubber.max = String(Math.max(0, state.timeline.length - 1));
+  elements.startFrameInput.max = String(lastFrameIdx());
+  elements.endFrameInput.max = String(lastFrameIdx());
   updateNavigation();
   updatePlaybackControls();
   updateReadout();
@@ -996,6 +1044,15 @@ elements.previousFrame.addEventListener("click", () => stepFrame(-1));
 elements.nextFrame.addEventListener("click", () => stepFrame(1));
 elements.setStart.addEventListener("click", () => setBoundary("start"));
 elements.setEnd.addEventListener("click", () => setBoundary("end"));
+[["start", elements.startFrameInput], ["end", elements.endFrameInput]].forEach(([name, input]) => {
+  input.addEventListener("input", () => applyBoundaryInput(name, input));
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    const frameIdx = Number.parseInt(input.value.trim(), 10);
+    if (state.timelineIndexByFrame.has(frameIdx)) seekToFrame(frameIdx);
+  });
+});
 elements.resetDraft.addEventListener("click", resetDraft);
 elements.saveMove.addEventListener("click", saveDraft);
 elements.deleteMove.addEventListener("click", deleteSelected);

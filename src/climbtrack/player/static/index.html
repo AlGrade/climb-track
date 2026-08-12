@@ -146,14 +146,36 @@
             </div>
 
             <div class="boundary-grid">
-              <button id="setStart" class="boundary-button">
-                <span>START</span>
-                <strong id="startValue">Unset</strong>
-              </button>
-              <button id="setEnd" class="boundary-button">
-                <span>END</span>
-                <strong id="endValue">Unset</strong>
-              </button>
+              <div class="boundary-field">
+                <span class="boundary-label">START</span>
+                <input
+                  id="startFrameInput"
+                  class="boundary-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="Frame"
+                  aria-label="Start frame"
+                >
+                <button id="setStart" class="boundary-button">Use current frame</button>
+                <span class="boundary-time" id="startValue">Unset</span>
+              </div>
+              <div class="boundary-field">
+                <span class="boundary-label">END</span>
+                <input
+                  id="endFrameInput"
+                  class="boundary-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="Frame"
+                  aria-label="End frame"
+                >
+                <button id="setEnd" class="boundary-button">Use current frame</button>
+                <span class="boundary-time" id="endValue">Unset</span>
+              </div>
             </div>
 
             <fieldset class="hand-picker">
