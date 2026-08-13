@@ -4,7 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ClimbTrack</title>
-    <link rel="stylesheet" href="/assets/styles.css">
+    <!-- Order matters: later sheets override earlier ones. -->
+    <link rel="stylesheet" href="/assets/styles/base.css">
+    <link rel="stylesheet" href="/assets/styles/video.css">
+    <link rel="stylesheet" href="/assets/styles/panels.css">
+    <link rel="stylesheet" href="/assets/styles/chart.css">
+    <link rel="stylesheet" href="/assets/styles/editor.css">
+    <link rel="stylesheet" href="/assets/styles/responsive.css">
+    <link rel="stylesheet" href="/assets/styles/fullscreen.css">
   </head>
   <body>
     <main class="workspace">
@@ -198,6 +205,6 @@
       </aside>
     </main>
 
-    <script src="/assets/app.js" defer></script>
+    <script src="/assets/js/main.js" type="module"></script>
   </body>
 </html>

@@ -1,0 +1,150 @@
+/* Move navigation, the side-panel cards, the move list, and the metric tiles. */
+
+.transport {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+#replayMove,
+#playAll {
+  grid-column: 1 / -1;
+}
+
+.primary {
+  background: var(--accent);
+  color: #11170a;
+  font-weight: 750;
+}
+
+.secondary {
+  border-color: var(--line);
+}
+
+.ghost {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.side-panel > * {
+  flex: 0 0 auto;
+}
+
+.editor-card,
+.metrics-card,
+.moves-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--surface);
+}
+
+.metrics-card {
+  margin-top: 0;
+  padding: 10px;
+}
+
+.moves-card {
+  padding: 8px;
+}
+
+.move-list {
+  display: flex;
+  max-height: 30dvh;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.move-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  min-height: 54px;
+  border-color: var(--line);
+  padding: 6px 9px;
+  text-align: left;
+}
+
+.move-row[aria-current="true"] {
+  border-color: var(--accent);
+  background: var(--accent-dark);
+}
+
+.move-row-fall {
+  border-color: rgba(255, 120, 109, 0.55);
+}
+
+.move-number {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.move-row-fall .move-number,
+.move-row-fall .move-summary strong {
+  color: var(--danger);
+}
+
+.move-summary strong,
+.move-summary span {
+  display: block;
+}
+
+.move-summary span,
+.move-duration {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.metrics-grid div {
+  min-width: 0;
+  border-radius: 9px;
+  padding: 7px 9px;
+  background: var(--raised);
+}
+
+.metrics-grid span,
+.metrics-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.metrics-grid strong {
+  display: block;
+  margin: 4px 0 2px;
+  color: var(--accent);
+  font-size: 0.96rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics-note {
+  margin: 6px 1px 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+

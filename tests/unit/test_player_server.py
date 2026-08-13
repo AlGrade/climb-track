@@ -1,6 +1,8 @@
 import json
 import threading
+from http import HTTPStatus
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
@@ -8,7 +10,7 @@ import pytest
 
 from climbtrack.config import MovePlayerConfig
 from climbtrack.moves import MoveSession, save_move_session
-from climbtrack.player.server import create_player_server, parse_byte_range
+from climbtrack.player.server import create_player_server, parse_byte_range, resolve_asset
 from climbtrack.schema.moves import read_moves_parquet
 
 
@@ -30,6 +32,44 @@ def test_parse_byte_range(header: str | None, expected: tuple[int, int] | None) 
 def test_parse_byte_range_rejects_invalid_input(header: str) -> None:
     with pytest.raises(ValueError):
         parse_byte_range(header, 10)
+
+
+def test_resolve_asset_returns_files_inside_the_static_root(tmp_path: Path) -> None:
+    (tmp_path / "js").mkdir()
+    (tmp_path / "js" / "main.js").write_text("export {};", encoding="utf-8")
+
+    resolved = resolve_asset(tmp_path, "js/main.js")
+
+    assert resolved == (tmp_path / "js" / "main.js").resolve()
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "../secret.txt",
+        "js/../../secret.txt",
+        "..%2fsecret.txt",
+        "%2e%2e/secret.txt",
+        "/etc/hosts",
+        "",
+    ],
+)
+def test_resolve_asset_rejects_paths_outside_the_static_root(tmp_path: Path, relative: str) -> None:
+    (tmp_path / "secret.txt").write_text("private", encoding="utf-8")
+    static_root = tmp_path / "static"
+    static_root.mkdir()
+
+    assert resolve_asset(static_root, relative) is None
+
+
+def test_resolve_asset_rejects_symlinks_leaving_the_static_root(tmp_path: Path) -> None:
+    outside = tmp_path / "secret.txt"
+    outside.write_text("private", encoding="utf-8")
+    static_root = tmp_path / "static"
+    static_root.mkdir()
+    (static_root / "escape.js").symlink_to(outside)
+
+    assert resolve_asset(static_root, "escape.js") is None
 
 
 def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None:
@@ -73,13 +113,25 @@ def test_player_serves_ranges_and_atomically_saves_moves(tmp_path: Path) -> None
         assert 'id="transport"' in player_html
         assert 'id="editorCard"' in player_html
 
-        with urlopen(f"{origin}/assets/app.js") as response:
-            player_javascript = response.read().decode("utf-8")
-        assert "previewScrub" in player_javascript
-        assert "finishFrameStep" in player_javascript
-        assert "initializeLayout" in player_javascript
-        assert "arrangeLayout" in player_javascript
-        assert "syncMoveSelection" in player_javascript
+        with urlopen(f"{origin}/assets/js/main.js") as response:
+            assert response.headers["Content-Type"].startswith("text/javascript")
+            entry_point = response.read().decode("utf-8")
+        assert "./playback.js" in entry_point
+        assert "./selection.js" in entry_point
+
+        with urlopen(f"{origin}/assets/js/playback.js") as response:
+            playback_module = response.read().decode("utf-8")
+        assert "previewScrub" in playback_module
+        assert "finishFrameStep" in playback_module
+
+        with urlopen(f"{origin}/assets/styles/base.css") as response:
+            assert response.headers["Content-Type"].startswith("text/css")
+            assert ":root" in response.read().decode("utf-8")
+
+        for missing in ("/assets/app.js", "/assets/../server.py", "/assets/js/"):
+            with pytest.raises(HTTPError) as rejected:
+                urlopen(f"{origin}{missing}")
+            assert rejected.value.code == HTTPStatus.NOT_FOUND
 
         with urlopen(f"{origin}/api/session") as response:
             payload = json.load(response)

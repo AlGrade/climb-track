@@ -1,0 +1,121 @@
+/* The per-frame speed chart: header, legend, axes, curves, and cursor. */
+
+.speed-chart {
+  border-radius: 9px;
+  padding: 10px 12px 7px;
+  background: var(--raised);
+}
+
+.chart-header,
+.chart-legend,
+.chart-readout {
+  display: flex;
+  align-items: center;
+}
+
+.chart-header {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.chart-header > strong {
+  font-size: 0.9rem;
+}
+
+.chart-legend,
+.chart-readout {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.chart-legend {
+  gap: 14px;
+}
+
+.chart-readout {
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-readout strong {
+  margin-left: 3px;
+  color: var(--text);
+}
+
+.chart-readout span:last-child {
+  margin-left: auto;
+}
+
+.chart-legend i {
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.hand-line {
+  background: var(--accent);
+}
+
+.body-line {
+  background: #7dc8ff;
+}
+
+.speed-chart svg {
+  display: block;
+  width: min(100%, 680px);
+  margin: 3px auto 0;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-grid-axis {
+  stroke: #637068;
+}
+
+.chart-tick-label,
+.chart-axis-title {
+  fill: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-axis-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.chart-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.hand-path {
+  stroke: var(--accent);
+}
+
+.body-path {
+  stroke: #7dc8ff;
+}
+
+.chart-cursor {
+  filter: drop-shadow(0 0 2px #000);
+  stroke: #fff;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+

@@ -1,0 +1,163 @@
+/* The video shell: overlay label, action buttons, transport bar, scrubber. */
+
+.video-shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  height: 43dvh;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #050606;
+}
+
+video {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #050606;
+  cursor: pointer;
+}
+
+.video-label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(4, 7, 5, 0.76);
+  backdrop-filter: blur(10px);
+  color: var(--accent);
+  font-size: 0.76rem;
+}
+
+.video-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 7px;
+}
+
+.video-action-button {
+  display: flex;
+  min-height: 34px;
+  gap: 7px;
+  align-items: center;
+  border-color: rgba(255, 255, 255, 0.18);
+  padding: 0 11px;
+  background: rgba(4, 7, 5, 0.76);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.video-action-button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+#layoutToggleIcon,
+#fullscreenToggleIcon {
+  color: var(--accent);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.video-controls {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: 36px minmax(90px, 1fr) auto 36px;
+  gap: 10px;
+  align-items: center;
+  padding: 28px 12px 11px;
+  background: linear-gradient(transparent, rgba(3, 5, 4, 0.9));
+}
+
+.video-control-button {
+  min-height: 34px;
+  border-color: rgba(255, 255, 255, 0.2);
+  padding: 0;
+  background: rgba(7, 10, 8, 0.78);
+  font-size: 0.8rem;
+}
+
+/* Frame stepping lives in the editor panel; fullscreen re-exposes it here. */
+.frame-step {
+  display: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.video-time {
+  color: #fff;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px #000;
+  white-space: nowrap;
+}
+
+.video-scrubber {
+  --scrub-progress: 0%;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.video-scrubber:focus-visible {
+  outline: 3px solid rgba(183, 243, 74, 0.45);
+  outline-offset: 2px;
+}
+
+.video-scrubber::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0 var(--scrub-progress),
+    rgba(255, 255, 255, 0.28) var(--scrub-progress) 100%
+  );
+}
+
+.video-scrubber::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  appearance: none;
+  background: var(--accent);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
+}
+
+.video-scrubber::-moz-range-track {
+  height: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.video-scrubber::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.video-scrubber::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
+}
+

@@ -1,0 +1,174 @@
+/* The empty state and the collapsible boundary editor. */
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 9px;
+  padding: 14px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.editor-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.editor-card summary {
+  padding: 12px 14px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.editor-card[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.editor-content {
+  padding: 12px;
+}
+
+.editor-heading,
+.correction-readout,
+.frame-controls,
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.editor-heading {
+  justify-content: space-between;
+}
+
+.text-button {
+  min-height: auto;
+  padding: 4px 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.correction-readout {
+  justify-content: space-between;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.frame-controls {
+  margin: 8px 0;
+}
+
+.frame-controls button {
+  flex: 1;
+}
+
+.boundary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.boundary-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.boundary-label {
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.boundary-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  padding: 6px 8px;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.boundary-input:focus-visible {
+  outline: 2px solid var(--accent, #4c8dff);
+  outline-offset: 1px;
+}
+
+.boundary-button {
+  min-height: auto;
+  padding: 5px 7px;
+  border-color: var(--line);
+  font-size: 0.72rem;
+}
+
+.boundary-time {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hand-picker {
+  margin: 12px 0;
+  border: 0;
+  padding: 0;
+}
+
+.hand-picker legend {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.hand-picker div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.hand-picker button {
+  border-color: var(--line);
+}
+
+.hand-picker button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-dark);
+  color: var(--accent);
+}
+
+.wide {
+  flex: 1;
+}
+
+.danger {
+  border-color: rgba(255, 120, 109, 0.35);
+  background: transparent;
+  color: var(--danger);
+}
+
+.validation {
+  min-height: 16px;
+  margin: 7px 0 0;
+  color: var(--danger);
+  font-size: 0.75rem;
+}
+
+.save-state {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.save-state[data-state="saved"] {
+  display: none;
+}
+
+.save-state[data-state="error"] {
+  color: var(--danger);
+}
+

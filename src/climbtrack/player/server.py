@@ -10,7 +10,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -25,6 +25,15 @@ from climbtrack.moves import (
 
 MAX_REQUEST_BYTES = 1_000_000
 MOVE_EDITS = TypeAdapter(list[MoveEdit])
+
+# An allowlist rather than mimetypes.guess_type: the front end only ever asks for
+# these three kinds, and the browser refuses ES modules served as anything but
+# JavaScript. Anything else under static/ is simply not reachable over HTTP.
+ASSET_CONTENT_TYPES = {
+    ".js": "text/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".svg": "image/svg+xml",
+}
 
 
 @dataclass(frozen=True)
@@ -135,6 +144,26 @@ def parse_byte_range(value: str | None, size: int) -> tuple[int, int] | None:
     return start, min(end, size - 1)
 
 
+def resolve_asset(static_root: Path, relative_path: str) -> Path | None:
+    """Resolve a request path inside the static directory, or None if it escapes.
+
+    Percent-encoding is decoded first, because `..%2f..` would otherwise slip past
+    a check on the raw path. Symlinks are followed before the containment check,
+    so a link pointing outside the directory cannot be used to read the rest of
+    the filesystem either.
+    """
+    decoded = unquote(relative_path)
+    if not decoded or decoded.startswith("/"):
+        return None
+    root = static_root.resolve()
+    try:
+        target = (root / decoded).resolve()
+        target.relative_to(root)
+    except (ValueError, OSError):
+        return None
+    return target
+
+
 def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
     static_root = Path(__file__).with_name("static")
 
@@ -145,10 +174,8 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
             request = urlsplit(self.path)
             if request.path == "/":
                 self._send_file(static_root / "index.html", "text/html; charset=utf-8")
-            elif request.path == "/assets/app.js":
-                self._send_file(static_root / "app.js", "text/javascript; charset=utf-8")
-            elif request.path == "/assets/styles.css":
-                self._send_file(static_root / "styles.css", "text/css; charset=utf-8")
+            elif request.path.startswith("/assets/"):
+                self._send_asset(request.path[len("/assets/") :])
             elif request.path == "/favicon.ico":
                 self.send_response(HTTPStatus.NO_CONTENT)
                 self.end_headers()
@@ -288,6 +315,18 @@ def _handler_for(state: _PlayerState) -> type[BaseHTTPRequestHandler]:
                     except (BrokenPipeError, ConnectionResetError):
                         break
                     remaining -= len(chunk)
+
+        def _send_asset(self, relative_path: str) -> None:
+            """Serve one file from the static directory, and nothing outside it."""
+            target = resolve_asset(static_root, relative_path)
+            if target is None:
+                self.send_error(HTTPStatus.NOT_FOUND)
+                return
+            content_type = ASSET_CONTENT_TYPES.get(target.suffix)
+            if content_type is None:
+                self.send_error(HTTPStatus.NOT_FOUND)
+                return
+            self._send_file(target, content_type)
 
         def _send_file(self, path: Path, content_type: str) -> None:
             if not path.is_file():
