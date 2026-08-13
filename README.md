@@ -198,7 +198,7 @@ dependencies are declared as compatible ranges and pinned exactly in the committ
 
 ```text
 configs/                    YAML configuration
-docs/                       development log, design decisions, data formats
+docs/                       data format reference and README media
 src/climbtrack/
 ├── annotation/             stress-frame selection, editor, evaluation
 ├── backends/               YOLO11x, ByteTrack, Sapiens2 adapters
@@ -244,11 +244,20 @@ size. There is no CI; the checks above are run locally.
 
 ## Documentation
 
-- [docs/milestones.md](docs/milestones.md) — what each development milestone added and why
-- [docs/design-decisions.md](docs/design-decisions.md) — the reasoning behind non-obvious choices,
-  and the known limitations
-- [docs/data-formats.md](docs/data-formats.md) — cache layout, parquet schemas, configuration
-  reference
+[docs/data-formats.md](docs/data-formats.md) covers the cache layout, the parquet schemas, and the
+full configuration reference.
+
+## Known limitations
+
+- Sapiens2-1B with four TTA passes per frame is very slow on Apple Silicon.
+- No post-processing reliably reconstructs extreme occlusion; long missing stretches stay missing.
+- Face keypoints are stored but not rendered or annotated by default.
+- The ground-truth set is one video and ten stress frames, and refinement clearly improves the right
+  hand but not, on average, the left.
+- Perspective, wide angle, and camera motion are not converted into world coordinates, so numbers
+  from two different camera angles are not directly comparable.
+- The palm point can jump when the number of visible hand anchors changes, because the median is
+  then formed over a different set of points. A minimum anchor count would be the real fix.
 
 ## License and notices
 
