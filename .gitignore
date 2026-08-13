@@ -13,4 +13,9 @@ __pycache__/
 /data/
 /models/
 /outputs/
+# Hand-made annotations are versioned; everything derived from them is not.
+# `moves.parquet` is rewritten from `moves_ground_truth.json` on every save, and
+# the evaluation reports are recomputed from ground truth plus the pose cache.
+annotations/**/moves.parquet
+annotations/**/evaluation*.json
 
