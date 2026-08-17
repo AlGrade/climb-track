@@ -1,39 +1,30 @@
 # ClimbTrack
 
-An offline pipeline that turns a climbing video into precise, temporally stable 2D skeleton data,
+An offline pipeline that turns a bouldering video into temporally stable 2D skeleton data,
 splits the ascent into individual moves, and measures how fast and how well coordinated each move
-was. Everything runs locally: no video ever leaves the machine.
+was.
 
 ![Skeleton overlay of a single move](docs/media/crux-move.gif)
 
-## What ClimbTrack does
+## What it does
 
-Imagine filming someone climbing a boulder problem on your phone. You can watch the video back, but
-you cannot really say *why* one attempt worked and another did not.
+You film someone on a boulder with your phone. You can watch it back, but you still can't say why
+one attempt worked and the next one didn't.
 
-ClimbTrack takes that video apart, frame by frame:
+This project enables going through the video frame by frame.
 
-1. **It finds the climber.** Other people in the gym are detected too, then filtered out — the tool
-   follows one person through the whole video.
-2. **It marks the body.** In every single frame it places 308 points on the body: joints, fingers,
-   toes. Drawn over the video, this becomes the moving stick figure you see above.
-3. **It splits the climb into moves.** A "move" here means one hand letting go of a hold and
-   grabbing the next one. The tool finds those automatically by looking for a hand that was still,
-   moves, and becomes still again somewhere else.
-4. **It measures each move.** How long it took, how far the hand travelled, how fast it went at its
-   quickest point, how much the hips rose, and whether the body started moving before the hand did —
-   which is roughly the difference between pulling yourself up with your arms and driving the move
-   from your legs.
+1. It finds the climber. Everyone else in the video gets detected too and thrown out, so the tool
+   stays on one person for the whole video.
+2. It puts 308 points on the body in every frame: joints, fingers, toes. Drawn over the video.
+3. It cuts the climb into moves. A move is one hand leaving a hold and catching the next one. It
+   finds them by looking for a hand that sits still, moves, and sits still again somewhere else.
+4. It measures each move: how long it took, how far the hand travelled, top speed, how much the hips
+   came up, and whether the body started moving before the hand did.
 
-The result is a browser view where you can step through the climb move by move, with a speed curve
-running alongside the video, and correct any boundary the automatic detection got wrong.
+In the browser you step through the climb move by move, with a speed curve next to the video.
 
 ![The local player: video with skeleton overlay, per-frame speed curve, move metrics, and boundary
 editing](docs/media/player.png)
-
-**What it does not do:** it does not tell you whether a move was *good*. It measures, you interpret.
-It also cannot see holds, cannot measure force, and works in 2D — so numbers from two different
-camera angles are not directly comparable.
 
 ## Requirements
 
