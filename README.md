@@ -6,7 +6,7 @@ was. Everything runs locally: no video ever leaves the machine.
 
 ![Skeleton overlay of a single move](docs/media/crux-move.gif)
 
-## What this actually does
+## What ClimbTrack does
 
 Imagine filming someone climbing a boulder problem on your phone. You can watch the video back, but
 you cannot really say *why* one attempt worked and another did not.
@@ -28,21 +28,12 @@ ClimbTrack takes that video apart, frame by frame:
 The result is a browser view where you can step through the climb move by move, with a speed curve
 running alongside the video, and correct any boundary the automatic detection got wrong.
 
+![The local player: video with skeleton overlay, per-frame speed curve, move metrics, and boundary
+editing](docs/media/player.png)
+
 **What it does not do:** it does not tell you whether a move was *good*. It measures, you interpret.
 It also cannot see holds, cannot measure force, and works in 2D — so numbers from two different
 camera angles are not directly comparable.
-
-## Scope
-
-In scope: person detection and tracking, one selected climber, 308 keypoints per frame, conservative
-temporal repair, automatic move segmentation, per-move speed, posture, and coordination metrics, and
-a local review player.
-
-Deliberately out of scope: 3D reconstruction and world coordinates, hold detection, force
-estimation, real-time or mobile operation, and any server or database component.
-
-Quality takes priority over speed. Full pose estimation of a short video can take hours on a Mac, so
-every expensive step is cached and resumable.
 
 ## Requirements
 
@@ -228,36 +219,10 @@ The split keeps model adapters, orchestration, data schemas, rendering, and refi
 There are no speculative abstraction layers for hypothetical backends, but the interfaces stay
 extensible — a different pose backend can be mapped into the same canonical schema.
 
-## Development
-
-```bash
-uv run ruff check
-uv run ruff format --check
-uv run pytest
-```
-
-71 tests cover hashing, cache behaviour, timestamps, schemas, scoring, ByteTrack, pose crops, pose
-resume, the keypoint registry, VFR rendering, annotation and evaluation, the move schema, video range
-streaming, revision-safe saving, confidence gating, interpolation, swap and outlier logic, and the
-One-Euro filter. Full neural inference is not run in the automated tests because of runtime and model
-size. There is no CI; the checks above are run locally.
-
 ## Documentation
 
 [docs/data-formats.md](docs/data-formats.md) covers the cache layout, the parquet schemas, and the
 full configuration reference.
-
-## Known limitations
-
-- Sapiens2-1B with four TTA passes per frame is very slow on Apple Silicon.
-- No post-processing reliably reconstructs extreme occlusion; long missing stretches stay missing.
-- Face keypoints are stored but not rendered or annotated by default.
-- The ground-truth set is one video and ten stress frames, and refinement clearly improves the right
-  hand but not, on average, the left.
-- Perspective, wide angle, and camera motion are not converted into world coordinates, so numbers
-  from two different camera angles are not directly comparable.
-- The palm point can jump when the number of visible hand anchors changes, because the median is
-  then formed over a different set of points. A minimum anchor count would be the real fix.
 
 ## License and notices
 
